@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
 import TopBar from "@/components/layout/TopBar";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -8,6 +8,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
+  const location = useLocation();
   
   // Автоматически закрывать сайдбар на мобильных и делать узким на десктопе
   useEffect(() => {
@@ -17,6 +18,13 @@ export default function MainLayout() {
       setSidebarOpen(true);
     }
   }, [isMobile]);
+  
+  // Закрывать сайдбар при переходе на новую страницу (только на мобильных)
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname, isMobile]);
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
@@ -40,4 +48,3 @@ export default function MainLayout() {
     </div>
   );
 }
-

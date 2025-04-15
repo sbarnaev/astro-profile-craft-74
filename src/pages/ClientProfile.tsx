@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Calendar, FileText, Bell, Clock, User, Edit, ChevronLeft } from "lucide-react";
+import { Calendar, FileText, Bell, Clock, User, Edit, ChevronLeft, MessageCircle, Share2, Info, Eye } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 // Пример данных о клиентах для демонстрации
 const clientsData = [
@@ -29,7 +30,16 @@ const clientsData = [
     phone: "+7 (900) 123-45-67", 
     email: "anna@example.com",
     analysisCount: 3, 
-    lastAnalysis: "02.03.2025" 
+    lastAnalysis: "02.03.2025",
+    source: "Instagram",
+    communicationChannel: "WhatsApp",
+    codeNumbers: {
+      lifeCode: 7,
+      destinyCode: 5,
+      energyCode: 3
+    },
+    hasAnalysis: true,
+    analysisId: 123
   },
   { 
     id: 2, 
@@ -40,7 +50,15 @@ const clientsData = [
     phone: "+7 (911) 987-65-43", 
     email: "ivan@example.com",
     analysisCount: 2, 
-    lastAnalysis: "15.02.2025" 
+    lastAnalysis: "15.02.2025",
+    source: "Рекомендация",
+    communicationChannel: "Telegram",
+    codeNumbers: {
+      lifeCode: 9,
+      destinyCode: 6,
+      energyCode: 8
+    },
+    hasAnalysis: false
   },
   // ... остальные клиенты
 ];
@@ -80,6 +98,20 @@ const ClientProfile = () => {
     month: '2-digit', 
     year: 'numeric' 
   }).format(client.dob);
+  
+  const getCommunicationIcon = (channel: string) => {
+    switch (channel.toLowerCase()) {
+      case 'whatsapp':
+        return <span className="text-green-500"><MessageCircle className="h-4 w-4" /></span>;
+      case 'telegram':
+        return <span className="text-blue-500"><MessageCircle className="h-4 w-4" /></span>;
+      case 'офлайн':
+      case 'оффлайн':
+        return <span className="text-purple-500"><User className="h-4 w-4" /></span>;
+      default:
+        return <span className="text-gray-500"><MessageCircle className="h-4 w-4" /></span>;
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -155,13 +187,56 @@ const ClientProfile = () => {
               </div>
             )}
             
+            <div>
+              <p className="text-sm text-muted-foreground">Источник</p>
+              <div className="flex items-center gap-1">
+                <Share2 className="h-4 w-4 text-muted-foreground" />
+                <p className="font-medium">{client.source}</p>
+              </div>
+            </div>
+            
+            <div>
+              <p className="text-sm text-muted-foreground">Канал общения</p>
+              <div className="flex items-center gap-1">
+                {getCommunicationIcon(client.communicationChannel)}
+                <p className="font-medium">{client.communicationChannel}</p>
+              </div>
+            </div>
+            
+            <div className="border-t pt-4 mt-4">
+              <p className="text-sm text-muted-foreground mb-2">Коды</p>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="p-2 rounded-md bg-primary/10 text-center">
+                  <p className="text-xs text-muted-foreground">Код жизни</p>
+                  <p className="text-2xl font-bold text-primary">{client.codeNumbers.lifeCode}</p>
+                </div>
+                <div className="p-2 rounded-md bg-primary/10 text-center">
+                  <p className="text-xs text-muted-foreground">Код судьбы</p>
+                  <p className="text-2xl font-bold text-primary">{client.codeNumbers.destinyCode}</p>
+                </div>
+                <div className="p-2 rounded-md bg-primary/10 text-center">
+                  <p className="text-xs text-muted-foreground">Код энергии</p>
+                  <p className="text-2xl font-bold text-primary">{client.codeNumbers.energyCode}</p>
+                </div>
+              </div>
+            </div>
+            
             <div className="pt-4 space-y-2">
-              <Button className="w-full" asChild>
-                <Link to={`/analysis/new?client=${client.id}`}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Новый анализ
-                </Link>
-              </Button>
+              {client.hasAnalysis ? (
+                <Button className="w-full" asChild>
+                  <Link to={`/analysis/${client.analysisId}`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Просмотреть анализ
+                  </Link>
+                </Button>
+              ) : (
+                <Button className="w-full" asChild>
+                  <Link to={`/analysis/new?client=${client.id}`}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Создать анализ
+                  </Link>
+                </Button>
+              )}
               
               <Button variant="outline" className="w-full" asChild>
                 <Link to={`/consultations/schedule?client=${client.id}`}>
