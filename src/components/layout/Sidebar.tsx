@@ -4,11 +4,15 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   Users, 
   Calendar, 
-  Home, 
+  LayoutDashboard, 
   Settings, 
   ClipboardList, 
   ChevronLeft, 
-  ChevronRight
+  ChevronRight,
+  BarChartBig,
+  FileText,
+  Library,
+  Bell
 } from "lucide-react";
 
 interface SidebarProps {
@@ -20,10 +24,14 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
   
   const navItems = [
-    { name: "Главная", path: "/", icon: Home },
+    { name: "Дашборд", path: "/", icon: LayoutDashboard },
     { name: "Клиенты", path: "/clients", icon: Users },
-    { name: "Анализы", path: "/analysis", icon: ClipboardList },
     { name: "Календарь", path: "/calendar", icon: Calendar },
+    { name: "Анализ", path: "/analysis", icon: ClipboardList },
+    { name: "Консультации", path: "/consultations", icon: FileText },
+    { name: "Аналитика", path: "/analytics", icon: BarChartBig },
+    { name: "База знаний", path: "/knowledge", icon: Library },
+    { name: "Напоминания", path: "/reminders", icon: Bell },
     { name: "Настройки", path: "/settings", icon: Settings },
   ];
 
