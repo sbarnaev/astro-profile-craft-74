@@ -18,15 +18,11 @@ import {
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  onHoverEnter?: () => void;
-  onHoverLeave?: () => void;
 }
 
 const Sidebar: FC<SidebarProps> = ({ 
   isOpen, 
-  setIsOpen, 
-  onHoverEnter, 
-  onHoverLeave 
+  setIsOpen
 }) => {
   const location = useLocation();
   
@@ -47,13 +43,15 @@ const Sidebar: FC<SidebarProps> = ({
     return location.pathname === path;
   };
 
+  const handleNavClick = () => {
+    setIsOpen(false);
+  };
+
   return (
     <aside 
       className={`h-screen bg-sidebar fixed lg:relative z-30 transition-all duration-300 ease-in-out ${
         isOpen ? "w-64" : "w-0 lg:w-20"
       } shadow-md overflow-hidden`}
-      onMouseEnter={onHoverEnter}
-      onMouseLeave={onHoverLeave}
     >
       <div className="flex flex-col h-full">
         {/* Заголовок */}
@@ -82,6 +80,7 @@ const Sidebar: FC<SidebarProps> = ({
               <li key={item.path}>
                 <Link
                   to={item.path}
+                  onClick={handleNavClick}
                   className={`flex items-center py-2 px-3 rounded-md transition-colors ${
                     isActive(item.path) 
                       ? "bg-sidebar-primary text-sidebar-primary-foreground" 

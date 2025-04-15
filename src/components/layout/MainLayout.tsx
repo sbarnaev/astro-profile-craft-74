@@ -14,31 +14,45 @@ export default function MainLayout() {
     if (isMobile) {
       setSidebarOpen(false);
     } else {
-      // На десктопе открываем сайдбар по умолчанию
-      setSidebarOpen(true);
+      // По умолчанию сайдбар скрыт на десктопе
+      setSidebarOpen(false);
     }
   }, [isMobile]);
   
   useEffect(() => {
-    // Закрываем сайдбар при смене роута на мобильных
-    if (isMobile) {
+    // Закрываем сайдбар при смене роута
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      setSidebarOpen(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile) {
       setSidebarOpen(false);
     }
-  }, [location.pathname, isMobile]);
+  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      <Sidebar 
-        isOpen={sidebarOpen} 
-        setIsOpen={setSidebarOpen} 
-        onHoverEnter={() => !isMobile && setSidebarOpen(true)}
-        onHoverLeave={() => !isMobile && !sidebarOpen && setSidebarOpen(false)}
-      />
+      <div 
+        className="h-full"
+        onMouseEnter={handleMouseEnter}
+      >
+        <Sidebar 
+          isOpen={sidebarOpen} 
+          setIsOpen={setSidebarOpen} 
+        />
+      </div>
       
       <div 
         className={`flex flex-col flex-1 w-full overflow-hidden transition-all duration-300 ${
           sidebarOpen && !isMobile ? 'ml-64' : 'ml-0'
         }`}
+        onMouseEnter={handleMouseLeave}
       >
         <TopBar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         
