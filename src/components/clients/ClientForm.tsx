@@ -33,7 +33,10 @@ export function ClientForm({
   generateAnalysis = true,
   redirectAfterSubmit = false
 }: ClientFormProps) {
-  const [phoneValue, setPhoneValue] = useState(initialData?.phone || "");
+  const [phoneValue, setPhoneValue] = useState(initialData?.phone?.replace(/^\+\d+\s/, "") || "");
+  const [countryCode, setCountryCode] = useState(
+    initialData?.phone?.match(/^\+\d+/)?.toString() || "+7"
+  );
   const navigate = useNavigate();
   
   const form = useForm<ClientFormValues>({
@@ -74,9 +77,9 @@ export function ClientForm({
   }, [form.watch("dob")]);
   
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedValue = formatPhoneNumber(e.target.value);
+    const formattedValue = formatPhoneNumber(e.target.value, countryCode);
     setPhoneValue(formattedValue);
-    form.setValue("phone", formattedValue, { shouldValidate: true });
+    form.setValue("phone", `${countryCode} ${formattedValue}`, { shouldValidate: true });
   };
 
   const handleSubmit = (values: ClientFormValues) => {
@@ -108,9 +111,9 @@ export function ClientForm({
         description: "Анализ был создан на основе данных клиента"
       });
       
-      onSubmit({...values, id: newClientId}, analysisData);
+      onSubmit(values, analysisData);
     } else {
-      onSubmit({...values, id: newClientId});
+      onSubmit(values);
     }
     
     // После успешного создания клиента перенаправляем на его карточку
@@ -128,7 +131,12 @@ export function ClientForm({
         <PersonalInfoFields 
           form={form} 
           handlePhoneChange={handlePhoneChange} 
-          phoneValue={phoneValue} 
+          phoneValue={phoneValue}
+          countryCode={countryCode}
+          setCountryCode={(code) => {
+            setCountryCode(code);
+            form.setValue("phone", `${code} ${phoneValue}`, { shouldValidate: true });
+          }}
         />
         
         <DateOfBirthField form={form} />

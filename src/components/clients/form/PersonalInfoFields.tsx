@@ -4,14 +4,45 @@ import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { formSchema } from "../schema/clientFormSchema";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PersonalInfoFieldsProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
   handlePhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   phoneValue: string;
+  countryCode: string;
+  setCountryCode: (code: string) => void;
 }
 
-export function PersonalInfoFields({ form, handlePhoneChange, phoneValue }: PersonalInfoFieldsProps) {
+// Список популярных кодов стран для телефонных номеров
+const countryCodes = [
+  { code: "+7", country: "Россия" },
+  { code: "+375", country: "Беларусь" },
+  { code: "+380", country: "Украина" },
+  { code: "+1", country: "США/Канада" },
+  { code: "+44", country: "Великобритания" },
+  { code: "+49", country: "Германия" },
+  { code: "+33", country: "Франция" },
+  { code: "+39", country: "Италия" },
+  { code: "+34", country: "Испания" },
+  { code: "+86", country: "Китай" },
+  { code: "+91", country: "Индия" },
+  { code: "+81", country: "Япония" },
+];
+
+export function PersonalInfoFields({ 
+  form, 
+  handlePhoneChange, 
+  phoneValue, 
+  countryCode, 
+  setCountryCode 
+}: PersonalInfoFieldsProps) {
   return (
     <>
       <FormField
@@ -62,13 +93,31 @@ export function PersonalInfoFields({ form, handlePhoneChange, phoneValue }: Pers
         render={() => (
           <FormItem>
             <FormLabel>Телефон</FormLabel>
-            <FormControl>
-              <Input 
-                placeholder="+7 (900) 123-45-67" 
-                value={phoneValue}
-                onChange={handlePhoneChange}
-              />
-            </FormControl>
+            <div className="flex gap-2">
+              <div className="w-1/4">
+                <Select value={countryCode} onValueChange={setCountryCode}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={countryCode} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countryCodes.map((country) => (
+                      <SelectItem key={country.code} value={country.code}>
+                        {country.code} ({country.country})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1">
+                <FormControl>
+                  <Input
+                    placeholder="(900) 123-45-67"
+                    value={phoneValue}
+                    onChange={handlePhoneChange}
+                  />
+                </FormControl>
+              </div>
+            </div>
             <FormMessage />
           </FormItem>
         )}

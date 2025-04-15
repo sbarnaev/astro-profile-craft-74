@@ -76,7 +76,7 @@ const Clients = () => {
   const [clients, setClients] = useState(clientsData);
   const navigate = useNavigate();
   
-  const itemsPerPage = 5;
+  const itemsPerPage = 20;
   
   const filteredClients = clients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchValue.toLowerCase()) || 
@@ -104,8 +104,9 @@ const Clients = () => {
     setOpen(false);
     console.log("New client data:", data);
     
+    const newClientId = data.id || Math.floor(Math.random() * 10000) + 100;
     const newClient = {
-      id: data.id || Math.floor(Math.random() * 10000) + 100,
+      id: newClientId,
       name: `${data.lastName} ${data.firstName} ${data.patronymic || ""}`.trim(),
       date: data.dob ? new Intl.DateTimeFormat('ru-RU').format(data.dob) : "",
       phone: data.phone,
@@ -123,7 +124,7 @@ const Clients = () => {
       });
       
       setTimeout(() => {
-        navigate(`/clients/${newClient.id}`);
+        navigate(`/clients/${newClientId}`);
       }, 500);
     } else {
       toast.success("Клиент успешно добавлен", {
@@ -131,7 +132,7 @@ const Clients = () => {
       });
       
       setTimeout(() => {
-        navigate(`/clients/${newClient.id}`);
+        navigate(`/clients/${newClientId}`);
       }, 500);
     }
   };
@@ -176,7 +177,7 @@ const Clients = () => {
             <ClientForm 
               onSubmit={handleAddClient} 
               generateAnalysis={true} 
-              redirectAfterSubmit={true}
+              redirectAfterSubmit={false}
             />
           </DialogContent>
         </Dialog>
@@ -230,7 +231,7 @@ const Clients = () => {
                       <tr 
                         key={client.id} 
                         className="border-b hover:bg-muted/30 transition-colors cursor-pointer"
-                        onClick={() => window.location.href = `/clients/${client.id}`}
+                        onClick={() => navigate(`/clients/${client.id}`)}
                       >
                         <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                           <Link to={`/clients/${client.id}`} className="block">
@@ -306,16 +307,31 @@ const Clients = () => {
                     />
                   </PaginationItem>
                   
-                  {Array.from({ length: totalPages }).map((_, index) => (
-                    <PaginationItem key={index}>
-                      <PaginationLink
-                        onClick={() => handlePageChange(index + 1)}
-                        isActive={currentPage === index + 1}
-                      >
-                        {index + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
+                  {Array.from({ length: totalPages }).map((_, index) => {
+                    if (
+                      index === 0 || 
+                      index === totalPages - 1 || 
+                      (index >= currentPage - 2 && index <= currentPage + 2)
+                    ) {
+                      return (
+                        <PaginationItem key={index}>
+                          <PaginationLink
+                            onClick={() => handlePageChange(index + 1)}
+                            isActive={currentPage === index + 1}
+                          >
+                            {index + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    } else if (index === currentPage - 3 || index === currentPage + 3) {
+                      return (
+                        <PaginationItem key={index}>
+                          <span className="flex h-9 w-9 items-center justify-center">...</span>
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
                   
                   <PaginationItem>
                     <PaginationNext 

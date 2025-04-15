@@ -11,10 +11,13 @@ export function NewClientTab({ onCreateClient }: NewClientTabProps) {
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Создание нового клиента</h3>
       <ClientForm 
-        onSubmit={(clientData, analysisData) => onCreateClient(clientData, analysisData)} 
+        onSubmit={(clientData, analysisData) => {
+          // Убедимся, что обработчик вызывается с правильными параметрами
+          onCreateClient(clientData, analysisData);
+        }} 
         showCodes={false} 
         generateAnalysis={true}
-        redirectAfterSubmit={true}
+        redirectAfterSubmit={false}  // Важно: не делаем редирект, чтобы не прерывать создание записи
       />
     </div>
   );

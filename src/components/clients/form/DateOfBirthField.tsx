@@ -32,14 +32,38 @@ export function DateOfBirthField({ form }: DateOfBirthFieldProps) {
     setInputValue(initialFormatted);
   }
 
-  // Обработчик ручного ввода даты
+  // Обработчик ручного ввода даты с автоматическим добавлением точек
   const handleManualInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setInputValue(value);
+    
+    // Удаляем все нецифровые символы
+    const digits = value.replace(/\D/g, "");
+    
+    // Форматируем с точками автоматически
+    let formattedValue = "";
+    
+    if (digits.length > 0) {
+      formattedValue = digits.substring(0, Math.min(2, digits.length));
+    }
+    
+    if (digits.length > 2) {
+      formattedValue += "." + digits.substring(2, Math.min(4, digits.length));
+    }
+    
+    if (digits.length > 4) {
+      formattedValue += "." + digits.substring(4, Math.min(8, digits.length));
+    }
+    
+    setInputValue(formattedValue);
     
     // Валидация и установка даты при вводе
-    if (value.length === 10) { // DD.MM.YYYY
-      const parsedDate = parse(value, "dd.MM.yyyy", new Date());
+    if (digits.length === 8) { // DDMMYYYY
+      const day = digits.substring(0, 2);
+      const month = digits.substring(2, 4);
+      const year = digits.substring(4, 8);
+      const dateString = `${day}.${month}.${year}`;
+      
+      const parsedDate = parse(dateString, "dd.MM.yyyy", new Date());
       if (isValid(parsedDate)) {
         form.setValue("dob", parsedDate, { shouldValidate: true });
       }
