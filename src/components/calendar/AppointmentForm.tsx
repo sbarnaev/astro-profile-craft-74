@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parse, addMinutes } from "date-fns";
 import { ru } from "date-fns/locale";
-import { CalendarIcon, Search, Plus, Loader2 } from "lucide-react";
+import { CalendarIcon, Search, Plus, Loader2, DollarSign } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -59,10 +60,10 @@ const clientsData = [
 
 // Типы консультаций
 const consultationTypes = [
-  { id: 1, name: "Экспресс-консультация", duration: 30 },
-  { id: 2, name: "Базовый анализ", duration: 60 },
-  { id: 3, name: "Отношения", duration: 90 },
-  { id: 4, name: "Целевой анализ", duration: 120 },
+  { id: 1, name: "Экспресс-консультация", duration: 30, cost: 2000 },
+  { id: 2, name: "Базовый анализ", duration: 60, cost: 3500 },
+  { id: 3, name: "Отношения", duration: 90, cost: 5000 },
+  { id: 4, name: "Целевой анализ", duration: 120, cost: 7000 },
 ];
 
 // Схема формы
@@ -78,6 +79,7 @@ const formSchema = z.object({
     required_error: "Выберите время консультации",
   }),
   request: z.string().optional(),
+  cost: z.number().optional(),
 });
 
 interface AppointmentFormProps {
@@ -97,8 +99,9 @@ export function AppointmentForm({
 }: AppointmentFormProps) {
   const [showClientForm, setShowClientForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredClients, setFilteredClients] = useState(clientsData);
+  const [filteredClients, setFilteredClients] = useState<typeof clientsData>([]);
   const [activeTab, setActiveTab] = useState<string>("existing");
+  const [customCost, setCustomCost] = useState<number | null>(null);
   
   // Создаем форму
   const form = useForm<z.infer<typeof formSchema>>({
@@ -107,13 +110,25 @@ export function AppointmentForm({
       date: initialDate || new Date(),
       time: initialTime || "10:00",
       request: "",
+      cost: 3500,
     },
   });
+  
+  // Update cost when consultation type changes
+  useEffect(() => {
+    const typeId = form.getValues().consultationType;
+    if (typeId) {
+      const selectedType = consultationTypes.find(type => type.id === typeId);
+      if (selectedType && !customCost) {
+        form.setValue("cost", selectedType.cost);
+      }
+    }
+  }, [form.watch("consultationType")]);
   
   // Фильтрация клиентов по поисковому запросу
   useEffect(() => {
     if (searchQuery.trim() === "") {
-      setFilteredClients(clientsData);
+      setFilteredClients([]);
     } else {
       const query = searchQuery.toLowerCase().trim();
       const filtered = clientsData.filter(
@@ -175,15 +190,26 @@ export function AppointmentForm({
             clientsData.find((c) => c.id === values.clientId)?.firstName
           } ${clientsData.find((c) => c.id === values.clientId)?.patronymic}`
         : "Новый клиент",
+      cost: values.cost || 3500
     };
     
     onSubmit(appointmentData);
     onClose();
   };
   
+  const handleCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value)) {
+      setCustomCost(value);
+      form.setValue("cost", value);
+    } else {
+      setCustomCost(null);
+    }
+  };
+  
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Запись на консультацию</DialogTitle>
         </DialogHeader>
@@ -307,30 +333,57 @@ export function AppointmentForm({
                   />
                 </div>
                 
-                <FormField
-                  control={form.control}
-                  name="time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Время</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Выберите время" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="z-50">
-                          {timeSlots.map((time) => (
-                            <SelectItem key={time} value={time}>
-                              {time}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="time"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Время</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Выберите время" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="z-50">
+                            {timeSlots.map((time) => (
+                              <SelectItem key={time} value={time}>
+                                {time}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  
+                  </FormField>
+                  
+                  <FormField
+                    control={form.control}
+                    name="cost"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Стоимость</FormLabel>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                          <Input
+                            type="number"
+                            placeholder="Стоимость"
+                            className="pl-10"
+                            value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(parseInt(e.target.value) || 0);
+                              handleCostChange(e);
+                            }}
+                          />
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 
                 <FormField
                   control={form.control}

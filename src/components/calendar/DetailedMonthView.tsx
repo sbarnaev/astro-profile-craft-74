@@ -8,8 +8,8 @@ import {
   isSameMonth,
   isToday,
   getDay,
-  addDays,
-  isWeekend
+  isWeekend,
+  isPast
 } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Calendar as CalendarIcon, Plus } from "lucide-react";
@@ -18,20 +18,34 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { AppointmentForm } from "./AppointmentForm";
+import { AppointmentInterface } from "@/types/calendar";
 
-interface Appointment {
-  id: number;
-  clientName: string;
-  clientId: number;
-  date: Date;
-  duration: number;
-  type: string;
-  request: string;
-}
+// Russian holidays (some major ones for example)
+const russianHolidays = [
+  "01-01", // New Year
+  "01-02", // New Year holidays
+  "01-03", // New Year holidays
+  "01-04", // New Year holidays
+  "01-05", // New Year holidays
+  "01-06", // New Year holidays
+  "01-07", // Christmas
+  "02-23", // Defender of the Fatherland Day
+  "03-08", // International Women's Day
+  "05-01", // Spring and Labor Day
+  "05-09", // Victory Day
+  "06-12", // Russia Day
+  "11-04", // Unity Day
+];
+
+// Check if a date is a Russian holiday
+const isRussianHoliday = (date: Date) => {
+  const monthDay = format(date, "MM-dd");
+  return russianHolidays.includes(monthDay);
+};
 
 interface DetailedMonthViewProps {
   currentDate: Date;
-  appointments: Appointment[];
+  appointments: AppointmentInterface[];
   onAppointmentClick: (id: number) => void;
   onAddAppointment: (data: any) => void;
 }
@@ -138,9 +152,13 @@ export function DetailedMonthView({
                       isSameMonth(day, currentDate)
                         ? isToday(day)
                           ? "bg-primary/10 border-primary"
-                          : isWeekend(day)
-                            ? "bg-accent/10"
-                            : "bg-background"
+                          : isPast(day) 
+                            ? "bg-gray-100"
+                            : isRussianHoliday(day)
+                              ? "bg-purple-100"
+                              : isWeekend(day)
+                                ? "bg-secondary/10"
+                                : "bg-background"
                         : "bg-muted/20 text-muted-foreground"
                     ) : "bg-transparent border-transparent"
                   )}
@@ -150,7 +168,9 @@ export function DetailedMonthView({
                       <div className="flex justify-between items-start">
                         <span className={cn(
                           "text-sm font-medium",
-                          isToday(day) ? "text-primary" : ""
+                          isToday(day) ? "text-primary" : "",
+                          isPast(day) ? "text-gray-500" : "",
+                          isRussianHoliday(day) ? "text-purple-700" : ""
                         )}>
                           {format(day, 'd')}
                         </span>

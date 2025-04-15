@@ -2,7 +2,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Users, Eye, Plus, DollarSign } from "lucide-react";
+import { Users, Eye, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -76,10 +76,6 @@ export function AppointmentDrawer({ appointment }: AppointmentDrawerProps) {
         <div className="border-t border-border pt-4">
           <div className="flex justify-between items-center mb-2">
             <p className="font-medium">Связанные анализы</p>
-            <Button variant="outline" size="sm" className="h-8">
-              <Plus className="h-3.5 w-3.5 mr-1" />
-              Новый анализ
-            </Button>
           </div>
           <div className="space-y-2">
             <div className="p-3 border rounded-md flex justify-between items-center">

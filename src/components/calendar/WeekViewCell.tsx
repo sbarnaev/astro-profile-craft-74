@@ -22,6 +22,9 @@ interface WeekViewCellProps {
   appointments: Appointment[];
   onAppointmentClick: (id: number) => void;
   onAddAppointment: (data: any) => void;
+  isPast?: boolean;
+  isWeekend?: boolean;
+  isHoliday?: boolean;
 }
 
 export function WeekViewCell({
@@ -29,7 +32,10 @@ export function WeekViewCell({
   hour,
   appointments,
   onAppointmentClick,
-  onAddAppointment
+  onAddAppointment,
+  isPast = false,
+  isWeekend = false,
+  isHoliday = false
 }: WeekViewCellProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -46,6 +52,9 @@ export function WeekViewCell({
       className={cn(
         "border-b border-r min-h-[60px] relative transition-colors",
         isToday(day) ? 'bg-primary/5' : '',
+        isPast ? 'bg-gray-100' : '',
+        isWeekend ? 'bg-secondary/10' : '',
+        isHoliday ? 'bg-purple-100' : '',
         isHovered && 'bg-accent/30'
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -72,7 +81,7 @@ export function WeekViewCell({
           ))}
         </div>
       ) : (
-        isHovered && (
+        isHovered && !isPast && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div 
               className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/20"

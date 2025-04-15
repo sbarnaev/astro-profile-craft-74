@@ -11,7 +11,8 @@ const appointmentsData = [
     date: new Date(2025, 3, 15, 10, 0), 
     duration: 60, 
     type: "Консультация",
-    request: "Вопросы по личностному росту"
+    request: "Вопросы по личностному росту",
+    cost: 3500
   },
   { 
     id: 2, 
@@ -20,7 +21,8 @@ const appointmentsData = [
     date: new Date(2025, 3, 15, 13, 30), 
     duration: 90, 
     type: "Полный анализ",
-    request: "Проблемы в карьере, поиск направления" 
+    request: "Проблемы в карьере, поиск направления",
+    cost: 5000
   },
   { 
     id: 3, 
@@ -29,7 +31,8 @@ const appointmentsData = [
     date: new Date(2025, 3, 16, 11, 0), 
     duration: 45, 
     type: "Консультация",
-    request: "Сложности в отношениях с партнером" 
+    request: "Сложности в отношениях с партнером",
+    cost: 2000
   },
   { 
     id: 4, 
@@ -38,7 +41,8 @@ const appointmentsData = [
     date: new Date(2025, 3, 17, 15, 0), 
     duration: 60, 
     type: "Базовый анализ",
-    request: "Поиск предназначения" 
+    request: "Поиск предназначения",
+    cost: 3500
   },
   { 
     id: 5, 
@@ -47,7 +51,8 @@ const appointmentsData = [
     date: new Date(2025, 3, 18, 12, 0), 
     duration: 60, 
     type: "Консультация",
-    request: "Вопросы самореализации" 
+    request: "Вопросы самореализации",
+    cost: 3500
   },
   { 
     id: 6, 
@@ -56,7 +61,8 @@ const appointmentsData = [
     date: new Date(2025, 3, 19, 9, 30), 
     duration: 45, 
     type: "Консультация",
-    request: "Финансовые вопросы" 
+    request: "Финансовые вопросы",
+    cost: 2000
   },
 ];
 
@@ -78,7 +84,8 @@ export function useAppointments() {
       type: data.consultationType 
         ? ["Экспресс-консультация", "Базовый анализ", "Отношения", "Целевой анализ"][data.consultationType - 1] 
         : "Консультация",
-      request: data.request || ""
+      request: data.request || "",
+      cost: data.cost || 3500
     };
     
     setAppointments([...appointments, newAppointment]);

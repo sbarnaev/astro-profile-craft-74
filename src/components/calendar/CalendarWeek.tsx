@@ -1,6 +1,6 @@
 
 import React from "react";
-import { format, isToday, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
+import { format, isToday, startOfWeek, endOfWeek, eachDayOfInterval, isPast, isWeekend } from "date-fns";
 import { ru } from "date-fns/locale";
 import { CalendarIcon, ArrowLeft, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,30 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { WeekViewCell } from "./WeekViewCell";
 import { AppointmentInterface } from "@/types/calendar";
+import { cn } from "@/lib/utils";
+
+// Russian holidays (some major ones for example)
+const russianHolidays = [
+  "01-01", // New Year
+  "01-02", // New Year holidays
+  "01-03", // New Year holidays
+  "01-04", // New Year holidays
+  "01-05", // New Year holidays
+  "01-06", // New Year holidays
+  "01-07", // Christmas
+  "02-23", // Defender of the Fatherland Day
+  "03-08", // International Women's Day
+  "05-01", // Spring and Labor Day
+  "05-09", // Victory Day
+  "06-12", // Russia Day
+  "11-04", // Unity Day
+];
+
+// Check if a date is a Russian holiday
+const isRussianHoliday = (date: Date) => {
+  const monthDay = format(date, "MM-dd");
+  return russianHolidays.includes(monthDay);
+};
 
 interface CalendarWeekProps {
   currentWeek: Date;
@@ -67,10 +91,28 @@ export function CalendarWeek({
           {daysOfWeek.map((day, index) => (
             <div 
               key={index} 
-              className={`px-2 py-2 text-center ${isToday(day) ? 'bg-primary/10 rounded-t-md' : ''}`}
+              className={cn(
+                "px-2 py-2 text-center",
+                isToday(day) ? 'bg-primary/10 rounded-t-md' : '',
+                isWeekend(day) ? 'bg-secondary/10' : '',
+                isRussianHoliday(day) ? 'bg-purple-100' : '',
+                isPast(day) ? 'bg-gray-100' : ''
+              )}
             >
-              <p className="font-medium">{format(day, "E", { locale: ru })}</p>
-              <p className={`text-sm ${isToday(day) ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+              <p className={cn(
+                "font-medium",
+                isWeekend(day) ? 'text-secondary' : '',
+                isRussianHoliday(day) ? 'text-purple-700' : '',
+                isPast(day) ? 'text-gray-500' : ''
+              )}>
+                {format(day, "E", { locale: ru })}
+              </p>
+              <p className={cn(
+                "text-sm",
+                isToday(day) ? 'text-primary font-medium' : 'text-muted-foreground',
+                isRussianHoliday(day) ? 'text-purple-700' : '',
+                isPast(day) ? 'text-gray-500' : ''
+              )}>
                 {format(day, "d", { locale: ru })}
               </p>
             </div>
@@ -95,6 +137,9 @@ export function CalendarWeek({
                     appointments={getAppointmentsForHourAndDay(hour, day)}
                     onAppointmentClick={onAppointmentClick}
                     onAddAppointment={onAddAppointment}
+                    isPast={isPast(day)}
+                    isWeekend={isWeekend(day)}
+                    isHoliday={isRussianHoliday(day)}
                   />
                 ))}
               </React.Fragment>

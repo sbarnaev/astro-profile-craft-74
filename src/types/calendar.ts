@@ -7,4 +7,5 @@ export interface AppointmentInterface {
   duration: number;
   type: string;
   request: string;
+  cost?: number; // Make cost optional
 }
