@@ -1,13 +1,20 @@
 
 import { useState } from "react";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale";
-import { Calendar as CalendarIcon, Clock, Bell } from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -16,12 +23,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -31,10 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const timeSlots = Array.from({ length: 24 }).flatMap((_, hour) => 
-  ["00", "30"].map(minutes => `${hour.toString().padStart(2, '0')}:${minutes}`)
-);
-
+// Schema for the reminder form
 const reminderFormSchema = z.object({
   date: z.date({
     required_error: "Выберите дату напоминания",
@@ -50,121 +55,138 @@ const reminderFormSchema = z.object({
 type ReminderFormValues = z.infer<typeof reminderFormSchema>;
 
 interface ReminderFormProps {
-  consultationId: number;
+  isOpen: boolean;
+  onClose: () => void;
   onSubmit: (values: ReminderFormValues) => void;
 }
 
-export function ReminderForm({ consultationId, onSubmit }: ReminderFormProps) {
+export function ReminderForm({ isOpen, onClose, onSubmit }: ReminderFormProps) {
+  // Create time slots for every 15 minutes
+  const timeSlots = [];
+  for (let i = 8; i < 22; i++) {
+    timeSlots.push(`${i}:00`);
+    timeSlots.push(`${i}:15`);
+    timeSlots.push(`${i}:30`);
+    timeSlots.push(`${i}:45`);
+  }
+
   const form = useForm<ReminderFormValues>({
     resolver: zodResolver(reminderFormSchema),
     defaultValues: {
-      date: undefined,
-      time: "",
+      date: new Date(),
+      time: format(new Date(), "HH:mm"),
       note: "",
     },
   });
 
-  const handleSubmit = (values: ReminderFormValues) => {
-    onSubmit({ ...values, consultationId });
-  };
+  function handleSubmit(values: ReminderFormValues) {
+    onSubmit(values);
+    onClose();
+  }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Дата напоминания</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "d MMMM yyyy", { locale: ru })
-                        ) : (
-                          <span>Выберите дату</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Создать напоминание</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Дата</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "d MMMM yyyy", { locale: ru })
+                            ) : (
+                              <span>Выберите дату</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          locale={ru}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="time"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Время напоминания</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Время</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите время" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {timeSlots.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="note"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Текст напоминания</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите время" />
-                    </SelectTrigger>
+                    <Textarea
+                      placeholder="Введите текст напоминания..."
+                      className="resize-none min-h-[100px]"
+                      {...field}
+                    />
                   </FormControl>
-                  <SelectContent className="max-h-[300px]">
-                    {timeSlots.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        <div className="flex items-center">
-                          <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                          {time}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="note"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Текст напоминания</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Опишите напоминание..."
-                  className="min-h-[80px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit">
-            <Bell className="mr-2 h-4 w-4" />
-            Создать напоминание
-          </Button>
-        </div>
-      </form>
-    </Form>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Отмена
+              </Button>
+              <Button type="submit">Создать</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }
