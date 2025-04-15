@@ -41,6 +41,7 @@ export default function MainLayout() {
       <div 
         className="h-full"
         onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <Sidebar 
           isOpen={sidebarOpen} 
@@ -52,7 +53,6 @@ export default function MainLayout() {
         className={`flex flex-col flex-1 w-full overflow-hidden transition-all duration-300 ${
           sidebarOpen && !isMobile ? 'ml-64' : 'ml-0'
         }`}
-        onMouseEnter={handleMouseLeave}
       >
         <TopBar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         

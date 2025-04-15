@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -292,7 +291,7 @@ export function AppointmentForm({
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                          <PopoverContent className="w-auto p-0 z-50" align="start">
                             <Calendar
                               mode="single"
                               selected={field.value}
@@ -320,7 +319,7 @@ export function AppointmentForm({
                             <SelectValue placeholder="Выберите время" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="z-50">
                           {timeSlots.map((time) => (
                             <SelectItem key={time} value={time}>
                               {time}

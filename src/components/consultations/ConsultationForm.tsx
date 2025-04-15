@@ -158,7 +158,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 z-50" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value}
@@ -187,7 +187,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
                       <SelectValue placeholder="Выберите время" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="max-h-[300px]">
+                  <SelectContent className="max-h-[300px] z-50">
                     {timeSlots.map((time) => (
                       <SelectItem key={time} value={time}>
                         <div className="flex items-center">
@@ -218,7 +218,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
                       <SelectValue placeholder="Выберите продолжительность" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="z-50">
                     {durations.map((duration) => (
                       <SelectItem
                         key={duration.value}
@@ -246,7 +246,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
                       <SelectValue placeholder="Выберите тип" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="z-50">
                     {consultationTypes.map((type) => (
                       <SelectItem key={type.id} value={type.id}>
                         {type.name}
@@ -271,7 +271,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
                       <SelectValue placeholder="Выберите формат" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="z-50">
                     <SelectItem value="video">Видео-консультация</SelectItem>
                     <SelectItem value="in-person">Очная встреча</SelectItem>
                   </SelectContent>
