@@ -29,7 +29,12 @@ export default function MainLayout() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       {/* Боковое меню */}
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        setIsOpen={setSidebarOpen} 
+        onHoverEnter={() => !isMobile && setSidebarOpen(true)}
+        onHoverLeave={() => !isMobile && !sidebarOpen && setSidebarOpen(false)}
+      />
       
       {/* Основной контент */}
       <div 

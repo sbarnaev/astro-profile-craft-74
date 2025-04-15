@@ -18,9 +18,16 @@ import {
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  onHoverEnter?: () => void;
+  onHoverLeave?: () => void;
 }
 
-const Sidebar: FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
+const Sidebar: FC<SidebarProps> = ({ 
+  isOpen, 
+  setIsOpen, 
+  onHoverEnter, 
+  onHoverLeave 
+}) => {
   const location = useLocation();
   
   const navItems = [
@@ -45,6 +52,8 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       className={`h-screen bg-sidebar fixed lg:relative z-30 transition-all duration-300 ease-in-out ${
         isOpen ? "w-64" : "w-0 lg:w-20"
       } shadow-md overflow-hidden`}
+      onMouseEnter={onHoverEnter}
+      onMouseLeave={onHoverLeave}
     >
       <div className="flex flex-col h-full">
         {/* Заголовок */}
