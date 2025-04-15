@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -24,6 +23,7 @@ interface ClientFormProps {
   showCodes?: boolean;
   generateAnalysis?: boolean;
   redirectAfterSubmit?: boolean;
+  isSubmitting?: boolean;
 }
 
 export function ClientForm({ 
@@ -31,14 +31,14 @@ export function ClientForm({
   initialData, 
   showCodes = true,
   generateAnalysis = true,
-  redirectAfterSubmit = false
+  redirectAfterSubmit = false,
+  isSubmitting = false
 }: ClientFormProps) {
   const [phoneValue, setPhoneValue] = useState(initialData?.phone?.replace(/^\+\d+\s/, "") || "");
   const [countryCode, setCountryCode] = useState(
     initialData?.phone?.match(/^\+\d+/)?.toString() || "+7"
   );
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(formSchema),
@@ -84,8 +84,6 @@ export function ClientForm({
 
   const handleSubmit = async (values: ClientFormValues) => {
     try {
-      setIsSubmitting(true);
-      
       if (generateAnalysis) {
         const analysisData = {
           clientId: null, // Будет заполнено при создании клиента
@@ -124,8 +122,6 @@ export function ClientForm({
       toast.error("Не удалось сохранить клиента", {
         description: "Пожалуйста, проверьте введенные данные и попробуйте снова."
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
