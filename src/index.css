@@ -4,51 +4,51 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Астрологическая тема для CRM */
+    --background: 260 25% 98%;
+    --foreground: 250 40% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 260 30% 100%;
+    --card-foreground: 250 40% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 260 30% 100%;
+    --popover-foreground: 250 40% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 260 80% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 230 40% 60%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 260 20% 96%;
+    --muted-foreground: 250 20% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 290 80% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 260 20% 90%;
+    --input: 260 20% 90%;
+    --ring: 260 80% 60%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 260 30% 98%;
+    --sidebar-foreground: 250 40% 20%;
+    --sidebar-primary: 260 80% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 290 80% 60%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 260 20% 90%;
+    --sidebar-ring: 260 80% 60%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Дополнительные цвета для нашей CRM */
+    --astro-gold: 40 80% 60%;
+    --astro-silver: 230 20% 80%;
+    --astro-indigo: 250 80% 40%;
+    --astro-violet: 270 80% 60%;
   }
 
   .dark {
@@ -97,5 +97,66 @@
 
   body {
     @apply bg-background text-foreground;
+    background-image: radial-gradient(
+      circle at top right,
+      hsl(var(--accent) / 0.1),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      hsl(var(--secondary) / 0.1),
+      transparent 40%
+    );
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/20 backdrop-blur-lg border border-white/30 shadow-lg;
+  }
+  
+  .glass-dark {
+    @apply bg-foreground/10 backdrop-blur-lg border border-white/10 shadow-lg;
+  }
+
+  .astro-card {
+    @apply bg-gradient-to-br from-card to-card/80 backdrop-blur-sm rounded-xl shadow-md relative overflow-hidden;
+  }
+
+  .astro-card::before {
+    content: "";
+    @apply absolute inset-0 bg-gradient-to-br from-accent/20 to-primary/10 opacity-30;
+    z-index: -1;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .animate-slide-in {
+    animation: slideIn 0.5s ease-out forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
