@@ -50,6 +50,7 @@ export function AddClientDialog({ open, setOpen, handleAddClient }: AddClientDia
           onSubmit={onSubmit} 
           generateAnalysis={true} 
           redirectAfterSubmit={false}
+          isSubmitting={isSubmitting}
         />
       </DialogContent>
     </Dialog>

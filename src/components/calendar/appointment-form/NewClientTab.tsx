@@ -28,6 +28,7 @@ export function NewClientTab({ onCreateClient }: NewClientTabProps) {
         showCodes={false} 
         generateAnalysis={true}
         redirectAfterSubmit={false}
+        isSubmitting={isSubmitting}
       />
     </div>
   );

@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ClientsSearch } from "@/components/clients/ClientsSearch";
-import { ClientsTable } from "@/components/clients/ClientsTable";
+import { ClientsTable, Client } from "@/components/clients/ClientsTable";
 import { ClientsPagination } from "@/components/clients/ClientsPagination";
 import { AddClientDialog } from "@/components/clients/AddClientDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -36,17 +36,38 @@ const Clients = () => {
         return [];
       }
       
-      // Преобразуем данные из Supabase в формат, используемый в приложении
-      return data.map(client => ({
-        id: client.id,
-        name: `${client.last_name} ${client.first_name} ${client.patronymic || ''}`.trim(),
-        date: client.dob ? new Date(client.dob).toLocaleDateString('ru-RU') : "",
-        phone: client.phone,
-        analysisCount: 0, // Будет заполнено дополнительным запросом
-        lastAnalysis: "", // Будет заполнено дополнительным запросом
-        source: client.source,
-        communicationChannel: client.communication_channel
-      }));
+      // Загружаем количество анализов для каждого клиента
+      const clientsWithAnalysisCount: Client[] = [];
+      
+      for (const client of data) {
+        // Получаем количество и последний анализ
+        const { data: analyses, error: analysisError } = await supabase
+          .from('analysis')
+          .select('created_at')
+          .eq('client_id', client.id)
+          .order('created_at', { ascending: false });
+          
+        if (analysisError) {
+          console.error('Ошибка при загрузке анализов:', analysisError);
+        }
+        
+        const lastAnalysisDate = analyses && analyses.length > 0 
+          ? new Date(analyses[0].created_at).toLocaleDateString('ru-RU') 
+          : "";
+        
+        clientsWithAnalysisCount.push({
+          id: client.id,
+          name: `${client.last_name} ${client.first_name} ${client.patronymic || ''}`.trim(),
+          date: client.dob ? new Date(client.dob).toLocaleDateString('ru-RU') : "",
+          phone: client.phone,
+          analysisCount: analyses?.length || 0,
+          lastAnalysis: lastAnalysisDate,
+          source: client.source,
+          communicationChannel: client.communication_channel
+        });
+      }
+      
+      return clientsWithAnalysisCount;
     }
   });
   

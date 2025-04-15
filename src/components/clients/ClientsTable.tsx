@@ -2,8 +2,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ClientActionMenu } from "./ClientActionMenu";
 
-interface Client {
-  id: number;
+export interface Client {
+  id: string; // изменено с number на string для соответствия UUID из Supabase
   name: string;
   date: string;
   phone: string;
