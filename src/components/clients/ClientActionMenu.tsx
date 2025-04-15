@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface ClientActionMenuProps {
-  clientId: number;
+  clientId: string; // Changed from number to string to match Supabase UUID format
 }
 
 export function ClientActionMenu({ clientId }: ClientActionMenuProps) {

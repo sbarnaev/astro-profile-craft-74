@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ClientActionMenu } from "./ClientActionMenu";
 
 export interface Client {
-  id: string; // изменено с number на string для соответствия UUID из Supabase
+  id: string; // Changed from number to string to match Supabase UUID format
   name: string;
   date: string;
   phone: string;

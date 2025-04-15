@@ -18,52 +18,9 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-
-const clientsData = [
-  { 
-    id: 1, 
-    firstName: "Анна", 
-    lastName: "Смирнова", 
-    patronymic: "Владимировна",
-    dob: new Date(1993, 3, 14), 
-    phone: "+7 (900) 123-45-67", 
-    email: "anna@example.com",
-    analysisCount: 3, 
-    lastAnalysis: "02.03.2025",
-    source: "instagram",
-    communicationChannel: "whatsapp",
-    personalityCode: 7,
-    connectorCode: 5,
-    realizationCode: 4,
-    generatorCode: 3,
-    missionCode: 11,
-    hasAnalysis: true,
-    analysisId: 123,
-    revenue: 25000,
-    avatar: null
-  },
-  { 
-    id: 2, 
-    firstName: "Иван", 
-    lastName: "Петров", 
-    patronymic: "Сергеевич",
-    dob: new Date(1985, 1, 28), 
-    phone: "+7 (911) 987-65-43", 
-    email: "ivan@example.com",
-    analysisCount: 2, 
-    lastAnalysis: "15.02.2025",
-    source: "referral",
-    communicationChannel: "telegram",
-    personalityCode: 9,
-    connectorCode: 6,
-    realizationCode: 8,
-    generatorCode: 3,
-    missionCode: 6,
-    hasAnalysis: false,
-    revenue: 15000,
-    avatar: null
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 
 const getSourceLabel = (source: string): string => {
   const sourceMap: Record<string, string> = {
@@ -131,8 +88,63 @@ const ClientProfile = () => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("consultations");
   const [openReminderDialog, setOpenReminderDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const client = clientsData.find(c => c.id === Number(id));
+  const { data: client, isLoading, error } = useQuery({
+    queryKey: ['client', id],
+    queryFn: async () => {
+      if (!id) return null;
+
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', id)
+        .single();
+        
+      if (clientError) {
+        console.error('Ошибка при загрузке клиента:', clientError);
+        throw new Error('Не удалось загрузить данные клиента');
+      }
+      
+      const { data: analyses, error: analysisError } = await supabase
+        .from('analysis')
+        .select('created_at')
+        .eq('client_id', id)
+        .order('created_at', { ascending: false });
+        
+      if (analysisError) {
+        console.error('Ошибка при загрузке анализов:', analysisError);
+      }
+
+      const hasAnalysis = analyses && analyses.length > 0;
+      const lastAnalysis = hasAnalysis 
+        ? new Date(analyses[0].created_at).toLocaleDateString('ru-RU') 
+        : "";
+      
+      return {
+        id: clientData.id,
+        firstName: clientData.first_name,
+        lastName: clientData.last_name,
+        patronymic: clientData.patronymic || "",
+        dob: new Date(clientData.dob),
+        phone: clientData.phone,
+        email: clientData.email || "",
+        source: clientData.source,
+        communicationChannel: clientData.communication_channel,
+        personalityCode: clientData.personality_code || 0,
+        connectorCode: clientData.connector_code || 0,
+        realizationCode: clientData.realization_code || 0,
+        generatorCode: clientData.generator_code || 0,
+        missionCode: Number(clientData.mission_code) || 0,
+        analysisCount: analyses?.length || 0,
+        lastAnalysis: lastAnalysis,
+        hasAnalysis: hasAnalysis,
+        analysisId: hasAnalysis ? analyses[0].id : null,
+        revenue: 0,
+        avatar: null
+      };
+    }
+  });
   
   useEffect(() => {
     if (location.state?.openReminder) {
@@ -141,11 +153,19 @@ const ClientProfile = () => {
     }
   }, [location.state]);
   
-  if (!client) {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
+  if (error || !client) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <h1 className="text-2xl font-bold mb-4">Клиент не найден</h1>
-        <p className="text-muted-foreground mb-8">Клиент с указанным ID не существует</p>
+        <p className="text-muted-foreground mb-8">Клиент с указанным ID не существует или произошла ошибка при загрузке данных</p>
         <Button asChild>
           <Link to="/clients">
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -156,12 +176,45 @@ const ClientProfile = () => {
     );
   }
   
-  const handleEditClient = (data: any) => {
-    setOpen(false);
-    toast.success("Данные клиента обновлены", {
-      description: "Информация о клиенте была успешно обновлена."
-    });
-    console.log("Updated client data:", data);
+  const handleEditClient = async (data: any) => {
+    try {
+      setIsSubmitting(true);
+      
+      const { error } = await supabase
+        .from('clients')
+        .update({
+          first_name: data.firstName,
+          last_name: data.lastName,
+          patronymic: data.patronymic || null,
+          dob: format(data.dob, 'yyyy-MM-dd'),
+          phone: data.phone,
+          email: data.email || null,
+          source: data.source,
+          communication_channel: data.communicationChannel,
+          personality_code: data.personalityCode,
+          connector_code: data.connectorCode,
+          realization_code: data.realizationCode,
+          generator_code: data.generatorCode,
+          mission_code: String(data.missionCode)
+        })
+        .eq('id', client.id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      setOpen(false);
+      toast.success("Данные клиента обновлены", {
+        description: "Информация о клиенте была успешно обновлена."
+      });
+    } catch (error) {
+      console.error("Ошибка при обновлении данных клиента:", error);
+      toast.error("Не удалось обновить данные клиента", {
+        description: "Пожалуйста, попробуйте еще раз или обратитесь к администратору."
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -233,6 +286,7 @@ const ClientProfile = () => {
                   missionCode: client.missionCode
                 }}
                 generateAnalysis={false}
+                isSubmitting={isSubmitting}
               />
             </DialogContent>
           </Dialog>
