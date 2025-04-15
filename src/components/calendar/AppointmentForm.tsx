@@ -357,8 +357,7 @@ export function AppointmentForm({
                         <FormMessage />
                       </FormItem>
                     )}
-                  
-                  </FormField>
+                  />
                   
                   <FormField
                     control={form.control}
