@@ -63,21 +63,22 @@ const getCommunicationIcon = (channel: string) => {
   }
 };
 
-const getArchetypeName = (code: number): string => {
-  const archetypes: Record<number, string> = {
-    1: "Воин",
-    2: "Партнер",
-    3: "Творец",
-    4: "Исследователь",
-    5: "Путешественник",
-    6: "Учитель",
-    7: "Мудрец",
-    8: "Правитель",
-    9: "Философ",
-    10: "Дипломат",
-    11: "Целитель"
+const getArchetypeName = (code: number | string): string => {
+  const archetypes: Record<string, string> = {
+    "1": "Воин",
+    "2": "Партнер",
+    "3": "Творец",
+    "4": "Исследователь",
+    "5": "Путешественник",
+    "6": "Учитель",
+    "7": "Мудрец",
+    "8": "Правитель",
+    "9": "Философ",
+    "10": "Дипломат",
+    "11": "Целитель"
   };
-  return archetypes[code] || "Неизвестный";
+  const codeStr = String(code);
+  return archetypes[codeStr] || "Неизвестный";
 };
 
 const ClientProfile = () => {
@@ -108,7 +109,7 @@ const ClientProfile = () => {
       
       const { data: analyses, error: analysisError } = await supabase
         .from('analysis')
-        .select('created_at')
+        .select('id, created_at')
         .eq('client_id', id)
         .order('created_at', { ascending: false });
         
@@ -120,6 +121,8 @@ const ClientProfile = () => {
       const lastAnalysis = hasAnalysis 
         ? new Date(analyses[0].created_at).toLocaleDateString('ru-RU') 
         : "";
+
+      const analysisId = hasAnalysis ? analyses[0].id : null;
       
       return {
         id: clientData.id,
@@ -135,11 +138,11 @@ const ClientProfile = () => {
         connectorCode: clientData.connector_code || 0,
         realizationCode: clientData.realization_code || 0,
         generatorCode: clientData.generator_code || 0,
-        missionCode: Number(clientData.mission_code) || 0,
+        missionCode: clientData.mission_code || "0",
         analysisCount: analyses?.length || 0,
         lastAnalysis: lastAnalysis,
         hasAnalysis: hasAnalysis,
-        analysisId: hasAnalysis ? analyses[0].id : null,
+        analysisId: analysisId,
         revenue: 0,
         avatar: null
       };

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -12,8 +11,8 @@ import { AnalysisView } from "@/components/analysis/AnalysisView";
 // Пример данных об анализах
 const analysisData = [
   { 
-    id: 1,
-    clientId: 1,
+    id: "1",
+    clientId: "1",
     clientName: "Иванов Иван",
     clientPhone: "+7 (900) 123-45-67",
     clientDob: new Date(1990, 5, 15),
@@ -30,8 +29,8 @@ const analysisData = [
     }
   },
   { 
-    id: 2,
-    clientId: 1,
+    id: "2",
+    clientId: "1",
     clientName: "Иванов Иван",
     clientPhone: "+7 (900) 123-45-67",
     clientDob: new Date(1990, 5, 15),
@@ -45,8 +44,8 @@ const analysisData = [
     }
   },
   { 
-    id: 3,
-    clientId: 1,
+    id: "3",
+    clientId: "1",
     clientName: "Иванов Иван",
     clientPhone: "+7 (900) 123-45-67",
     clientDob: new Date(1990, 5, 15),
@@ -61,8 +60,8 @@ const analysisData = [
     }
   },
   { 
-    id: 4,
-    clientId: 2,
+    id: "4",
+    clientId: "2",
     clientName: "Петрова Анна",
     clientPhone: "+7 (900) 987-65-43",
     clientDob: new Date(1985, 8, 20),
@@ -81,7 +80,7 @@ const analysisData = [
 ];
 
 interface ClientAnalysisProps {
-  clientId: number;
+  clientId: string;
 }
 
 export const ClientAnalysis = ({ clientId }: ClientAnalysisProps) => {
