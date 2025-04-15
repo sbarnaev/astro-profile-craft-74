@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { Calendar, FileText, Bell, Clock, User, Edit, ChevronLeft, MessageCircle, Share2, Info, Eye, Upload, DollarSign } from "lucide-react";
@@ -471,7 +470,7 @@ const ClientProfile = () => {
                 </Button>
               ) : (
                 <Button className="w-full" asChild>
-                  <Link to={`/analysis/${client.id}`}>
+                  <Link to={`/analysis/new?client=${client.id}`}>
                     <FileText className="mr-2 h-4 w-4" />
                     Создать анализ
                   </Link>
