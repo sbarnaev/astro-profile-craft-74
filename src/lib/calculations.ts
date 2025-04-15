@@ -57,7 +57,7 @@ export const calculatePersonalityCodes = (birthDate: string): {
  * Суммирует цифры числа до получения однозначного числа (1-9)
  * Например: 123 -> 1+2+3=6, 58 -> 5+8=13 -> 1+3=4
  */
-const sumDigitsToSingle = (num: number): number => {
+export const sumDigitsToSingle = (num: number): number => {
   if (num <= 9) return num;
   
   // Складываем цифры числа
@@ -71,4 +71,25 @@ const sumDigitsToSingle = (num: number): number => {
   
   // Рекурсивно складываем цифры, пока не получим однозначное число
   return sumDigitsToSingle(sum);
+};
+
+/**
+ * Возвращает название архетипа для числа
+ * @param code - число от 1 до 9 или 11
+ * @returns название архетипа
+ */
+export const getArchetypeName = (code: number | string): string => {
+  switch (Number(code)) {
+    case 1: return "Лидер";
+    case 2: return "Партнер";
+    case 3: return "Творец";
+    case 4: return "Стабилизатор";
+    case 5: return "Свободный";
+    case 6: return "Гармонизатор";
+    case 7: return "Мыслитель";
+    case 8: return "Организатор";
+    case 9: return "Мудрец";
+    case 11: return "Учитель";
+    default: return "Неизвестный";
+  }
 };
