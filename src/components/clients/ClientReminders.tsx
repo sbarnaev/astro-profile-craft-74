@@ -1,19 +1,29 @@
 
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Bell, Calendar, Check, AlarmClock, PlusCircle, Edit } from "lucide-react";
+import { Bell, Calendar, Check, AlarmClock, PlusCircle, Edit, Clock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ReminderForm } from "@/components/consultations/ReminderForm";
 
 // Пример данных о напоминаниях
-const remindersData = [
+const initialRemindersData = [
   { 
     id: 1,
     clientId: 1,
     date: new Date(2025, 3, 15),
+    time: "10:00",
     title: "Позвонить и предложить консультацию",
     description: "Обсудить результаты последнего анализа и предложить консультацию",
     completed: false,
@@ -23,6 +33,7 @@ const remindersData = [
     id: 2,
     clientId: 1,
     date: new Date(2025, 2, 25),
+    time: "15:30",
     title: "Отправить материалы",
     description: "Отправить дополнительные материалы по личностному развитию",
     completed: true,
@@ -32,6 +43,7 @@ const remindersData = [
     id: 3,
     clientId: 1,
     date: new Date(2025, 4, 5),
+    time: "12:00",
     title: "Напомнить о предстоящей консультации",
     description: "Напомнить о консультации 10 апреля",
     completed: false,
@@ -41,6 +53,7 @@ const remindersData = [
     id: 4,
     clientId: 2,
     date: new Date(2025, 3, 2),
+    time: "14:45",
     title: "Обсудить результаты анализа",
     description: null,
     completed: false,
@@ -53,18 +66,19 @@ interface ClientRemindersProps {
 }
 
 export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
+  const [remindersData, setRemindersData] = useState(initialRemindersData);
+  const [isReminderFormOpen, setIsReminderFormOpen] = useState(false);
+  const [editingReminder, setEditingReminder] = useState<number | null>(null);
+  
   // Фильтрация напоминаний для текущего клиента и сортировка по дате и статусу
   const clientReminders = remindersData
-    .filter(reminder => reminder.clientId === clientId)
-    .sort((a, b) => {
-      if (a.completed !== b.completed) {
-        return a.completed ? 1 : -1; // Сначала активные
-      }
-      return a.date.getTime() - b.date.getTime(); // Затем по дате (сначала ближайшие)
-    });
+    .filter(reminder => reminder.clientId === clientId);
   
-  const activeReminders = clientReminders.filter(r => !r.completed);
-  const completedReminders = clientReminders.filter(r => r.completed);
+  const activeReminders = clientReminders.filter(r => !r.completed)
+    .sort((a, b) => a.date.getTime() - b.date.getTime()); // Сначала ближайшие
+  
+  const completedReminders = clientReminders.filter(r => r.completed)
+    .sort((a, b) => b.date.getTime() - a.date.getTime()); // Сначала недавние
   
   const formatReminderDate = (date: Date) => {
     return format(date, "d MMMM yyyy", { locale: ru });
@@ -97,26 +111,43 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   };
 
   const handleCompleteReminder = (id: number) => {
-    // В реальном приложении здесь был бы API-запрос для изменения статуса
+    // Отметить напоминание как выполненное
+    setRemindersData(prevData => 
+      prevData.map(reminder => 
+        reminder.id === id 
+          ? { ...reminder, completed: true } 
+          : reminder
+      )
+    );
+    
     toast.success("Напоминание выполнено", {
       description: "Напоминание помечено как выполненное"
     });
-    
-    // Имитация обновления данных после запроса
-    const updatedReminders = [...clientReminders];
-    const reminderIndex = updatedReminders.findIndex(r => r.id === id);
-    
-    if (reminderIndex !== -1) {
-      // Визуально отмечаем как выполненное для демонстрации
-      setTimeout(() => {
-        document.getElementById(`reminder-${id}`)?.classList.add('opacity-50');
-      }, 100);
-    }
   };
 
   const handleEditReminder = (id: number) => {
-    toast.info("Редактирование напоминания", {
-      description: `Открытие формы редактирования напоминания #${id}`
+    setEditingReminder(id);
+    setIsReminderFormOpen(true);
+  };
+
+  const handleCreateReminder = (data: any) => {
+    // Создать новое напоминание
+    const newReminder = {
+      id: Math.floor(Math.random() * 10000),
+      clientId,
+      date: data.date,
+      time: data.time,
+      title: data.text,
+      description: null,
+      completed: false,
+      priority: data.priority
+    };
+    
+    setRemindersData(prev => [...prev, newReminder]);
+    setIsReminderFormOpen(false);
+    
+    toast.success("Напоминание создано", {
+      description: "Новое напоминание добавлено в список"
     });
   };
 
@@ -124,12 +155,24 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Напоминания</h3>
-        <Button size="sm" asChild>
-          <Link to={`/reminders/new?client=${clientId}`}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Создать напоминание
-          </Link>
-        </Button>
+        <Dialog open={isReminderFormOpen} onOpenChange={setIsReminderFormOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Создать напоминание
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Создать напоминание</DialogTitle>
+            </DialogHeader>
+            <ReminderForm 
+              isOpen={isReminderFormOpen}
+              onClose={() => setIsReminderFormOpen(false)}
+              onSubmit={handleCreateReminder}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
       
       {activeReminders.length > 0 && (
@@ -151,9 +194,17 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
                         {getPriorityLabel(reminder.priority)}
                       </Badge>
                     </div>
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">{formatReminderDate(reminder.date)}</span>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">{formatReminderDate(reminder.date)}</span>
+                      </div>
+                      {reminder.time && (
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">{reminder.time}</span>
+                        </div>
+                      )}
                     </div>
                     {reminder.description && (
                       <p className="text-sm mt-2">{reminder.description}</p>
@@ -193,9 +244,17 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
                       <span className="font-medium line-through">{reminder.title}</span>
                       <Badge variant="outline">Выполнено</Badge>
                     </div>
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">{formatReminderDate(reminder.date)}</span>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">{formatReminderDate(reminder.date)}</span>
+                      </div>
+                      {reminder.time && (
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">{reminder.time}</span>
+                        </div>
+                      )}
                     </div>
                     {reminder.description && (
                       <p className="text-sm mt-2 line-through">{reminder.description}</p>
@@ -215,14 +274,42 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
           <p className="text-muted-foreground mb-6">
             Для этого клиента нет активных или выполненных напоминаний
           </p>
-          <Button asChild>
-            <Link to={`/reminders/new?client=${clientId}`}>
-              <AlarmClock className="mr-2 h-4 w-4" />
-              Создать напоминание
-            </Link>
+          <Button onClick={() => setIsReminderFormOpen(true)}>
+            <AlarmClock className="mr-2 h-4 w-4" />
+            Создать напоминание
           </Button>
         </div>
       )}
+
+      <Dialog open={editingReminder !== null} onOpenChange={(open) => !open && setEditingReminder(null)}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Редактировать напоминание</DialogTitle>
+          </DialogHeader>
+          <ReminderForm 
+            isOpen={editingReminder !== null}
+            onClose={() => setEditingReminder(null)}
+            onSubmit={(data) => {
+              // Обновление существующего напоминания
+              setRemindersData(prev => prev.map(rem => 
+                rem.id === editingReminder 
+                  ? {
+                      ...rem,
+                      date: data.date,
+                      time: data.time,
+                      title: data.text,
+                      priority: data.priority
+                    }
+                  : rem
+              ));
+              setEditingReminder(null);
+              toast.success("Напоминание обновлено", {
+                description: "Изменения сохранены"
+              });
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

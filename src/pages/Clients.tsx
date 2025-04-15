@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,12 +99,21 @@ const Clients = () => {
     setCurrentPage(page);
   };
   
-  const handleAddClient = (data: any) => {
+  const handleAddClient = (data: any, analysisData?: any) => {
     setOpen(false);
     console.log("New client data:", data);
-    toast.success("Клиент успешно добавлен", {
-      description: "Новый клиент был добавлен в базу данных."
-    });
+    
+    if (analysisData) {
+      console.log("Analysis data:", analysisData);
+      // В реальном приложении здесь был бы API-запрос для сохранения анализа
+      toast.success("Клиент и анализ успешно добавлены", {
+        description: "Новый клиент и анализ были добавлены в базу данных."
+      });
+    } else {
+      toast.success("Клиент успешно добавлен", {
+        description: "Новый клиент был добавлен в базу данных."
+      });
+    }
   };
 
   const getCommunicationIcon = (channel: string) => {
@@ -143,7 +153,7 @@ const Clients = () => {
             <DialogHeader>
               <DialogTitle>Добавить нового клиента</DialogTitle>
             </DialogHeader>
-            <ClientForm onSubmit={handleAddClient} />
+            <ClientForm onSubmit={handleAddClient} generateAnalysis={true} />
           </DialogContent>
         </Dialog>
       </div>
@@ -226,8 +236,9 @@ const Clients = () => {
                                 <Link to={`/clients/${client.id}`}>Профиль</Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link to={`/analysis/new?client=${client.id}`}>
-                                  Новый анализ
+                                <Link to={`/analysis/${client.id}`}>
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  <span>Анализ</span>
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
@@ -237,7 +248,7 @@ const Clients = () => {
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link to={`/reminders/new?client=${client.id}`}>
+                                <Link to={`/clients/${client.id}`} state={{ openReminder: true }}>
                                   <Bell className="mr-2 h-4 w-4" />
                                   <span>Создать напоминание</span>
                                 </Link>

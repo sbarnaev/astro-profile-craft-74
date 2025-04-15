@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { calculatePersonalityCodes } from "@/lib/calculations";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 import { PersonalInfoFields } from "./form/PersonalInfoFields";
 import { DateOfBirthField } from "./form/DateOfBirthField";
@@ -17,12 +18,18 @@ import { formatPhoneNumber } from "./utils/phoneFormatter";
 import { formSchema, ClientFormValues } from "./schema/clientFormSchema";
 
 interface ClientFormProps {
-  onSubmit: (data: z.infer<typeof formSchema>) => void;
+  onSubmit: (data: z.infer<typeof formSchema>, analysis?: any) => void;
   initialData?: Partial<z.infer<typeof formSchema>>;
   showCodes?: boolean;
+  generateAnalysis?: boolean;
 }
 
-export function ClientForm({ onSubmit, initialData, showCodes = true }: ClientFormProps) {
+export function ClientForm({ 
+  onSubmit, 
+  initialData, 
+  showCodes = true,
+  generateAnalysis = true 
+}: ClientFormProps) {
   const [phoneValue, setPhoneValue] = useState(initialData?.phone || "");
   
   const form = useForm<ClientFormValues>({
@@ -69,7 +76,35 @@ export function ClientForm({ onSubmit, initialData, showCodes = true }: ClientFo
   };
 
   const handleSubmit = (values: ClientFormValues) => {
-    onSubmit(values);
+    if (generateAnalysis) {
+      // Генерация базового анализа на основе данных клиента
+      const analysisData = {
+        id: Math.floor(Math.random() * 10000),
+        clientId: Math.floor(Math.random() * 10000), // Временный ID, обычно присваивается сервером
+        clientName: `${values.lastName} ${values.firstName} ${values.patronymic || ""}`,
+        clientPhone: values.phone,
+        clientDob: values.dob,
+        date: new Date(),
+        type: "full",
+        status: "completed",
+        title: "Полный анализ личности",
+        codes: {
+          personality: values.personalityCode,
+          connector: values.connectorCode,
+          implementation: values.realizationCode,
+          generator: values.generatorCode,
+          mission: values.missionCode
+        }
+      };
+      
+      toast.success("Анализ личности создан автоматически", {
+        description: "Анализ был создан на основе данных клиента"
+      });
+      
+      onSubmit(values, analysisData);
+    } else {
+      onSubmit(values);
+    }
   };
 
   return (

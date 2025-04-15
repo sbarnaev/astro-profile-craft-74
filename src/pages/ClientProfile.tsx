@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { Calendar, FileText, Bell, Clock, User, Edit, ChevronLeft, MessageCircle, Share2, Info, Eye, Upload, DollarSign } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientForm } from "@/components/clients/ClientForm";
 import { ClientConsultations } from "@/components/clients/ClientConsultations";
 import { ClientReminders } from "@/components/clients/ClientReminders";
+import { ClientAnalysis } from "@/components/clients/ClientAnalysis";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -19,7 +19,6 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
-// Пример данных о клиентах для демонстрации
 const clientsData = [
   { 
     id: 1, 
@@ -64,10 +63,8 @@ const clientsData = [
     revenue: 15000,
     avatar: null
   },
-  // ... остальные клиенты
 ];
 
-// Функция для получения названия источника
 const getSourceLabel = (source: string): string => {
   const sourceMap: Record<string, string> = {
     'instagram': 'Instagram',
@@ -80,7 +77,6 @@ const getSourceLabel = (source: string): string => {
   return sourceMap[source] || source;
 };
 
-// Функция для получения названия канала общения
 const getCommunicationLabel = (channel: string): string => {
   const channelMap: Record<string, string> = {
     'whatsapp': 'WhatsApp',
@@ -93,7 +89,6 @@ const getCommunicationLabel = (channel: string): string => {
   return channelMap[channel] || channel;
 };
 
-// Функция для получения иконки канала общения
 const getCommunicationIcon = (channel: string) => {
   switch (channel.toLowerCase()) {
     case 'whatsapp':
@@ -111,7 +106,6 @@ const getCommunicationIcon = (channel: string) => {
   }
 };
 
-// Функция для получения названий архетипов по кодам
 const getArchetypeName = (code: number): string => {
   const archetypes: Record<number, string> = {
     1: "Воин",
@@ -131,12 +125,21 @@ const getArchetypeName = (code: number): string => {
 
 const ClientProfile = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("consultations");
+  const [openReminderDialog, setOpenReminderDialog] = useState(false);
   
-  // Находим клиента по ID
   const client = clientsData.find(c => c.id === Number(id));
+  
+  useEffect(() => {
+    if (location.state?.openReminder) {
+      setActiveTab("reminders");
+      setOpenReminderDialog(true);
+    }
+  }, [location.state]);
   
   if (!client) {
     return (
@@ -175,7 +178,6 @@ const ClientProfile = () => {
   };
   
   const handleSaveAvatar = () => {
-    // В реальном приложении здесь был бы API-запрос для сохранения аватара
     toast.success("Аватар клиента обновлен", {
       description: "Изображение профиля было успешно обновлено."
     });
@@ -230,6 +232,7 @@ const ClientProfile = () => {
                   generatorCode: client.generatorCode,
                   missionCode: client.missionCode
                 }}
+                generateAnalysis={false}
               />
             </DialogContent>
           </Dialog>
@@ -410,7 +413,7 @@ const ClientProfile = () => {
                 </Button>
               ) : (
                 <Button className="w-full" asChild>
-                  <Link to={`/analysis/new?client=${client.id}`}>
+                  <Link to={`/analysis/${client.id}`}>
                     <FileText className="mr-2 h-4 w-4" />
                     Создать анализ
                   </Link>
@@ -424,19 +427,21 @@ const ClientProfile = () => {
                 </Link>
               </Button>
               
-              <Button variant="outline" className="w-full" asChild>
-                <Link to={`/reminders/new?client=${client.id}`}>
-                  <Bell className="mr-2 h-4 w-4" />
-                  Создать напоминание
-                </Link>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => setOpenReminderDialog(true)}
+              >
+                <Bell className="mr-2 h-4 w-4" />
+                Создать напоминание
               </Button>
             </div>
           </CardContent>
         </Card>
         
         <div className="col-span-1 md:col-span-2">
-          <Tabs defaultValue="consultations" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="consultations">
                 <Calendar className="mr-2 h-4 w-4" />
                 Консультации
@@ -444,6 +449,10 @@ const ClientProfile = () => {
               <TabsTrigger value="reminders">
                 <Bell className="mr-2 h-4 w-4" />
                 Напоминания
+              </TabsTrigger>
+              <TabsTrigger value="analysis">
+                <FileText className="mr-2 h-4 w-4" />
+                Анализы
               </TabsTrigger>
             </TabsList>
             
@@ -454,9 +463,25 @@ const ClientProfile = () => {
             <TabsContent value="reminders">
               <ClientReminders clientId={client.id} />
             </TabsContent>
+            
+            <TabsContent value="analysis">
+              <ClientAnalysis clientId={client.id} />
+            </TabsContent>
           </Tabs>
         </div>
       </div>
+
+      <Dialog open={openReminderDialog} onOpenChange={setOpenReminderDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Создать напоминание</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {/* Компонент формы напоминания */}
+            {/* ...код формы напоминания... */}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

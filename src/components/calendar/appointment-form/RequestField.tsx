@@ -7,7 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import { AppointmentFormValues } from "./types";
 
@@ -24,8 +24,9 @@ export function RequestField({ form }: RequestFieldProps) {
         <FormItem>
           <FormLabel>Запрос клиента</FormLabel>
           <FormControl>
-            <Input
+            <Textarea
               placeholder="Опишите запрос клиента..."
+              className="resize-none"
               {...field}
             />
           </FormControl>
