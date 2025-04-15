@@ -11,6 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
+import { AppointmentForm } from "@/components/calendar/AppointmentForm";
+import { WeekViewCell } from "@/components/calendar/WeekViewCell";
+import { DetailedMonthView } from "@/components/calendar/DetailedMonthView";
 
 // Пример данных о встречах
 const appointmentsData = [
@@ -78,6 +81,8 @@ const Calendar = () => {
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
   const [selectedTab, setSelectedTab] = useState<string>("day");
   const [selectedAppointment, setSelectedAppointment] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [appointments, setAppointments] = useState(appointmentsData);
   
   // Получение дней текущей недели
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
@@ -156,6 +161,28 @@ const Calendar = () => {
   const selectedAppointmentDetails = selectedAppointment 
     ? getAppointmentById(selectedAppointment) 
     : null;
+    
+  // Обработчик добавления новой встречи
+  const handleAddAppointment = (data: any) => {
+    console.log("Новая встреча:", data);
+    // Здесь будет логика для добавления новой встречи
+    // В реальном приложении, здесь будет API-запрос к бэкенду
+    
+    // Для примера, добавим встречу в список
+    const newAppointment = {
+      id: appointments.length + 1,
+      clientName: data.clientName,
+      clientId: data.clientId || 999, // ID клиента или временное значение
+      date: data.appointmentDateTime || new Date(),
+      duration: data.duration || 60,
+      type: data.consultationType 
+        ? ["Экспресс-консультация", "Базовый анализ", "Отношения", "Целевой анализ"][data.consultationType - 1] 
+        : "Консультация",
+      request: data.request || ""
+    };
+    
+    setAppointments([...appointments, newAppointment]);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -164,7 +191,10 @@ const Calendar = () => {
           <h1 className="text-2xl font-bold">Календарь</h1>
           <p className="text-muted-foreground">Планирование встреч с клиентами</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button 
+          className="bg-primary hover:bg-primary/90"
+          onClick={() => setShowAddForm(true)}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Добавить встречу
         </Button>
@@ -329,7 +359,11 @@ const Calendar = () => {
                     <p className="text-muted-foreground mt-1">
                       {date ? "На выбранную дату нет встреч" : "Выберите дату в календаре"}
                     </p>
-                    <Button variant="outline" className="mt-4">
+                    <Button 
+                      variant="outline" 
+                      className="mt-4"
+                      onClick={() => setShowAddForm(true)}
+                    >
                       <Plus className="mr-2 h-4 w-4" />
                       Добавить встречу
                     </Button>
@@ -386,107 +420,16 @@ const Calendar = () => {
                       </div>
                       
                       {/* Дни недели */}
-                      {daysOfWeek.map((day, dayIndex) => {
-                        const appointmentsForThisHour = getAppointmentsForHourAndDay(hour, day);
-                        return (
-                          <div 
-                            key={dayIndex} 
-                            className={`border-b border-r min-h-[60px] relative ${isToday(day) ? 'bg-primary/5' : ''}`}
-                          >
-                            {appointmentsForThisHour.length > 0 ? (
-                              <div className="absolute inset-0 p-1">
-                                {appointmentsForThisHour.map((appointment) => (
-                                  <Drawer key={appointment.id}>
-                                    <DrawerTrigger asChild>
-                                      <div 
-                                        className="text-xs p-1 rounded bg-primary/20 text-primary-foreground mb-1 cursor-pointer truncate hover:bg-primary/30 transition-colors"
-                                        style={{
-                                          height: `${Math.min(appointment.duration / 15, 4) * 15}px`,
-                                          overflow: 'hidden'
-                                        }}
-                                        onClick={() => setSelectedAppointment(appointment.id)}
-                                      >
-                                        {formatTime(appointment.date)} - {appointment.clientName}
-                                      </div>
-                                    </DrawerTrigger>
-                                    <DrawerContent>
-                                      <DrawerHeader>
-                                        <DrawerTitle>Детали консультации</DrawerTitle>
-                                      </DrawerHeader>
-                                      <div className="p-4 space-y-4">
-                                        <div className="flex items-center justify-between">
-                                          <div className="flex items-center gap-2">
-                                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                              <Users className="h-5 w-5 text-primary" />
-                                            </div>
-                                            <div>
-                                              <h3 className="font-medium">{appointment.clientName}</h3>
-                                              <Link 
-                                                to={`/clients/${appointment.clientId}`} 
-                                                className="text-sm text-primary hover:underline"
-                                              >
-                                                Профиль клиента
-                                              </Link>
-                                            </div>
-                                          </div>
-                                          <Badge>{appointment.type}</Badge>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
-                                          <div>
-                                            <p className="text-sm text-muted-foreground">Дата и время</p>
-                                            <p className="font-medium">
-                                              {format(appointment.date, "d MMMM yyyy, HH:mm", { locale: ru })}
-                                            </p>
-                                          </div>
-                                          <div>
-                                            <p className="text-sm text-muted-foreground">Продолжительность</p>
-                                            <p className="font-medium">{appointment.duration} минут</p>
-                                          </div>
-                                        </div>
-                                        
-                                        <div className="border-t border-border pt-4">
-                                          <p className="text-sm text-muted-foreground mb-1">Запрос клиента</p>
-                                          <p>{appointment.request}</p>
-                                        </div>
-                                        
-                                        <div className="border-t border-border pt-4">
-                                          <div className="flex justify-between items-center mb-2">
-                                            <p className="font-medium">Связанные анализы</p>
-                                            <Button variant="outline" size="sm" className="h-8">
-                                              <Plus className="h-3.5 w-3.5 mr-1" />
-                                              Новый анализ
-                                            </Button>
-                                          </div>
-                                          <div className="space-y-2">
-                                            <div className="p-3 border rounded-md flex justify-between items-center">
-                                              <div>
-                                                <p className="font-medium">Базовый анализ</p>
-                                                <p className="text-sm text-muted-foreground">Создан 12.03.2025</p>
-                                              </div>
-                                              <Button variant="ghost" size="sm" asChild>
-                                                <Link to={`/analysis/1`}>
-                                                  <Eye className="h-4 w-4 mr-1" />
-                                                  Просмотр
-                                                </Link>
-                                              </Button>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        
-                                        <div className="flex justify-end space-x-2 pt-4">
-                                          <Button variant="outline">Редактировать</Button>
-                                          <Button variant="destructive">Отменить встречу</Button>
-                                        </div>
-                                      </div>
-                                    </DrawerContent>
-                                  </Drawer>
-                                ))}
-                              </div>
-                            ) : null}
-                          </div>
-                        );
-                      })}
+                      {daysOfWeek.map((day, dayIndex) => (
+                        <WeekViewCell
+                          key={dayIndex}
+                          day={day}
+                          hour={hour}
+                          appointments={getAppointmentsForHourAndDay(hour, day)}
+                          onAppointmentClick={(id) => setSelectedAppointment(id)}
+                          onAddAppointment={handleAddAppointment}
+                        />
+                      ))}
                     </React.Fragment>
                   ))}
                 </div>
@@ -496,129 +439,21 @@ const Calendar = () => {
         </TabsContent>
         
         <TabsContent value="month">
-          <Card className="astro-card border-none">
-            <CardHeader className="pb-2">
-              <CardTitle>Календарь на месяц</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CalendarComponent
-                mode="single"
-                selected={date}
-                onSelect={handleDateSelect}
-                locale={ru}
-                className="mx-auto"
-                modifiersClassNames={{
-                  today: '!bg-primary/20',
-                  selected: '!bg-primary !text-primary-foreground'
-                }}
-              />
-              
-              <div className="mt-6">
-                <h3 className="font-medium mb-3">Все встречи в этом месяце:</h3>
-                <div className="space-y-2">
-                  {appointmentsData.map((appointment) => (
-                    <div key={appointment.id} className="p-3 border rounded-md flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Users className="h-4 w-4 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{appointment.clientName}</p>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <CalendarIcon className="h-3.5 w-3.5 mr-1" />
-                            {format(appointment.date, "d MMMM, HH:mm", { locale: ru })}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center">
-                        <Badge variant="outline" className="mr-2">{appointment.type}</Badge>
-                        <Drawer>
-                          <DrawerTrigger asChild>
-                            <Button variant="ghost" size="sm" onClick={() => setSelectedAppointment(appointment.id)}>
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </DrawerTrigger>
-                          <DrawerContent>
-                            <DrawerHeader>
-                              <DrawerTitle>Детали консультации</DrawerTitle>
-                            </DrawerHeader>
-                            <div className="p-4 space-y-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <Users className="h-5 w-5 text-primary" />
-                                  </div>
-                                  <div>
-                                    <h3 className="font-medium">{appointment.clientName}</h3>
-                                    <Link 
-                                      to={`/clients/${appointment.clientId}`} 
-                                      className="text-sm text-primary hover:underline"
-                                    >
-                                      Профиль клиента
-                                    </Link>
-                                  </div>
-                                </div>
-                                <Badge>{appointment.type}</Badge>
-                              </div>
-                              
-                              <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
-                                <div>
-                                  <p className="text-sm text-muted-foreground">Дата и время</p>
-                                  <p className="font-medium">
-                                    {format(appointment.date, "d MMMM yyyy, HH:mm", { locale: ru })}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-sm text-muted-foreground">Продолжительность</p>
-                                  <p className="font-medium">{appointment.duration} минут</p>
-                                </div>
-                              </div>
-                              
-                              <div className="border-t border-border pt-4">
-                                <p className="text-sm text-muted-foreground mb-1">Запрос клиента</p>
-                                <p>{appointment.request}</p>
-                              </div>
-                              
-                              <div className="border-t border-border pt-4">
-                                <div className="flex justify-between items-center mb-2">
-                                  <p className="font-medium">Связанные анализы</p>
-                                  <Button variant="outline" size="sm" className="h-8">
-                                    <Plus className="h-3.5 w-3.5 mr-1" />
-                                    Новый анализ
-                                  </Button>
-                                </div>
-                                <div className="space-y-2">
-                                  <div className="p-3 border rounded-md flex justify-between items-center">
-                                    <div>
-                                      <p className="font-medium">Базовый анализ</p>
-                                      <p className="text-sm text-muted-foreground">Создан 12.03.2025</p>
-                                    </div>
-                                    <Button variant="ghost" size="sm" asChild>
-                                      <Link to={`/analysis/1`}>
-                                        <Eye className="h-4 w-4 mr-1" />
-                                        Просмотр
-                                      </Link>
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex justify-end space-x-2 pt-4">
-                                <Button variant="outline">Редактировать</Button>
-                                <Button variant="destructive">Отменить встречу</Button>
-                              </div>
-                            </div>
-                          </DrawerContent>
-                        </Drawer>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <DetailedMonthView
+            currentDate={date || new Date()}
+            appointments={appointments}
+            onAppointmentClick={(id) => setSelectedAppointment(id)}
+            onAddAppointment={handleAddAppointment}
+          />
         </TabsContent>
       </Tabs>
+      
+      <AppointmentForm
+        isOpen={showAddForm}
+        onClose={() => setShowAddForm(false)}
+        initialDate={date}
+        onSubmit={handleAddAppointment}
+      />
     </div>
   );
 };
