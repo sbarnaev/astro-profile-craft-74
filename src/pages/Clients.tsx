@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -74,10 +73,12 @@ const Clients = () => {
   const [filterOption, setFilterOption] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [open, setOpen] = useState(false);
+  const [clients, setClients] = useState(clientsData);
+  const navigate = useNavigate();
   
   const itemsPerPage = 5;
   
-  const filteredClients = clientsData.filter(client => {
+  const filteredClients = clients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchValue.toLowerCase()) || 
                          client.phone.includes(searchValue);
     
@@ -103,16 +104,35 @@ const Clients = () => {
     setOpen(false);
     console.log("New client data:", data);
     
+    const newClient = {
+      id: data.id || Math.floor(Math.random() * 10000) + 100,
+      name: `${data.lastName} ${data.firstName} ${data.patronymic || ""}`.trim(),
+      date: data.dob ? new Intl.DateTimeFormat('ru-RU').format(data.dob) : "",
+      phone: data.phone,
+      analysisCount: analysisData ? 1 : 0,
+      lastAnalysis: analysisData ? new Intl.DateTimeFormat('ru-RU').format(new Date()) : "",
+      source: data.source,
+      communicationChannel: data.communicationChannel
+    };
+    
+    setClients(prev => [newClient, ...prev]);
+    
     if (analysisData) {
-      console.log("Analysis data:", analysisData);
-      // В реальном приложении здесь был бы API-запрос для сохранения анализа
       toast.success("Клиент и анализ успешно добавлены", {
         description: "Новый клиент и анализ были добавлены в базу данных."
       });
+      
+      setTimeout(() => {
+        navigate(`/clients/${newClient.id}`);
+      }, 500);
     } else {
       toast.success("Клиент успешно добавлен", {
         description: "Новый клиент был добавлен в базу данных."
       });
+      
+      setTimeout(() => {
+        navigate(`/clients/${newClient.id}`);
+      }, 500);
     }
   };
 
@@ -153,7 +173,11 @@ const Clients = () => {
             <DialogHeader>
               <DialogTitle>Добавить нового клиента</DialogTitle>
             </DialogHeader>
-            <ClientForm onSubmit={handleAddClient} generateAnalysis={true} />
+            <ClientForm 
+              onSubmit={handleAddClient} 
+              generateAnalysis={true} 
+              redirectAfterSubmit={true}
+            />
           </DialogContent>
         </Dialog>
       </div>

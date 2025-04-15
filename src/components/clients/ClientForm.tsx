@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -22,15 +23,18 @@ interface ClientFormProps {
   initialData?: Partial<z.infer<typeof formSchema>>;
   showCodes?: boolean;
   generateAnalysis?: boolean;
+  redirectAfterSubmit?: boolean;
 }
 
 export function ClientForm({ 
   onSubmit, 
   initialData, 
   showCodes = true,
-  generateAnalysis = true 
+  generateAnalysis = true,
+  redirectAfterSubmit = false
 }: ClientFormProps) {
   const [phoneValue, setPhoneValue] = useState(initialData?.phone || "");
+  const navigate = useNavigate();
   
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(formSchema),
@@ -76,11 +80,14 @@ export function ClientForm({
   };
 
   const handleSubmit = (values: ClientFormValues) => {
+    // Генерируем случайный ID для клиента в демо-приложении
+    const newClientId = Math.floor(Math.random() * 10000) + 100;
+    
     if (generateAnalysis) {
       // Генерация базового анализа на основе данных клиента
       const analysisData = {
         id: Math.floor(Math.random() * 10000),
-        clientId: Math.floor(Math.random() * 10000), // Временный ID, обычно присваивается сервером
+        clientId: newClientId,
         clientName: `${values.lastName} ${values.firstName} ${values.patronymic || ""}`,
         clientPhone: values.phone,
         clientDob: values.dob,
@@ -101,9 +108,17 @@ export function ClientForm({
         description: "Анализ был создан на основе данных клиента"
       });
       
-      onSubmit(values, analysisData);
+      onSubmit({...values, id: newClientId}, analysisData);
     } else {
-      onSubmit(values);
+      onSubmit({...values, id: newClientId});
+    }
+    
+    // После успешного создания клиента перенаправляем на его карточку
+    if (redirectAfterSubmit) {
+      // Задержка для имитации сохранения данных
+      setTimeout(() => {
+        navigate(`/clients/${newClientId}`);
+      }, 500);
     }
   };
 

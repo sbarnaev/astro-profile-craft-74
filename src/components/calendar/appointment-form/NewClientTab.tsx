@@ -14,6 +14,7 @@ export function NewClientTab({ onCreateClient }: NewClientTabProps) {
         onSubmit={(clientData, analysisData) => onCreateClient(clientData, analysisData)} 
         showCodes={false} 
         generateAnalysis={true}
+        redirectAfterSubmit={true}
       />
     </div>
   );
