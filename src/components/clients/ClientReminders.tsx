@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Bell, Calendar, Check, AlarmClock } from "lucide-react";
+import { Bell, Calendar, Check, AlarmClock, PlusCircle, Edit } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -101,10 +101,37 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     toast.success("Напоминание выполнено", {
       description: "Напоминание помечено как выполненное"
     });
+    
+    // Имитация обновления данных после запроса
+    const updatedReminders = [...clientReminders];
+    const reminderIndex = updatedReminders.findIndex(r => r.id === id);
+    
+    if (reminderIndex !== -1) {
+      // Визуально отмечаем как выполненное для демонстрации
+      setTimeout(() => {
+        document.getElementById(`reminder-${id}`)?.classList.add('opacity-50');
+      }, 100);
+    }
+  };
+
+  const handleEditReminder = (id: number) => {
+    toast.info("Редактирование напоминания", {
+      description: `Открытие формы редактирования напоминания #${id}`
+    });
   };
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Напоминания</h3>
+        <Button size="sm" asChild>
+          <Link to={`/reminders/new?client=${clientId}`}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Создать напоминание
+          </Link>
+        </Button>
+      </div>
+      
       {activeReminders.length > 0 && (
         <Card className="border-none">
           <CardHeader className="pb-2">
@@ -116,7 +143,7 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
           <CardContent>
             <div className="space-y-4">
               {activeReminders.map((reminder) => (
-                <div key={reminder.id} className="flex flex-col md:flex-row md:items-start justify-between p-4 border rounded-lg">
+                <div id={`reminder-${reminder.id}`} key={reminder.id} className="flex flex-col md:flex-row md:items-start justify-between p-4 border rounded-lg">
                   <div className="space-y-2 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium">{reminder.title}</span>
@@ -137,10 +164,9 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
                       <Check className="mr-2 h-4 w-4" />
                       Выполнено
                     </Button>
-                    <Button size="sm" variant="outline" asChild>
-                      <Link to={`/reminders/${reminder.id}/edit`}>
-                        Изменить
-                      </Link>
+                    <Button size="sm" variant="outline" onClick={() => handleEditReminder(reminder.id)}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Изменить
                     </Button>
                   </div>
                 </div>

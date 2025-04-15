@@ -2,7 +2,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Users, Eye, Plus } from "lucide-react";
+import { Users, Eye, Plus, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -48,6 +48,23 @@ export function AppointmentDrawer({ appointment }: AppointmentDrawerProps) {
           <div>
             <p className="text-sm text-muted-foreground">Продолжительность</p>
             <p className="font-medium">{appointment.duration} минут</p>
+          </div>
+        </div>
+        
+        <div className="border-t border-border pt-4">
+          <div className="flex justify-between items-center mb-2">
+            <div>
+              <p className="text-sm text-muted-foreground">Стоимость</p>
+              <p className="font-medium text-lg text-green-600">
+                {(appointment.cost || 3500).toLocaleString('ru-RU')} ₽
+              </p>
+            </div>
+            <Button size="sm" variant="outline" asChild>
+              <Link to={`/consultations?id=${appointment.id}`}>
+                <Eye className="h-4 w-4 mr-1" />
+                Полная информация
+              </Link>
+            </Button>
           </div>
         </div>
         

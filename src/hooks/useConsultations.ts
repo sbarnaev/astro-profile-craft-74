@@ -16,7 +16,8 @@ const consultationsData = [
     format: "video",
     status: "scheduled",
     notes: "Первичная консультация",
-    request: "Хочу разобраться с проблемами в личной жизни"
+    request: "Хочу разобраться с проблемами в личной жизни",
+    cost: 3500
   },
   { 
     id: 2,
@@ -30,7 +31,8 @@ const consultationsData = [
     format: "in-person",
     status: "completed",
     notes: "Обсуждение результатов анализа",
-    request: "Нужна помощь в понимании направления развития карьеры"
+    request: "Нужна помощь в понимании направления развития карьеры",
+    cost: 5000
   },
   { 
     id: 3,
@@ -44,7 +46,8 @@ const consultationsData = [
     format: "video",
     status: "completed",
     notes: "Разбор профиля и потенциала",
-    request: "Хочу понять свое предназначение и таланты"
+    request: "Хочу понять свое предназначение и таланты",
+    cost: 3500
   },
 ];
 

@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Calendar, Clock, Video, Users, FileText, MessageCircle, Eye } from "lucide-react";
+import { Calendar, Clock, Video, Users, FileText, MessageCircle, Eye, DollarSign } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,8 @@ const consultationsData = [
     type: "video",
     status: "scheduled",
     notes: "Первичная консультация",
-    request: "Хочу разобраться с проблемами в личной жизни"
+    request: "Хочу разобраться с проблемами в личной жизни",
+    cost: 3500
   },
   { 
     id: 2,
@@ -34,7 +35,8 @@ const consultationsData = [
     type: "in-person",
     status: "completed",
     notes: "Обсуждение результатов анализа",
-    request: "Нужна помощь в понимании направления развития карьеры"
+    request: "Нужна помощь в понимании направления развития карьеры",
+    cost: 5000
   },
   { 
     id: 3,
@@ -44,7 +46,8 @@ const consultationsData = [
     type: "video",
     status: "completed",
     notes: "Разбор профиля и потенциала",
-    request: "Хочу понять свое предназначение и таланты"
+    request: "Хочу понять свое предназначение и таланты",
+    cost: 3500
   },
   { 
     id: 4,
@@ -54,7 +57,8 @@ const consultationsData = [
     type: "in-person",
     status: "completed",
     notes: "Первичная консультация",
-    request: "Проблемы в отношениях с родителями"
+    request: "Проблемы в отношениях с родителями",
+    cost: 3500
   },
 ];
 
@@ -157,6 +161,10 @@ export const ClientConsultations = ({ clientId }: ClientConsultationsProps) => {
                             {getConsultationTypeIcon(consultation.type)}
                             <span className="ml-2 text-sm text-muted-foreground">{getConsultationTypeText(consultation.type)}</span>
                           </div>
+                          <div className="flex items-center">
+                            <DollarSign className="h-4 w-4 mr-1 text-green-600" />
+                            <span className="text-sm font-medium text-green-600">{consultation.cost.toLocaleString('ru-RU')} ₽</span>
+                          </div>
                         </div>
                         <div className="flex items-start">
                           <MessageCircle className="h-4 w-4 mr-2 text-muted-foreground mt-0.5" />
@@ -181,6 +189,12 @@ export const ClientConsultations = ({ clientId }: ClientConsultationsProps) => {
                           <h3 className="text-lg font-medium">{getConsultationTypeText(consultation.type)}</h3>
                         </div>
                         <div className="flex gap-2">
+                          <Button variant="outline" size="sm" asChild>
+                            <Link to={`/consultations?id=${consultation.id}`}>
+                              <Eye className="h-4 w-4 mr-1" />
+                              Просмотр
+                            </Link>
+                          </Button>
                           <Button variant="outline" size="sm">Редактировать</Button>
                           <Button variant="destructive" size="sm">Отменить</Button>
                         </div>
@@ -199,6 +213,19 @@ export const ClientConsultations = ({ clientId }: ClientConsultationsProps) => {
                         </div>
                       </div>
                       
+                      <div className="flex justify-between items-center border-t border-border pt-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Стоимость</p>
+                          <p className="font-medium text-lg text-green-600">{consultation.cost.toLocaleString('ru-RU')} ₽</p>
+                        </div>
+                        <Button size="sm" asChild>
+                          <Link to={`/consultations?id=${consultation.id}`}>
+                            <Eye className="h-4 w-4 mr-1" />
+                            Открыть полную информацию
+                          </Link>
+                        </Button>
+                      </div>
+                      
                       <div className="border-t border-border pt-4">
                         <p className="text-sm text-muted-foreground mb-1">Запрос клиента</p>
                         <p>{consultation.request}</p>
@@ -207,26 +234,6 @@ export const ClientConsultations = ({ clientId }: ClientConsultationsProps) => {
                       <div className="border-t border-border pt-4">
                         <p className="text-sm text-muted-foreground mb-1">Заметки</p>
                         <p>{consultation.notes || "Нет заметок"}</p>
-                      </div>
-                      
-                      <div className="border-t border-border pt-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <p className="font-medium">Связанные анализы</p>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="p-3 border rounded-md flex justify-between items-center">
-                            <div>
-                              <p className="font-medium">Базовый анализ</p>
-                              <p className="text-sm text-muted-foreground">Создан 12.03.2025</p>
-                            </div>
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link to={`/analysis/1`}>
-                                <Eye className="h-4 w-4 mr-1" />
-                                Просмотр
-                              </Link>
-                            </Button>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </DrawerContent>
@@ -268,6 +275,10 @@ export const ClientConsultations = ({ clientId }: ClientConsultationsProps) => {
                             {getConsultationTypeIcon(consultation.type)}
                             <span className="ml-2 text-sm text-muted-foreground">{getConsultationTypeText(consultation.type)}</span>
                           </div>
+                          <div className="flex items-center">
+                            <DollarSign className="h-4 w-4 mr-1 text-green-600" />
+                            <span className="text-sm font-medium text-green-600">{consultation.cost.toLocaleString('ru-RU')} ₽</span>
+                          </div>
                         </div>
                         <div className="flex items-start">
                           <MessageCircle className="h-4 w-4 mr-2 text-muted-foreground mt-0.5" />
@@ -292,7 +303,12 @@ export const ClientConsultations = ({ clientId }: ClientConsultationsProps) => {
                           <h3 className="text-lg font-medium">{getConsultationTypeText(consultation.type)}</h3>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">Редактировать</Button>
+                          <Button variant="outline" size="sm" asChild>
+                            <Link to={`/consultations?id=${consultation.id}`}>
+                              <Eye className="h-4 w-4 mr-1" />
+                              Просмотр
+                            </Link>
+                          </Button>
                         </div>
                       </div>
                       
@@ -309,6 +325,19 @@ export const ClientConsultations = ({ clientId }: ClientConsultationsProps) => {
                         </div>
                       </div>
                       
+                      <div className="flex justify-between items-center border-t border-border pt-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Стоимость</p>
+                          <p className="font-medium text-lg text-green-600">{consultation.cost.toLocaleString('ru-RU')} ₽</p>
+                        </div>
+                        <Button size="sm" asChild>
+                          <Link to={`/consultations?id=${consultation.id}`}>
+                            <Eye className="h-4 w-4 mr-1" />
+                            Открыть полную информацию
+                          </Link>
+                        </Button>
+                      </div>
+                      
                       <div className="border-t border-border pt-4">
                         <p className="text-sm text-muted-foreground mb-1">Запрос клиента</p>
                         <p>{consultation.request}</p>
@@ -317,26 +346,6 @@ export const ClientConsultations = ({ clientId }: ClientConsultationsProps) => {
                       <div className="border-t border-border pt-4">
                         <p className="text-sm text-muted-foreground mb-1">Заметки</p>
                         <p>{consultation.notes || "Нет заметок"}</p>
-                      </div>
-                      
-                      <div className="border-t border-border pt-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <p className="font-medium">Связанные анализы</p>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="p-3 border rounded-md flex justify-between items-center">
-                            <div>
-                              <p className="font-medium">Базовый анализ</p>
-                              <p className="text-sm text-muted-foreground">Создан 12.03.2025</p>
-                            </div>
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link to={`/analysis/1`}>
-                                <Eye className="h-4 w-4 mr-1" />
-                                Просмотр
-                              </Link>
-                            </Button>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </DrawerContent>

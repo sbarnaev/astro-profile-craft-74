@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,11 +21,17 @@ import { EmptyConsultationsList } from "@/components/consultations/EmptyConsulta
 import { useConsultations } from "@/hooks/useConsultations";
 
 export default function Consultations() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
+  const consultationId = searchParams.get('id');
+  
   const {
     searchQuery,
     setSearchQuery,
     upcomingConsultations,
-    pastConsultations
+    pastConsultations,
+    filteredConsultations
   } = useConsultations();
   
   const [activeTab, setActiveTab] = useState("upcoming");
@@ -35,6 +42,19 @@ export default function Consultations() {
   const [selectedConsultation, setSelectedConsultation] = useState<any>(null);
   const [isConsultationDetailsOpen, setIsConsultationDetailsOpen] = useState(false);
   const [isReminderFormOpen, setIsReminderFormOpen] = useState(false);
+  
+  // Обработка параметров запроса для отображения деталей консультации
+  useEffect(() => {
+    if (consultationId) {
+      const consultation = filteredConsultations.find(
+        c => c.id === Number(consultationId)
+      );
+      if (consultation) {
+        setSelectedConsultation(consultation);
+        setIsConsultationDetailsOpen(true);
+      }
+    }
+  }, [consultationId, filteredConsultations]);
   
   const handleClientSelect = (client: any) => {
     setIsClientSearchOpen(false);
@@ -71,7 +91,22 @@ export default function Consultations() {
   const handleCloseConsultationDetails = () => {
     setIsConsultationDetailsOpen(false);
     setSelectedConsultation(null);
+    // Удаляем параметр id из URL при закрытии деталей
+    if (consultationId) {
+      navigate('/consultations');
+    }
   };
+
+  // Если открыта детальная страница консультации, показываем только её
+  if (isConsultationDetailsOpen && selectedConsultation) {
+    return (
+      <ConsultationDetails 
+        consultation={selectedConsultation}
+        onAddReminder={() => setIsReminderFormOpen(true)}
+        onClose={handleCloseConsultationDetails}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -115,6 +150,8 @@ export default function Consultations() {
             onConsultationClick={(consultation) => {
               setSelectedConsultation(consultation);
               setIsConsultationDetailsOpen(true);
+              // Обновляем URL для отображения деталей консультации
+              navigate(`/consultations?id=${consultation.id}`);
             }}
           />
         </TabsContent>
@@ -131,19 +168,12 @@ export default function Consultations() {
             onConsultationClick={(consultation) => {
               setSelectedConsultation(consultation);
               setIsConsultationDetailsOpen(true);
+              // Обновляем URL для отображения деталей консультации
+              navigate(`/consultations?id=${consultation.id}`);
             }}
           />
         </TabsContent>
       </Tabs>
-      
-      {/* Детальная информация о консультации в полноэкранном режиме */}
-      {isConsultationDetailsOpen && selectedConsultation && (
-        <ConsultationDetails 
-          consultation={selectedConsultation}
-          onAddReminder={() => setIsReminderFormOpen(true)}
-          onClose={handleCloseConsultationDetails}
-        />
-      )}
       
       {/* Диалог поиска клиента */}
       <ClientSearch 
