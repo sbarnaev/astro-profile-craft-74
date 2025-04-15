@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -32,7 +31,6 @@ export function AnalysisCard({ client, analysis, onBack }: AnalysisCardProps) {
   const [notes, setNotes] = useState(analysis?.notes || "");
   const isMobile = useIsMobile();
   
-  // Рассчитываем коды личности
   const birthDateString = format(client.dob, "yyyy-MM-dd");
   const codes = calculatePersonalityCodes(birthDateString);
   
@@ -50,7 +48,7 @@ export function AnalysisCard({ client, analysis, onBack }: AnalysisCardProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <div className="flex items-center gap-4">
         {onBack && (
           <Button variant="outline" size="icon" onClick={onBack}>
@@ -65,8 +63,7 @@ export function AnalysisCard({ client, analysis, onBack }: AnalysisCardProps) {
         </div>
       </div>
 
-      <div className="space-y-6">
-        {/* Информация о клиенте */}
+      <div className="space-y-6 w-full">
         <Card className="w-full">
           <CardHeader className="pb-2">
             <CardTitle className="text-xl">Информация о клиенте</CardTitle>
@@ -99,7 +96,6 @@ export function AnalysisCard({ client, analysis, onBack }: AnalysisCardProps) {
           </CardContent>
         </Card>
 
-        {/* Коды личности */}
         <Card className="w-full">
           <CardHeader className="pb-2">
             <CardTitle className="text-xl">Коды личности</CardTitle>
@@ -160,7 +156,6 @@ export function AnalysisCard({ client, analysis, onBack }: AnalysisCardProps) {
           </CardContent>
         </Card>
 
-        {/* Краткое саммари */}
         <Card className="w-full">
           <CardHeader className="pb-2">
             <CardTitle className="text-xl">Краткое саммари</CardTitle>
@@ -178,207 +173,187 @@ export function AnalysisCard({ client, analysis, onBack }: AnalysisCardProps) {
           </CardContent>
         </Card>
 
-        {/* Блоки расшифровки */}
-        <div className="space-y-4">
-          {/* Расшифровка */}
-          <Collapsible 
-            open={openSection === "decoding"} 
-            onOpenChange={() => toggleSection("decoding")}
-            className="border rounded-lg w-full"
+        <div className="flex flex-wrap gap-2 justify-start w-full mb-4">
+          <Button 
+            variant={openSection === "decoding" ? "default" : "outline"}
+            onClick={() => toggleSection("decoding")}
           >
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-4">
-                <div className="flex items-center">
-                  <FileText className="mr-2 h-4 w-4" />
-                  <span>Расшифровка</span>
-                </div>
-                {openSection === "decoding" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="p-4 border-t">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium mb-2">Детальная расшифровка кодов</h3>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium">Код личности {codes.personalityCode} - {getArchetypeName(codes.personalityCode)}</h4>
-                    <p className="text-muted-foreground mt-1">Основные черты характера, жизненные ценности и мотивация.</p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Код коннектора {codes.connectorCode} - {getArchetypeName(codes.connectorCode)}</h4>
-                    <p className="text-muted-foreground mt-1">Стиль общения, способы взаимодействия с окружающими.</p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Код реализации {codes.realizationCode} - {getArchetypeName(codes.realizationCode)}</h4>
-                    <p className="text-muted-foreground mt-1">Способы самореализации, карьера, достижение целей.</p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Код генератора {codes.generatorCode} - {getArchetypeName(codes.generatorCode)}</h4>
-                    <p className="text-muted-foreground mt-1">Источники энергии, внутренние ресурсы, подсознательные паттерны.</p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Код миссии {codes.missionCode} - {getArchetypeName(codes.missionCode)}</h4>
-                    <p className="text-muted-foreground mt-1">Глобальные задачи, жизненное предназначение.</p>
-                  </div>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Конфликты */}
-          <Collapsible 
-            open={openSection === "conflicts"} 
-            onOpenChange={() => toggleSection("conflicts")}
-            className="border rounded-lg w-full"
+            <FileText className="mr-2 h-4 w-4" />
+            Расшифровка
+          </Button>
+          <Button 
+            variant={openSection === "conflicts" ? "default" : "outline"}
+            onClick={() => toggleSection("conflicts")}
           >
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-4">
-                <div className="flex items-center">
-                  <AlertCircle className="mr-2 h-4 w-4" />
-                  <span>Конфликты</span>
-                </div>
-                {openSection === "conflicts" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="p-4 border-t">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium mb-2">Возможные внутренние конфликты</h3>
-                <p>Анализ потенциальных конфликтов между различными кодами личности и путей их разрешения.</p>
-                
-                <div className="space-y-2">
-                  {codes.personalityCode !== codes.connectorCode && (
-                    <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                      <h4 className="font-medium">Конфликт личности ({codes.personalityCode}) и коннектора ({codes.connectorCode})</h4>
-                      <p className="text-sm text-muted-foreground">Противоречие между внутренними стремлениями и способами взаимодействия с миром.</p>
-                    </div>
-                  )}
-                  
-                  {codes.connectorCode !== codes.realizationCode && (
-                    <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                      <h4 className="font-medium">Конфликт коннектора ({codes.connectorCode}) и реализации ({codes.realizationCode})</h4>
-                      <p className="text-sm text-muted-foreground">Разрыв между стилем общения и способами достижения целей.</p>
-                    </div>
-                  )}
-                  
-                  {codes.personalityCode !== codes.generatorCode && (
-                    <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                      <h4 className="font-medium">Конфликт личности ({codes.personalityCode}) и генератора ({codes.generatorCode})</h4>
-                      <p className="text-sm text-muted-foreground">Несоответствие между осознанными желаниями и подсознательными энергетическими паттернами.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Атлас архетипов */}
-          <Collapsible 
-            open={openSection === "archetypes"} 
-            onOpenChange={() => toggleSection("archetypes")}
-            className="border rounded-lg w-full"
+            <AlertCircle className="mr-2 h-4 w-4" />
+            Конфликты
+          </Button>
+          <Button 
+            variant={openSection === "archetypes" ? "default" : "outline"}
+            onClick={() => toggleSection("archetypes")}
           >
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-4">
-                <div className="flex items-center">
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  <span>Атлас архетипов</span>
-                </div>
-                {openSection === "archetypes" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="p-4 border-t">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium mb-2">Архетипы личности</h3>
-                <p>Детальное описание активных архетипов в структуре личности и их влияния.</p>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <h4 className="font-medium">Архетип {getArchetypeName(codes.personalityCode)}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">Доминирующий архетип, определяющий основу характера.</p>
-                  </div>
-                  
-                  <div className="p-3 bg-secondary/10 rounded-lg">
-                    <h4 className="font-medium">Архетип {getArchetypeName(codes.connectorCode)}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">Архетип социального взаимодействия и коммуникации.</p>
-                  </div>
-                  
-                  <div className="p-3 bg-accent/10 rounded-lg">
-                    <h4 className="font-medium">Архетип {getArchetypeName(codes.realizationCode)}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">Архетип профессиональной и личностной реализации.</p>
-                  </div>
-                  
-                  <div className="p-3 bg-muted rounded-lg">
-                    <h4 className="font-medium">Архетип {getArchetypeName(codes.generatorCode)}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">Архетип энергетического ресурса и жизненных сил.</p>
-                  </div>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Саммари */}
-          <Collapsible 
-            open={openSection === "summary"} 
-            onOpenChange={() => toggleSection("summary")}
-            className="border rounded-lg w-full"
+            <BookOpen className="mr-2 h-4 w-4" />
+            Атлас архетипов
+          </Button>
+          <Button 
+            variant={openSection === "summary" ? "default" : "outline"}
+            onClick={() => toggleSection("summary")}
           >
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-4">
-                <div className="flex items-center">
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  <span>Саммари</span>
-                </div>
-                {openSection === "summary" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="p-4 border-t">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium mb-2">Итоговое резюме</h3>
-                <p>Комплексная характеристика личности, учитывающая взаимодействие всех кодов и архетипов.</p>
-                
-                <div className="p-4 bg-muted/50 rounded-lg">
-                  <p className="mb-3">
-                    Основываясь на анализе кодов личности ({codes.personalityCode}, {codes.connectorCode}, {codes.realizationCode}, {codes.generatorCode}, {codes.missionCode}), 
-                    можно сделать следующие выводы о характере и потенциале:
-                  </p>
-                  <ul className="list-disc ml-5 space-y-2">
-                    <li>Ключевые качества: {getQualitiesForCode(codes.personalityCode)}</li>
-                    <li>Стиль коммуникации: {getQualitiesForCode(codes.connectorCode)}</li>
-                    <li>Таланты и способности: {getQualitiesForCode(codes.realizationCode)}</li>
-                    <li>Внутренние ресурсы: {getQualitiesForCode(codes.generatorCode)}</li>
-                    <li>Жизненная задача: {getQualitiesForCode(codes.missionCode)}</li>
-                  </ul>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-          
-          {/* Блок заметок */}
-          <Card className="mt-6 w-full">
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-xl">Заметки</CardTitle>
-                <Button size="sm" variant="outline" onClick={handleSaveNotes}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Сохранить
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Textarea 
-                placeholder="Введите заметки к анализу..." 
-                className="min-h-[150px]"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
-            </CardContent>
-          </Card>
+            <Sparkles className="mr-2 h-4 w-4" />
+            Саммари
+          </Button>
         </div>
+
+        <div className="space-y-4">
+          {openSection === "decoding" && (
+            <Card className="w-full">
+              <CardContent className="p-4">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium mb-2">Детальная расшифровка кодов</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium">Код личности {codes.personalityCode} - {getArchetypeName(codes.personalityCode)}</h4>
+                      <p className="text-muted-foreground mt-1">Основные черты характера, жизненные ценности и мотивация.</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Код коннектора {codes.connectorCode} - {getArchetypeName(codes.connectorCode)}</h4>
+                      <p className="text-muted-foreground mt-1">Стиль общения, способы взаимодействия с окружающими.</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Код реализации {codes.realizationCode} - {getArchetypeName(codes.realizationCode)}</h4>
+                      <p className="text-muted-foreground mt-1">Способы самореализации, карьера, достижение целей.</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Код генератора {codes.generatorCode} - {getArchetypeName(codes.generatorCode)}</h4>
+                      <p className="text-muted-foreground mt-1">Источники энергии, внутренние ресурсы, подсознательные паттерны.</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Код миссии {codes.missionCode} - {getArchetypeName(codes.missionCode)}</h4>
+                      <p className="text-muted-foreground mt-1">Глобальные задачи, жизненное предназначение.</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {openSection === "conflicts" && (
+            <Card className="w-full">
+              <CardContent className="p-4">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium mb-2">Возможные внутренние конфликты</h3>
+                  <p>Анализ потенциальных конфликтов между различными кодами личности и путей их разрешения.</p>
+                  
+                  <div className="space-y-2">
+                    {codes.personalityCode !== codes.connectorCode && (
+                      <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <h4 className="font-medium">Конфликт личности ({codes.personalityCode}) и коннектора ({codes.connectorCode})</h4>
+                        <p className="text-sm text-muted-foreground">Противоречие между внутренними стремлениями и способами взаимодействия с миром.</p>
+                      </div>
+                    )}
+                    
+                    {codes.connectorCode !== codes.realizationCode && (
+                      <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                        <h4 className="font-medium">Конфликт коннектора ({codes.connectorCode}) и реализации ({codes.realizationCode})</h4>
+                        <p className="text-sm text-muted-foreground">Разрыв между стилем общения и способами достижения целей.</p>
+                      </div>
+                    )}
+                    
+                    {codes.personalityCode !== codes.generatorCode && (
+                      <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                        <h4 className="font-medium">Конфликт личности ({codes.personalityCode}) и генератора ({codes.generatorCode})</h4>
+                        <p className="text-sm text-muted-foreground">Несоответствие между осознанными желаниями и подсознательными энергетическими паттернами.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {openSection === "archetypes" && (
+            <Card className="w-full">
+              <CardContent className="p-4">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium mb-2">Архетипы личности</h3>
+                  <p>Детальное описание активных архетипов в структуре личности и их влияния.</p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="p-3 bg-primary/10 rounded-lg">
+                      <h4 className="font-medium">Архетип {getArchetypeName(codes.personalityCode)}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">Доминирующий архетип, определяющий основу характера.</p>
+                    </div>
+                    
+                    <div className="p-3 bg-secondary/10 rounded-lg">
+                      <h4 className="font-medium">Архетип {getArchetypeName(codes.connectorCode)}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">Архетип социального взаимодействия и коммуникации.</p>
+                    </div>
+                    
+                    <div className="p-3 bg-accent/10 rounded-lg">
+                      <h4 className="font-medium">Архетип {getArchetypeName(codes.realizationCode)}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">Архетип профессиональной и личностной реализации.</p>
+                    </div>
+                    
+                    <div className="p-3 bg-muted rounded-lg">
+                      <h4 className="font-medium">Архетип {getArchetypeName(codes.generatorCode)}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">Архетип энергетического ресурса и жизненных сил.</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {openSection === "summary" && (
+            <Card className="w-full">
+              <CardContent className="p-4">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium mb-2">Итоговое резюме</h3>
+                  <p>Комплексная характеристика личности, учитывающая взаимодействие всех кодов и архетипов.</p>
+                  
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="mb-3">
+                      Основываясь на анализе кодов личности ({codes.personalityCode}, {codes.connectorCode}, {codes.realizationCode}, {codes.generatorCode}, {codes.missionCode}), 
+                      можно сделать следующие выводы о характере и потенциале:
+                    </p>
+                    <ul className="list-disc ml-5 space-y-2">
+                      <li>Ключевые качества: {getQualitiesForCode(codes.personalityCode)}</li>
+                      <li>Стиль коммуникации: {getQualitiesForCode(codes.connectorCode)}</li>
+                      <li>Таланты и способности: {getQualitiesForCode(codes.realizationCode)}</li>
+                      <li>Внутренние ресурсы: {getQualitiesForCode(codes.generatorCode)}</li>
+                      <li>Жизненная задача: {getQualitiesForCode(codes.missionCode)}</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <Card className="mt-6 w-full">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-xl">Заметки</CardTitle>
+              <Button size="sm" variant="outline" onClick={handleSaveNotes}>
+                <Save className="mr-2 h-4 w-4" />
+                Сохранить
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Textarea 
+              placeholder="Введите заметки к анализу..." 
+              className="min-h-[150px]"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
 
-// Вспомогательная функция для получения качеств по коду
 function getQualitiesForCode(code: number | string): string {
   const codeNum = Number(code);
   switch (codeNum) {

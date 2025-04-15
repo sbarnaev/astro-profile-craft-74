@@ -10,17 +10,17 @@ export default function MainLayout() {
   const isMobile = useIsMobile();
   const location = useLocation();
   
-  // Автоматически закрывать сайдбар на мобильных и делать узким на десктопе
   useEffect(() => {
     if (isMobile) {
       setSidebarOpen(false);
     } else {
+      // На десктопе открываем сайдбар по умолчанию
       setSidebarOpen(true);
     }
   }, [isMobile]);
   
-  // Закрывать сайдбар при переходе на новую страницу (только на мобильных)
   useEffect(() => {
+    // Закрываем сайдбар при смене роута на мобильных
     if (isMobile) {
       setSidebarOpen(false);
     }
@@ -28,7 +28,6 @@ export default function MainLayout() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      {/* Боковое меню */}
       <Sidebar 
         isOpen={sidebarOpen} 
         setIsOpen={setSidebarOpen} 
@@ -36,7 +35,6 @@ export default function MainLayout() {
         onHoverLeave={() => !isMobile && !sidebarOpen && setSidebarOpen(false)}
       />
       
-      {/* Основной контент */}
       <div 
         className={`flex flex-col flex-1 w-full overflow-hidden transition-all duration-300 ${
           sidebarOpen && !isMobile ? 'ml-64' : 'ml-0'
