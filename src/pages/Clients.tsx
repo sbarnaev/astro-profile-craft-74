@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-const clientsData = [
+const initialClientsData = [
   { 
     id: 1, 
     name: "Анна Смирнова", 
@@ -73,10 +73,24 @@ const Clients = () => {
   const [filterOption, setFilterOption] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [open, setOpen] = useState(false);
-  const [clients, setClients] = useState(clientsData);
+  const [clients, setClients] = useState(initialClientsData);
   const navigate = useNavigate();
+  const location = useLocation();
   
   const itemsPerPage = 20;
+  
+  useEffect(() => {
+    if (location.state?.newClient) {
+      const newClient = location.state.newClient;
+      console.log("Received new client from state:", newClient);
+      
+      if (!clients.some(client => client.id === newClient.id)) {
+        setClients(prev => [newClient, ...prev]);
+      }
+      
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
   
   const filteredClients = clients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchValue.toLowerCase()) || 
@@ -122,19 +136,13 @@ const Clients = () => {
       toast.success("Клиент и анализ успешно добавлены", {
         description: "Новый клиент и анализ были добавлены в базу данных."
       });
-      
-      setTimeout(() => {
-        navigate(`/clients/${newClientId}`);
-      }, 500);
     } else {
       toast.success("Клиент успешно добавлен", {
         description: "Новый клиент был добавлен в базу данных."
       });
-      
-      setTimeout(() => {
-        navigate(`/clients/${newClientId}`);
-      }, 500);
     }
+    
+    navigate(`/clients/${newClientId}`);
   };
 
   const getCommunicationIcon = (channel: string) => {

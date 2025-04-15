@@ -86,6 +86,12 @@ export function ClientForm({
     // Генерируем случайный ID для клиента в демо-приложении
     const newClientId = Math.floor(Math.random() * 10000) + 100;
     
+    // Добавляем ID в данные клиента для использования в компонентах родителях
+    const clientDataWithId = {
+      ...values,
+      id: newClientId
+    };
+    
     if (generateAnalysis) {
       // Генерация базового анализа на основе данных клиента
       const analysisData = {
@@ -111,17 +117,19 @@ export function ClientForm({
         description: "Анализ был создан на основе данных клиента"
       });
       
-      onSubmit(values, analysisData);
+      onSubmit(clientDataWithId, analysisData);
     } else {
-      onSubmit(values);
+      onSubmit(clientDataWithId);
     }
     
     // После успешного создания клиента перенаправляем на его карточку
     if (redirectAfterSubmit) {
-      // Задержка для имитации сохранения данных
-      setTimeout(() => {
-        navigate(`/clients/${newClientId}`);
-      }, 500);
+      toast.success("Клиент успешно добавлен", {
+        description: "Перенаправление на карточку клиента..."
+      });
+      
+      // Немедленное перенаправление на страницу клиента
+      navigate(`/clients/${newClientId}`);
     }
   };
 

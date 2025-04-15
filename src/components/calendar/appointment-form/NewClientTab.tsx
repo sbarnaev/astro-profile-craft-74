@@ -12,12 +12,13 @@ export function NewClientTab({ onCreateClient }: NewClientTabProps) {
       <h3 className="text-lg font-medium">Создание нового клиента</h3>
       <ClientForm 
         onSubmit={(clientData, analysisData) => {
-          // Убедимся, что обработчик вызывается с правильными параметрами
+          console.log("NewClientTab - Client created:", clientData);
+          console.log("NewClientTab - Analysis data:", analysisData);
           onCreateClient(clientData, analysisData);
         }} 
         showCodes={false} 
         generateAnalysis={true}
-        redirectAfterSubmit={false}  // Важно: не делаем редирект, чтобы не прерывать создание записи
+        redirectAfterSubmit={true}  // Enable redirect after client creation
       />
     </div>
   );
