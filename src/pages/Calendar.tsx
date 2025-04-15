@@ -59,41 +59,7 @@ const Calendar = () => {
           <TabsTrigger value="month">Месяц</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="day" className="space-y-4">
-          <CalendarTabContent
-            selectedTab={selectedTab}
-            date={date}
-            currentWeek={currentWeek}
-            appointments={appointments}
-            workHours={workHours}
-            filteredAppointments={filteredAppointments}
-            selectedAppointment={selectedAppointment}
-            setSelectedAppointment={setSelectedAppointment}
-            handleDateSelect={handleDateSelect}
-            handleAddAppointment={handleAddAppointment}
-            goToPrevWeek={goToPrevWeek}
-            goToNextWeek={goToNextWeek}
-          />
-        </TabsContent>
-        
-        <TabsContent value="week">
-          <CalendarTabContent
-            selectedTab={selectedTab}
-            date={date}
-            currentWeek={currentWeek}
-            appointments={appointments}
-            workHours={workHours}
-            filteredAppointments={filteredAppointments}
-            selectedAppointment={selectedAppointment}
-            setSelectedAppointment={setSelectedAppointment}
-            handleDateSelect={handleDateSelect}
-            handleAddAppointment={handleAddAppointment}
-            goToPrevWeek={goToPrevWeek}
-            goToNextWeek={goToNextWeek}
-          />
-        </TabsContent>
-        
-        <TabsContent value="month">
+        <TabsContent value={selectedTab}>
           <CalendarTabContent
             selectedTab={selectedTab}
             date={date}
