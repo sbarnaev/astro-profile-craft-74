@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { 
   Calculator, Calendar, User, FileText, 
-  Award, AlertCircle, BookOpen, FileSparkles,
+  Award, AlertCircle, BookOpen, Sparkles,
   Save, ChevronDown, ChevronUp, Edit
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -312,7 +312,7 @@ export function AnalysisCard({ client, onBack }: AnalysisCardProps) {
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" className="w-full justify-between p-4">
                   <div className="flex items-center">
-                    <FileSparkles className="mr-2 h-4 w-4" />
+                    <Sparkles className="mr-2 h-4 w-4" />
                     <span>Саммари</span>
                   </div>
                   {openSection === "summary" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
