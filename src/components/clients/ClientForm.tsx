@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -57,7 +56,6 @@ export function ClientForm({
     },
   });
   
-  // Автоматический расчёт кодов при изменении даты рождения
   useEffect(() => {
     const date = form.watch("dob");
     if (date) {
@@ -83,17 +81,14 @@ export function ClientForm({
   };
 
   const handleSubmit = (values: ClientFormValues) => {
-    // Генерируем случайный ID для клиента в демо-приложении
     const newClientId = Math.floor(Math.random() * 10000) + 100;
     
-    // Добавляем ID в данные клиента для использования в компонентах родителях
     const clientDataWithId = {
       ...values,
       id: newClientId
     };
     
     if (generateAnalysis) {
-      // Генерация базового анализа на основе данных клиента
       const analysisData = {
         id: Math.floor(Math.random() * 10000),
         clientId: newClientId,
@@ -122,14 +117,25 @@ export function ClientForm({
       onSubmit(clientDataWithId);
     }
     
-    // После успешного создания клиента перенаправляем на его карточку
     if (redirectAfterSubmit) {
       toast.success("Клиент успешно добавлен", {
         description: "Перенаправление на карточку клиента..."
       });
       
-      // Немедленное перенаправление на страницу клиента
-      navigate(`/clients/${newClientId}`);
+      const newClient = {
+        id: newClientId,
+        name: `${values.lastName} ${values.firstName} ${values.patronymic || ""}`.trim(),
+        date: values.dob ? new Intl.DateTimeFormat('ru-RU').format(values.dob) : "",
+        phone: values.phone,
+        analysisCount: generateAnalysis ? 1 : 0,
+        lastAnalysis: generateAnalysis ? new Intl.DateTimeFormat('ru-RU').format(new Date()) : "",
+        source: values.source,
+        communicationChannel: values.communicationChannel
+      };
+      
+      navigate(`/clients/${newClientId}`, { 
+        state: { newClient }
+      });
     }
   };
 

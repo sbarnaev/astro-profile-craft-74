@@ -31,6 +31,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -142,7 +143,9 @@ const Clients = () => {
       });
     }
     
-    navigate(`/clients/${newClientId}`);
+    navigate(`/clients/${newClientId}`, { 
+      state: { newClient }
+    });
   };
 
   const getCommunicationIcon = (channel: string) => {
@@ -181,6 +184,9 @@ const Clients = () => {
           <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Добавить нового клиента</DialogTitle>
+              <DialogDescription>
+                Заполните форму для создания нового клиента в системе
+              </DialogDescription>
             </DialogHeader>
             <ClientForm 
               onSubmit={handleAddClient} 

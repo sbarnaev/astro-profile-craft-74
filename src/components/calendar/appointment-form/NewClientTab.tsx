@@ -18,7 +18,7 @@ export function NewClientTab({ onCreateClient }: NewClientTabProps) {
         }} 
         showCodes={false} 
         generateAnalysis={true}
-        redirectAfterSubmit={true}  // Enable redirect after client creation
+        redirectAfterSubmit={false}  // Disable redirect for appointment creation flow
       />
     </div>
   );

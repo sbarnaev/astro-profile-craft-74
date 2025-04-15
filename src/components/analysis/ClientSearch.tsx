@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,9 @@ export function ClientSearch({ isOpen, onClose, onSelect, onCreateNew }: ClientS
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Выбор клиента для анализа</DialogTitle>
+          <DialogDescription>
+            Найдите существующего клиента или создайте нового
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
