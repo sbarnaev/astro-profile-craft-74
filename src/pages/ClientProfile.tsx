@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { Calendar, FileText, Bell, Clock, User, Edit, ChevronLeft, MessageCircle, Share2, Info, Eye, Upload, DollarSign } from "lucide-react";
@@ -194,10 +195,10 @@ const ClientProfile = () => {
           email: data.email || null,
           source: data.source,
           communication_channel: data.communicationChannel,
-          personality_code: data.personalityCode,
-          connector_code: data.connectorCode,
-          realization_code: data.realizationCode,
-          generator_code: data.generatorCode,
+          personality_code: Number(data.personalityCode),
+          connector_code: Number(data.connectorCode),
+          realization_code: Number(data.realizationCode),
+          generator_code: Number(data.generatorCode),
           mission_code: String(data.missionCode)
         })
         .eq('id', client.id);
