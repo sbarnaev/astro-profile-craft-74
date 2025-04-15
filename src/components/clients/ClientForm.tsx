@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -37,6 +38,7 @@ export function ClientForm({
     initialData?.phone?.match(/^\+\d+/)?.toString() || "+7"
   );
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(formSchema),
@@ -80,62 +82,50 @@ export function ClientForm({
     form.setValue("phone", `${countryCode} ${formattedValue}`, { shouldValidate: true });
   };
 
-  const handleSubmit = (values: ClientFormValues) => {
-    const newClientId = Math.floor(Math.random() * 10000) + 100;
-    
-    const clientDataWithId = {
-      ...values,
-      id: newClientId
-    };
-    
-    if (generateAnalysis) {
-      const analysisData = {
-        id: Math.floor(Math.random() * 10000),
-        clientId: newClientId,
-        clientName: `${values.lastName} ${values.firstName} ${values.patronymic || ""}`,
-        clientPhone: values.phone,
-        clientDob: values.dob,
-        date: new Date(),
-        type: "full",
-        status: "completed",
-        title: "Полный анализ личности",
-        codes: {
-          personality: values.personalityCode,
-          connector: values.connectorCode,
-          implementation: values.realizationCode,
-          generator: values.generatorCode,
-          mission: values.missionCode
-        }
-      };
+  const handleSubmit = async (values: ClientFormValues) => {
+    try {
+      setIsSubmitting(true);
       
-      toast.success("Анализ личности создан автоматически", {
-        description: "Анализ был создан на основе данных клиента"
+      if (generateAnalysis) {
+        const analysisData = {
+          clientId: null, // Будет заполнено при создании клиента
+          clientName: `${values.lastName} ${values.firstName} ${values.patronymic || ""}`,
+          clientPhone: values.phone,
+          clientDob: values.dob,
+          date: new Date(),
+          type: "full",
+          status: "completed",
+          title: "Полный анализ личности",
+          codes: {
+            personality: values.personalityCode,
+            connector: values.connectorCode,
+            implementation: values.realizationCode,
+            generator: values.generatorCode,
+            mission: values.missionCode
+          }
+        };
+        
+        toast.success("Анализ личности создан автоматически", {
+          description: "Анализ был создан на основе данных клиента"
+        });
+        
+        await onSubmit(values, analysisData);
+      } else {
+        await onSubmit(values);
+      }
+      
+      if (redirectAfterSubmit) {
+        toast.success("Клиент успешно добавлен", {
+          description: "Перенаправление на карточку клиента..."
+        });
+      }
+    } catch (error) {
+      console.error("Ошибка при отправке формы:", error);
+      toast.error("Не удалось сохранить клиента", {
+        description: "Пожалуйста, проверьте введенные данные и попробуйте снова."
       });
-      
-      onSubmit(clientDataWithId, analysisData);
-    } else {
-      onSubmit(clientDataWithId);
-    }
-    
-    if (redirectAfterSubmit) {
-      toast.success("Клиент успешно добавлен", {
-        description: "Перенаправление на карточку клиента..."
-      });
-      
-      const newClient = {
-        id: newClientId,
-        name: `${values.lastName} ${values.firstName} ${values.patronymic || ""}`.trim(),
-        date: values.dob ? new Intl.DateTimeFormat('ru-RU').format(values.dob) : "",
-        phone: values.phone,
-        analysisCount: generateAnalysis ? 1 : 0,
-        lastAnalysis: generateAnalysis ? new Intl.DateTimeFormat('ru-RU').format(new Date()) : "",
-        source: values.source,
-        communicationChannel: values.communicationChannel
-      };
-      
-      navigate(`/clients/${newClientId}`, { 
-        state: { newClient }
-      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -160,7 +150,14 @@ export function ClientForm({
         {showCodes && <PersonalityCodesFields form={form} />}
         
         <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit">Сохранить</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <span className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></span>
+                Сохранение...
+              </>
+            ) : "Сохранить"}
+          </Button>
         </div>
       </form>
     </Form>

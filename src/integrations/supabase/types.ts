@@ -9,7 +9,98 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      analysis: {
+        Row: {
+          client_id: string
+          codes: Json | null
+          created_at: string
+          id: string
+          status: string
+          title: string
+          type: string
+        }
+        Insert: {
+          client_id: string
+          codes?: Json | null
+          created_at?: string
+          id?: string
+          status: string
+          title: string
+          type: string
+        }
+        Update: {
+          client_id?: string
+          codes?: Json | null
+          created_at?: string
+          id?: string
+          status?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analysis_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          communication_channel: string
+          connector_code: number | null
+          created_at: string
+          dob: string
+          email: string | null
+          first_name: string
+          generator_code: number | null
+          id: string
+          last_name: string
+          mission_code: string | null
+          patronymic: string | null
+          personality_code: number | null
+          phone: string
+          realization_code: number | null
+          source: string
+        }
+        Insert: {
+          communication_channel: string
+          connector_code?: number | null
+          created_at?: string
+          dob: string
+          email?: string | null
+          first_name: string
+          generator_code?: number | null
+          id?: string
+          last_name: string
+          mission_code?: string | null
+          patronymic?: string | null
+          personality_code?: number | null
+          phone: string
+          realization_code?: number | null
+          source: string
+        }
+        Update: {
+          communication_channel?: string
+          connector_code?: number | null
+          created_at?: string
+          dob?: string
+          email?: string | null
+          first_name?: string
+          generator_code?: number | null
+          id?: string
+          last_name?: string
+          mission_code?: string | null
+          patronymic?: string | null
+          personality_code?: number | null
+          phone?: string
+          realization_code?: number | null
+          source?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

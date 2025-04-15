@@ -1,76 +1,141 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { ClientsSearch } from "@/components/clients/ClientsSearch";
 import { ClientsTable } from "@/components/clients/ClientsTable";
 import { ClientsPagination } from "@/components/clients/ClientsPagination";
 import { AddClientDialog } from "@/components/clients/AddClientDialog";
-
-const initialClientsData = [
-  { 
-    id: 1, 
-    name: "Анна Смирнова", 
-    date: "14.04.1993", 
-    phone: "+7 (900) 123-45-67", 
-    analysisCount: 3, 
-    lastAnalysis: "02.03.2025",
-    source: "instagram",
-    communicationChannel: "whatsapp"
-  },
-  { 
-    id: 2, 
-    name: "Иван Петров", 
-    date: "28.02.1985", 
-    phone: "+7 (911) 987-65-43", 
-    analysisCount: 2, 
-    lastAnalysis: "15.02.2025",
-    source: "referral",
-    communicationChannel: "telegram"
-  },
-  { id: 3, name: "Мария Иванова", date: "10.10.1990", phone: "+7 (905) 555-55-55", analysisCount: 5, lastAnalysis: "10.04.2025" },
-  { id: 4, name: "Александр Козлов", date: "05.07.1982", phone: "+7 (926) 111-22-33", analysisCount: 1, lastAnalysis: "01.04.2025" },
-  { id: 5, name: "Екатерина Новикова", date: "22.12.1988", phone: "+7 (903) 777-88-99", analysisCount: 4, lastAnalysis: "05.03.2025" },
-  { id: 6, name: "Дмитрий Соколов", date: "18.06.1995", phone: "+7 (999) 444-33-22", analysisCount: 2, lastAnalysis: "20.02.2025" },
-  { id: 7, name: "Ольга Васильева", date: "30.09.1987", phone: "+7 (916) 222-33-44", analysisCount: 6, lastAnalysis: "12.04.2025" },
-  { id: 8, name: "Сергей Кузнецов", date: "15.11.1980", phone: "+7 (925) 666-77-88", analysisCount: 3, lastAnalysis: "18.03.2025" },
-  { id: 9, name: "Наталья Морозова", date: "03.08.1992", phone: "+7 (917) 999-00-11", analysisCount: 1, lastAnalysis: "25.03.2025" },
-  { id: 10, name: "Алексей Попов", date: "27.01.1986", phone: "+7 (915) 333-22-11", analysisCount: 4, lastAnalysis: "30.03.2025" },
-  { id: 11, name: "Ирина Лебедева", date: "09.12.1983", phone: "+7 (926) 555-11-22", analysisCount: 2, lastAnalysis: "07.04.2025" },
-  { id: 12, name: "Михаил Семенов", date: "19.03.1994", phone: "+7 (929) 777-66-55", analysisCount: 3, lastAnalysis: "15.03.2025" },
-];
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Clients = () => {
   const [searchValue, setSearchValue] = useState("");
   const [filterOption, setFilterOption] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [open, setOpen] = useState(false);
-  const [clients, setClients] = useState(initialClientsData);
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   
   const itemsPerPage = 20;
+  
+  // Загрузка клиентов из Supabase
+  const { data: clients = [], isLoading } = useQuery({
+    queryKey: ['clients'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) {
+        console.error('Ошибка при загрузке клиентов:', error);
+        toast.error('Не удалось загрузить список клиентов');
+        return [];
+      }
+      
+      // Преобразуем данные из Supabase в формат, используемый в приложении
+      return data.map(client => ({
+        id: client.id,
+        name: `${client.last_name} ${client.first_name} ${client.patronymic || ''}`.trim(),
+        date: client.dob ? new Date(client.dob).toLocaleDateString('ru-RU') : "",
+        phone: client.phone,
+        analysisCount: 0, // Будет заполнено дополнительным запросом
+        lastAnalysis: "", // Будет заполнено дополнительным запросом
+        source: client.source,
+        communicationChannel: client.communication_channel
+      }));
+    }
+  });
+  
+  // Мутация для добавления клиента
+  const addClientMutation = useMutation({
+    mutationFn: async (clientData: any) => {
+      // Преобразование данных клиента для Supabase
+      const supabaseClient = {
+        first_name: clientData.firstName,
+        last_name: clientData.lastName,
+        patronymic: clientData.patronymic || null,
+        dob: clientData.dob,
+        phone: clientData.phone,
+        email: clientData.email || null,
+        source: clientData.source,
+        communication_channel: clientData.communicationChannel,
+        personality_code: clientData.personalityCode || null,
+        connector_code: clientData.connectorCode || null,
+        realization_code: clientData.realizationCode || null,
+        generator_code: clientData.generatorCode || null,
+        mission_code: clientData.missionCode || null
+      };
+      
+      const { data, error } = await supabase
+        .from('clients')
+        .insert(supabaseClient)
+        .select()
+        .single();
+        
+      if (error) {
+        console.error('Ошибка при создании клиента:', error);
+        throw new Error('Не удалось создать клиента');
+      }
+      
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+    }
+  });
+  
+  // Мутация для добавления анализа
+  const addAnalysisMutation = useMutation({
+    mutationFn: async (analysisData: any) => {
+      const supabaseAnalysis = {
+        client_id: analysisData.clientId,
+        type: analysisData.type,
+        title: analysisData.title,
+        status: analysisData.status,
+        codes: analysisData.codes
+      };
+      
+      const { data, error } = await supabase
+        .from('analysis')
+        .insert(supabaseAnalysis)
+        .select();
+        
+      if (error) {
+        console.error('Ошибка при создании анализа:', error);
+        throw new Error('Не удалось создать анализ');
+      }
+      
+      return data;
+    }
+  });
   
   useEffect(() => {
     if (location.state?.newClient) {
       const newClient = location.state.newClient;
       console.log("Received new client from state:", newClient);
       
-      if (!clients.some(client => client.id === newClient.id)) {
-        setClients(prev => [newClient, ...prev]);
-      }
-      
+      // Сбросить состояние маршрута, чтобы избежать дублирования
       window.history.replaceState({}, document.title);
+      
+      // Обновить список клиентов
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
     }
-  }, [location.state]);
+  }, [location.state, queryClient]);
   
   const filteredClients = clients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchValue.toLowerCase()) || 
                          client.phone.includes(searchValue);
     
     if (filterOption === "all") return matchesSearch;
-    if (filterOption === "recent") return matchesSearch && new Date(client.lastAnalysis.split('.').reverse().join('-')) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    if (filterOption === "recent") {
+      const lastDate = client.lastAnalysis ? 
+        new Date(client.lastAnalysis.split('.').reverse().join('-')) : null;
+      return matchesSearch && lastDate && lastDate >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    }
     if (filterOption === "frequent") return matchesSearch && client.analysisCount > 3;
     
     return matchesSearch;
@@ -87,37 +152,37 @@ const Clients = () => {
     setCurrentPage(page);
   };
   
-  const handleAddClient = (data: any, analysisData?: any) => {
+  const handleAddClient = async (data: any, analysisData?: any) => {
     setOpen(false);
     console.log("New client data:", data);
     
-    const newClientId = data.id || Math.floor(Math.random() * 10000) + 100;
-    const newClient = {
-      id: newClientId,
-      name: `${data.lastName} ${data.firstName} ${data.patronymic || ""}`.trim(),
-      date: data.dob ? new Intl.DateTimeFormat('ru-RU').format(data.dob) : "",
-      phone: data.phone,
-      analysisCount: analysisData ? 1 : 0,
-      lastAnalysis: analysisData ? new Intl.DateTimeFormat('ru-RU').format(new Date()) : "",
-      source: data.source,
-      communicationChannel: data.communicationChannel
-    };
-    
-    setClients(prev => [newClient, ...prev]);
-    
-    if (analysisData) {
-      toast.success("Клиент и анализ успешно добавлены", {
-        description: "Новый клиент и анализ были добавлены в базу данных."
-      });
-    } else {
-      toast.success("Клиент успешно добавлен", {
-        description: "Новый клиент был добавлен в базу данных."
+    try {
+      // Создаем клиента в базе данных
+      const newClient = await addClientMutation.mutateAsync(data);
+      console.log("Client created in database:", newClient);
+      
+      // Если есть данные анализа, создаем анализ
+      if (analysisData) {
+        analysisData.clientId = newClient.id;
+        await addAnalysisMutation.mutateAsync(analysisData);
+        toast.success("Клиент и анализ успешно добавлены", {
+          description: "Новый клиент и анализ были добавлены в базу данных."
+        });
+      } else {
+        toast.success("Клиент успешно добавлен", {
+          description: "Новый клиент был добавлен в базу данных."
+        });
+      }
+      
+      // Перенаправляем на страницу клиента
+      navigate(`/clients/${newClient.id}`);
+      
+    } catch (error) {
+      console.error("Error adding client:", error);
+      toast.error("Ошибка при добавлении клиента", {
+        description: "Пожалуйста, попробуйте еще раз или обратитесь к администратору."
       });
     }
-    
-    navigate(`/clients/${newClientId}`, { 
-      state: { newClient }
-    });
   };
 
   const getCommunicationIcon = (channel: string) => {
@@ -165,10 +230,16 @@ const Clients = () => {
             setFilterOption={setFilterOption}
           />
 
-          <ClientsTable 
-            clients={paginatedClients} 
-            getCommunicationIcon={getCommunicationIcon} 
-          />
+          {isLoading ? (
+            <div className="flex justify-center p-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <ClientsTable 
+              clients={paginatedClients} 
+              getCommunicationIcon={getCommunicationIcon} 
+            />
+          )}
           
           <ClientsPagination 
             currentPage={currentPage}

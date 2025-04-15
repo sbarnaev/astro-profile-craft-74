@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { ClientForm } from "@/components/clients/ClientForm";
+import { useState } from "react";
 
 interface AddClientDialogProps {
   open: boolean;
@@ -18,6 +19,18 @@ interface AddClientDialogProps {
 }
 
 export function AddClientDialog({ open, setOpen, handleAddClient }: AddClientDialogProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const onSubmit = async (data: any, analysisData?: any) => {
+    try {
+      setIsSubmitting(true);
+      await handleAddClient(data, analysisData);
+    } finally {
+      setIsSubmitting(false);
+      setOpen(false);
+    }
+  };
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -34,7 +47,7 @@ export function AddClientDialog({ open, setOpen, handleAddClient }: AddClientDia
           </DialogDescription>
         </DialogHeader>
         <ClientForm 
-          onSubmit={handleAddClient} 
+          onSubmit={onSubmit} 
           generateAnalysis={true} 
           redirectAfterSubmit={false}
         />
