@@ -1,13 +1,11 @@
 
-import { useState } from "react";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnalysisCard } from "./AnalysisCard";
+import { AnalysisType } from "@/types/consultations";
 
 interface AnalysisViewProps {
-  analysis: any;
+  analysis: AnalysisType;
   onBack: () => void;
 }
 
@@ -20,5 +18,5 @@ export function AnalysisView({ analysis, onBack }: AnalysisViewProps) {
     dob: analysis.clientDob,
   };
 
-  return <AnalysisCard client={client} onBack={onBack} />;
+  return <AnalysisCard client={client} analysis={analysis} onBack={onBack} />;
 }
