@@ -67,6 +67,11 @@ export default function Consultations() {
     setIsReminderFormOpen(false);
     console.log("Created reminder for consultation:", data);
   };
+  
+  const handleCloseConsultationDetails = () => {
+    setIsConsultationDetailsOpen(false);
+    setSelectedConsultation(null);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -131,21 +136,14 @@ export default function Consultations() {
         </TabsContent>
       </Tabs>
       
-      {/* Диалог детальной информации о консультации */}
-      <Dialog open={isConsultationDetailsOpen} onOpenChange={setIsConsultationDetailsOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Детали консультации</DialogTitle>
-          </DialogHeader>
-          
-          {selectedConsultation && (
-            <ConsultationDetails 
-              consultation={selectedConsultation}
-              onAddReminder={() => setIsReminderFormOpen(true)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Детальная информация о консультации в полноэкранном режиме */}
+      {isConsultationDetailsOpen && selectedConsultation && (
+        <ConsultationDetails 
+          consultation={selectedConsultation}
+          onAddReminder={() => setIsReminderFormOpen(true)}
+          onClose={handleCloseConsultationDetails}
+        />
+      )}
       
       {/* Диалог поиска клиента */}
       <ClientSearch 
