@@ -52,7 +52,7 @@ export function CalendarWeek({
             <Button variant="outline" size="icon" onClick={goToPrevWeek}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => currentWeek(new Date())}>
+            <Button variant="outline" size="icon" onClick={goToNextWeek}>
               <CalendarIcon className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="icon" onClick={goToNextWeek}>
