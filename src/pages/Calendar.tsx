@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Clock, Users, Plus, ArrowLeft, ArrowRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
