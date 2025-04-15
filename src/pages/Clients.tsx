@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,10 +35,27 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-// Пример данных о клиентах
 const clientsData = [
-  { id: 1, name: "Анна Смирнова", date: "14.04.1993", phone: "+7 (900) 123-45-67", analysisCount: 3, lastAnalysis: "02.03.2025" },
-  { id: 2, name: "Иван Петров", date: "28.02.1985", phone: "+7 (911) 987-65-43", analysisCount: 2, lastAnalysis: "15.02.2025" },
+  { 
+    id: 1, 
+    name: "Анна Смирнова", 
+    date: "14.04.1993", 
+    phone: "+7 (900) 123-45-67", 
+    analysisCount: 3, 
+    lastAnalysis: "02.03.2025",
+    source: "instagram",
+    communicationChannel: "whatsapp"
+  },
+  { 
+    id: 2, 
+    name: "Иван Петров", 
+    date: "28.02.1985", 
+    phone: "+7 (911) 987-65-43", 
+    analysisCount: 2, 
+    lastAnalysis: "15.02.2025",
+    source: "referral",
+    communicationChannel: "telegram"
+  },
   { id: 3, name: "Мария Иванова", date: "10.10.1990", phone: "+7 (905) 555-55-55", analysisCount: 5, lastAnalysis: "10.04.2025" },
   { id: 4, name: "Александр Козлов", date: "05.07.1982", phone: "+7 (926) 111-22-33", analysisCount: 1, lastAnalysis: "01.04.2025" },
   { id: 5, name: "Екатерина Новикова", date: "22.12.1988", phone: "+7 (903) 777-88-99", analysisCount: 4, lastAnalysis: "05.03.2025" },
@@ -60,7 +76,6 @@ const Clients = () => {
   
   const itemsPerPage = 5;
   
-  // Функция фильтрации клиентов
   const filteredClients = clientsData.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchValue.toLowerCase()) || 
                          client.phone.includes(searchValue);
@@ -72,7 +87,6 @@ const Clients = () => {
     return matchesSearch;
   });
   
-  // Пагинация
   const paginatedClients = filteredClients.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -84,11 +98,31 @@ const Clients = () => {
     setCurrentPage(page);
   };
   
-  const handleAddClient = () => {
+  const handleAddClient = (data: any) => {
     setOpen(false);
+    console.log("New client data:", data);
     toast.success("Клиент успешно добавлен", {
       description: "Новый клиент был добавлен в базу данных."
     });
+  };
+
+  const getCommunicationIcon = (channel: string) => {
+    if (!channel) return null;
+    
+    switch (channel.toLowerCase()) {
+      case 'whatsapp':
+        return <span className="text-green-500 text-xs">WhatsApp</span>;
+      case 'telegram':
+        return <span className="text-blue-500 text-xs">Telegram</span>;
+      case 'viber':
+        return <span className="text-purple-500 text-xs">Viber</span>;
+      case 'vk':
+        return <span className="text-blue-600 text-xs">ВКонтакте</span>;
+      case 'offline':
+        return <span className="text-gray-500 text-xs">Офлайн</span>;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -105,7 +139,7 @@ const Clients = () => {
               Добавить клиента
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Добавить нового клиента</DialogTitle>
             </DialogHeader>
@@ -151,28 +185,36 @@ const Clients = () => {
                     <th className="py-3 px-4 text-left">Имя</th>
                     <th className="py-3 px-4 text-left">Дата рождения</th>
                     <th className="py-3 px-4 text-left hidden md:table-cell">Телефон</th>
+                    <th className="py-3 px-4 text-center hidden lg:table-cell">Канал</th>
                     <th className="py-3 px-4 text-center hidden lg:table-cell">Анализы</th>
-                    <th className="py-3 px-4 text-left hidden lg:table-cell">Последний анализ</th>
                     <th className="py-3 px-4 text-right">Действия</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedClients.length > 0 ? (
                     paginatedClients.map((client) => (
-                      <tr key={client.id} className="border-b hover:bg-muted/30 transition-colors">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
-                              <span className="text-xs font-medium text-primary">{client.name.charAt(0)}</span>
+                      <tr 
+                        key={client.id} 
+                        className="border-b hover:bg-muted/30 transition-colors cursor-pointer"
+                        onClick={() => window.location.href = `/clients/${client.id}`}
+                      >
+                        <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                          <Link to={`/clients/${client.id}`} className="block">
+                            <div className="flex items-center">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+                                <span className="text-xs font-medium text-primary">{client.name.charAt(0)}</span>
+                              </div>
+                              <span>{client.name}</span>
                             </div>
-                            <span>{client.name}</span>
-                          </div>
+                          </Link>
                         </td>
                         <td className="py-3 px-4">{client.date}</td>
                         <td className="py-3 px-4 hidden md:table-cell">{client.phone}</td>
+                        <td className="py-3 px-4 text-center hidden lg:table-cell">
+                          {getCommunicationIcon(client.communicationChannel)}
+                        </td>
                         <td className="py-3 px-4 text-center hidden lg:table-cell">{client.analysisCount}</td>
-                        <td className="py-3 px-4 hidden lg:table-cell">{client.lastAnalysis}</td>
-                        <td className="py-3 px-4 text-right">
+                        <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" className="h-8 w-8 p-0">

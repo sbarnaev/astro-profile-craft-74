@@ -31,13 +31,13 @@ const clientsData = [
     email: "anna@example.com",
     analysisCount: 3, 
     lastAnalysis: "02.03.2025",
-    source: "Instagram",
-    communicationChannel: "WhatsApp",
-    codeNumbers: {
-      lifeCode: 7,
-      destinyCode: 5,
-      energyCode: 3
-    },
+    source: "instagram",
+    communicationChannel: "whatsapp",
+    personalityCode: 7,
+    connectorCode: 5,
+    realizationCode: 4,
+    generatorCode: 3,
+    missionCode: 11,
     hasAnalysis: true,
     analysisId: 123
   },
@@ -51,17 +51,61 @@ const clientsData = [
     email: "ivan@example.com",
     analysisCount: 2, 
     lastAnalysis: "15.02.2025",
-    source: "Рекомендация",
-    communicationChannel: "Telegram",
-    codeNumbers: {
-      lifeCode: 9,
-      destinyCode: 6,
-      energyCode: 8
-    },
+    source: "referral",
+    communicationChannel: "telegram",
+    personalityCode: 9,
+    connectorCode: 6,
+    realizationCode: 8,
+    generatorCode: 3,
+    missionCode: 6,
     hasAnalysis: false
   },
   // ... остальные клиенты
 ];
+
+// Функция для получения названия источника
+const getSourceLabel = (source: string): string => {
+  const sourceMap: Record<string, string> = {
+    'instagram': 'Instagram',
+    'facebook': 'Facebook',
+    'vk': 'ВКонтакте',
+    'referral': 'Рекомендация',
+    'search': 'Поиск в интернете',
+    'other': 'Другое'
+  };
+  return sourceMap[source] || source;
+};
+
+// Функция для получения названия канала общения
+const getCommunicationLabel = (channel: string): string => {
+  const channelMap: Record<string, string> = {
+    'whatsapp': 'WhatsApp',
+    'telegram': 'Telegram',
+    'viber': 'Viber',
+    'vk': 'ВКонтакте',
+    'offline': 'Офлайн',
+    'other': 'Другое'
+  };
+  return channelMap[channel] || channel;
+};
+
+// Функция для получения иконки канала общения
+const getCommunicationIcon = (channel: string) => {
+  switch (channel.toLowerCase()) {
+    case 'whatsapp':
+      return <span className="text-green-500"><MessageCircle className="h-4 w-4" /></span>;
+    case 'telegram':
+      return <span className="text-blue-500"><MessageCircle className="h-4 w-4" /></span>;
+    case 'viber':
+      return <span className="text-purple-500"><MessageCircle className="h-4 w-4" /></span>;
+    case 'vk':
+      return <span className="text-blue-600"><MessageCircle className="h-4 w-4" /></span>;
+    case 'offline':
+      return <span className="text-gray-500"><User className="h-4 w-4" /></span>;
+    default:
+      return <span className="text-gray-500"><MessageCircle className="h-4 w-4" /></span>;
+  }
+};
 
 const ClientProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -85,11 +129,12 @@ const ClientProfile = () => {
     );
   }
   
-  const handleEditClient = () => {
+  const handleEditClient = (data: any) => {
     setOpen(false);
     toast.success("Данные клиента обновлены", {
       description: "Информация о клиенте была успешно обновлена."
     });
+    console.log("Updated client data:", data);
   };
   
   const fullName = `${client.lastName} ${client.firstName} ${client.patronymic || ""}`.trim();
@@ -98,20 +143,6 @@ const ClientProfile = () => {
     month: '2-digit', 
     year: 'numeric' 
   }).format(client.dob);
-  
-  const getCommunicationIcon = (channel: string) => {
-    switch (channel.toLowerCase()) {
-      case 'whatsapp':
-        return <span className="text-green-500"><MessageCircle className="h-4 w-4" /></span>;
-      case 'telegram':
-        return <span className="text-blue-500"><MessageCircle className="h-4 w-4" /></span>;
-      case 'офлайн':
-      case 'оффлайн':
-        return <span className="text-purple-500"><User className="h-4 w-4" /></span>;
-      default:
-        return <span className="text-gray-500"><MessageCircle className="h-4 w-4" /></span>;
-    }
-  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -133,7 +164,7 @@ const ClientProfile = () => {
                 Редактировать
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Редактировать данные клиента</DialogTitle>
               </DialogHeader>
@@ -145,7 +176,14 @@ const ClientProfile = () => {
                   patronymic: client.patronymic || "",
                   dob: client.dob,
                   phone: client.phone,
-                  email: client.email || ""
+                  email: client.email || "",
+                  source: client.source,
+                  communicationChannel: client.communicationChannel,
+                  personalityCode: client.personalityCode,
+                  connectorCode: client.connectorCode,
+                  realizationCode: client.realizationCode,
+                  generatorCode: client.generatorCode,
+                  missionCode: client.missionCode
                 }}
               />
             </DialogContent>
@@ -191,7 +229,7 @@ const ClientProfile = () => {
               <p className="text-sm text-muted-foreground">Источник</p>
               <div className="flex items-center gap-1">
                 <Share2 className="h-4 w-4 text-muted-foreground" />
-                <p className="font-medium">{client.source}</p>
+                <p className="font-medium">{getSourceLabel(client.source)}</p>
               </div>
             </div>
             
@@ -199,7 +237,7 @@ const ClientProfile = () => {
               <p className="text-sm text-muted-foreground">Канал общения</p>
               <div className="flex items-center gap-1">
                 {getCommunicationIcon(client.communicationChannel)}
-                <p className="font-medium">{client.communicationChannel}</p>
+                <p className="font-medium">{getCommunicationLabel(client.communicationChannel)}</p>
               </div>
             </div>
             
@@ -207,16 +245,26 @@ const ClientProfile = () => {
               <p className="text-sm text-muted-foreground mb-2">Коды</p>
               <div className="grid grid-cols-3 gap-2">
                 <div className="p-2 rounded-md bg-primary/10 text-center">
-                  <p className="text-xs text-muted-foreground">Код жизни</p>
-                  <p className="text-2xl font-bold text-primary">{client.codeNumbers.lifeCode}</p>
+                  <p className="text-xs text-muted-foreground">Код личности</p>
+                  <p className="text-2xl font-bold text-primary">{client.personalityCode}</p>
                 </div>
                 <div className="p-2 rounded-md bg-primary/10 text-center">
-                  <p className="text-xs text-muted-foreground">Код судьбы</p>
-                  <p className="text-2xl font-bold text-primary">{client.codeNumbers.destinyCode}</p>
+                  <p className="text-xs text-muted-foreground">Код коннектора</p>
+                  <p className="text-2xl font-bold text-primary">{client.connectorCode}</p>
                 </div>
                 <div className="p-2 rounded-md bg-primary/10 text-center">
-                  <p className="text-xs text-muted-foreground">Код энергии</p>
-                  <p className="text-2xl font-bold text-primary">{client.codeNumbers.energyCode}</p>
+                  <p className="text-xs text-muted-foreground">Код реализации</p>
+                  <p className="text-2xl font-bold text-primary">{client.realizationCode}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="p-2 rounded-md bg-primary/10 text-center">
+                  <p className="text-xs text-muted-foreground">Код генератора</p>
+                  <p className="text-2xl font-bold text-primary">{client.generatorCode}</p>
+                </div>
+                <div className="p-2 rounded-md bg-primary/10 text-center">
+                  <p className="text-xs text-muted-foreground">Код миссии</p>
+                  <p className="text-2xl font-bold text-primary">{client.missionCode}</p>
                 </div>
               </div>
             </div>
