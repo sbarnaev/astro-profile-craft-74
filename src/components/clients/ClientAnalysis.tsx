@@ -1,17 +1,22 @@
 
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { FileText, Calendar, Lock, Eye } from "lucide-react";
+import { FileText, Calendar, Eye } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { AnalysisView } from "@/components/analysis/AnalysisView";
 
 // Пример данных об анализах
 const analysisData = [
   { 
     id: 1,
     clientId: 1,
+    clientName: "Иванов Иван",
+    clientPhone: "+7 (900) 123-45-67",
+    clientDob: new Date(1990, 5, 15),
     date: new Date(2025, 2, 2),
     type: "full",
     status: "completed",
@@ -27,6 +32,9 @@ const analysisData = [
   { 
     id: 2,
     clientId: 1,
+    clientName: "Иванов Иван",
+    clientPhone: "+7 (900) 123-45-67",
+    clientDob: new Date(1990, 5, 15),
     date: new Date(2025, 1, 15),
     type: "brief",
     status: "completed",
@@ -39,6 +47,9 @@ const analysisData = [
   { 
     id: 3,
     clientId: 1,
+    clientName: "Иванов Иван",
+    clientPhone: "+7 (900) 123-45-67",
+    clientDob: new Date(1990, 5, 15),
     date: new Date(2025, 0, 5),
     type: "relationship",
     status: "completed",
@@ -52,6 +63,9 @@ const analysisData = [
   { 
     id: 4,
     clientId: 2,
+    clientName: "Петрова Анна",
+    clientPhone: "+7 (900) 987-65-43",
+    clientDob: new Date(1985, 8, 20),
     date: new Date(2025, 2, 15),
     type: "full",
     status: "completed",
@@ -71,6 +85,8 @@ interface ClientAnalysisProps {
 }
 
 export const ClientAnalysis = ({ clientId }: ClientAnalysisProps) => {
+  const [selectedAnalysis, setSelectedAnalysis] = useState<any>(null);
+  
   // Фильтрация анализов для текущего клиента и сортировка по дате
   const clientAnalyses = analysisData
     .filter(analysis => analysis.clientId === clientId)
@@ -106,6 +122,15 @@ export const ClientAnalysis = ({ clientId }: ClientAnalysisProps) => {
     }
   };
 
+  if (selectedAnalysis) {
+    return (
+      <AnalysisView 
+        analysis={selectedAnalysis} 
+        onBack={() => setSelectedAnalysis(null)} 
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card className="border-none">
@@ -119,7 +144,7 @@ export const ClientAnalysis = ({ clientId }: ClientAnalysisProps) => {
           {clientAnalyses.length > 0 ? (
             <div className="space-y-4">
               {clientAnalyses.map((analysis) => (
-                <div key={analysis.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg">
+                <div key={analysis.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-muted/30 cursor-pointer transition-colors" onClick={() => setSelectedAnalysis(analysis)}>
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium">{analysis.title}</span>
@@ -187,11 +212,12 @@ export const ClientAnalysis = ({ clientId }: ClientAnalysisProps) => {
                     )}
                   </div>
                   <div className="flex gap-2 mt-4 md:mt-0">
-                    <Button size="sm" variant="outline" asChild>
-                      <Link to={`/analysis/${analysis.id}`}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Просмотр
-                      </Link>
+                    <Button size="sm" variant="outline" onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedAnalysis(analysis);
+                    }}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      Просмотр
                     </Button>
                   </div>
                 </div>
