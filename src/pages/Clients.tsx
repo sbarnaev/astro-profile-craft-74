@@ -1,40 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, Plus, Filter, MoreHorizontal, UserPlus, Calendar, FileText, Bell } from "lucide-react";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { ClientForm } from "@/components/clients/ClientForm";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import { ClientsSearch } from "@/components/clients/ClientsSearch";
+import { ClientsTable } from "@/components/clients/ClientsTable";
+import { ClientsPagination } from "@/components/clients/ClientsPagination";
+import { AddClientDialog } from "@/components/clients/AddClientDialog";
 
 const initialClientsData = [
   { 
@@ -174,27 +146,11 @@ const Clients = () => {
           <h1 className="text-2xl font-bold">Клиенты</h1>
           <p className="text-muted-foreground">Управление базой клиентов</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Добавить клиента
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Добавить нового клиента</DialogTitle>
-              <DialogDescription>
-                Заполните форму для создания нового клиента в системе
-              </DialogDescription>
-            </DialogHeader>
-            <ClientForm 
-              onSubmit={handleAddClient} 
-              generateAnalysis={true} 
-              redirectAfterSubmit={false}
-            />
-          </DialogContent>
-        </Dialog>
+        <AddClientDialog 
+          open={open} 
+          setOpen={setOpen} 
+          handleAddClient={handleAddClient} 
+        />
       </div>
 
       <Card className="astro-card border-none">
@@ -202,161 +158,23 @@ const Clients = () => {
           <CardTitle>Список клиентов</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input 
-                type="search" 
-                placeholder="Поиск по имени или телефону..." 
-                className="pl-8"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-              />
-            </div>
-            <Select value={filterOption} onValueChange={setFilterOption}>
-              <SelectTrigger className="w-[180px]">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Фильтры" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все клиенты</SelectItem>
-                <SelectItem value="recent">Недавние</SelectItem>
-                <SelectItem value="frequent">Частые</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <ClientsSearch 
+            searchValue={searchValue}
+            setSearchValue={setSearchValue}
+            filterOption={filterOption}
+            setFilterOption={setFilterOption}
+          />
 
-          <div className="rounded-md border">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50 font-medium">
-                    <th className="py-3 px-4 text-left">Имя</th>
-                    <th className="py-3 px-4 text-left">Дата рождения</th>
-                    <th className="py-3 px-4 text-left hidden md:table-cell">Телефон</th>
-                    <th className="py-3 px-4 text-center hidden lg:table-cell">Канал</th>
-                    <th className="py-3 px-4 text-center hidden lg:table-cell">Анализы</th>
-                    <th className="py-3 px-4 text-right">Действия</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedClients.length > 0 ? (
-                    paginatedClients.map((client) => (
-                      <tr 
-                        key={client.id} 
-                        className="border-b hover:bg-muted/30 transition-colors cursor-pointer"
-                        onClick={() => navigate(`/clients/${client.id}`)}
-                      >
-                        <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
-                          <Link to={`/clients/${client.id}`} className="block">
-                            <div className="flex items-center">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
-                                <span className="text-xs font-medium text-primary">{client.name.charAt(0)}</span>
-                              </div>
-                              <span>{client.name}</span>
-                            </div>
-                          </Link>
-                        </td>
-                        <td className="py-3 px-4">{client.date}</td>
-                        <td className="py-3 px-4 hidden md:table-cell">{client.phone}</td>
-                        <td className="py-3 px-4 text-center hidden lg:table-cell">
-                          {getCommunicationIcon(client.communicationChannel)}
-                        </td>
-                        <td className="py-3 px-4 text-center hidden lg:table-cell">{client.analysisCount}</td>
-                        <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <Link to={`/clients/${client.id}`}>Профиль</Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link to={`/analysis/${client.id}`}>
-                                  <FileText className="mr-2 h-4 w-4" />
-                                  <span>Анализ</span>
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link to={`/consultations/schedule?client=${client.id}`}>
-                                  <Calendar className="mr-2 h-4 w-4" />
-                                  <span>Записать на консультацию</span>
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link to={`/clients/${client.id}`} state={{ openReminder: true }}>
-                                  <Bell className="mr-2 h-4 w-4" />
-                                  <span>Создать напоминание</span>
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">Удалить</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className="py-6 text-center text-muted-foreground">
-                        Клиенты не найдены
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <ClientsTable 
+            clients={paginatedClients} 
+            getCommunicationIcon={getCommunicationIcon} 
+          />
           
-          {totalPages > 1 && (
-            <div className="mt-4">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-                  
-                  {Array.from({ length: totalPages }).map((_, index) => {
-                    if (
-                      index === 0 || 
-                      index === totalPages - 1 || 
-                      (index >= currentPage - 2 && index <= currentPage + 2)
-                    ) {
-                      return (
-                        <PaginationItem key={index}>
-                          <PaginationLink
-                            onClick={() => handlePageChange(index + 1)}
-                            isActive={currentPage === index + 1}
-                          >
-                            {index + 1}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    } else if (index === currentPage - 3 || index === currentPage + 3) {
-                      return (
-                        <PaginationItem key={index}>
-                          <span className="flex h-9 w-9 items-center justify-center">...</span>
-                        </PaginationItem>
-                      );
-                    }
-                    return null;
-                  })}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
+          <ClientsPagination 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            handlePageChange={handlePageChange}
+          />
         </CardContent>
       </Card>
     </div>
