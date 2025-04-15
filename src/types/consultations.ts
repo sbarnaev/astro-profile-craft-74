@@ -19,3 +19,9 @@ export interface Consultation {
   notes?: string;
   request: string;
 }
+
+export interface ReminderData {
+  date: Date;
+  text: string;
+  consultationId?: number;
+}

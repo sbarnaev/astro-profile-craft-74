@@ -194,8 +194,8 @@ export default function Consultations() {
             <ReminderForm
               isOpen={isReminderFormOpen}
               onClose={() => setIsReminderFormOpen(false)}
-              consultationId={selectedConsultation.id}
               onSubmit={handleCreateReminder}
+              consultationId={selectedConsultation.id}
             />
           )}
         </DialogContent>
