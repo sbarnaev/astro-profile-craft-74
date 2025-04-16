@@ -1,13 +1,25 @@
 
 import { FC } from "react";
-import { Menu, Bell, Search } from "lucide-react";
+import { Menu, Bell, Search, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/context/AuthContext";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 interface TopBarProps {
   onMenuClick: () => void;
 }
 
 const TopBar: FC<TopBarProps> = ({ onMenuClick }) => {
+  const { user, signOut } = useAuth();
+  
+  // Get first letter of email for avatar
+  const userInitial = user?.email ? user.email[0].toUpperCase() : 'П';
+  
   return (
     <header className="h-16 border-b border-border flex items-center justify-between px-4 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
       <div className="flex items-center">
@@ -34,11 +46,19 @@ const TopBar: FC<TopBarProps> = ({ onMenuClick }) => {
           <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-accent"></span>
         </button>
         
-        <div className="ml-2">
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-            <span className="text-sm font-medium text-primary">М</span>
-          </div>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="ml-2 focus:outline-none">
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-sm font-medium text-primary">{userInitial}</span>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+              <LogOut className="mr-2 h-4 w-4" />
+              Выйти
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

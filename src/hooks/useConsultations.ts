@@ -3,19 +3,25 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 export function useConsultations() {
   const [consultations, setConsultations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
   
-  // Загрузка данных при монтировании компонента
+  // Загрузка данных при монтировании компонента и при изменении пользователя
   useEffect(() => {
-    fetchConsultations();
-  }, []);
+    if (user) {
+      fetchConsultations();
+    }
+  }, [user]);
   
   // Функция для загрузки консультаций из Supabase
   const fetchConsultations = async () => {
+    if (!user) return;
+    
     try {
       setLoading(true);
       
