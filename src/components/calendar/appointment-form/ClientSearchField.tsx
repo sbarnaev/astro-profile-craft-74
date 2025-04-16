@@ -52,6 +52,7 @@ export function ClientSearchField({ value, onChange, onCreateNew, isEditing = fa
                 role="combobox"
                 aria-expanded={open}
                 className="justify-between"
+                disabled={isEditing && !open} // Disable button in edit mode unless opened
               >
                 {value && selectedClient
                   ? `${selectedClient.lastName} ${selectedClient.firstName} ${selectedClient.patronymic}`
@@ -72,25 +73,31 @@ export function ClientSearchField({ value, onChange, onCreateNew, isEditing = fa
                   </div>
                 </CommandEmpty>
                 <CommandGroup>
-                  {clientsData.map((client) => (
-                    <CommandItem
-                      key={client.id}
-                      value={client.id.toString()}
-                      onSelect={() => {
-                        onChange(client.id);
-                        setSelectedClient(client);
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          value === client.id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {client.lastName} {client.firstName} {client.patronymic}
+                  {clientsData && clientsData.length > 0 ? (
+                    clientsData.map((client) => (
+                      <CommandItem
+                        key={client.id}
+                        value={client.id.toString()}
+                        onSelect={() => {
+                          onChange(client.id);
+                          setSelectedClient(client);
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === client.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {client.lastName} {client.firstName} {client.patronymic}
+                      </CommandItem>
+                    ))
+                  ) : (
+                    <CommandItem value="no-clients">
+                      Нет доступных клиентов
                     </CommandItem>
-                  ))}
+                  )}
                 </CommandGroup>
               </Command>
             </PopoverContent>

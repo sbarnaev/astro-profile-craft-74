@@ -45,6 +45,7 @@ export function ExistingClientForm({
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      clientId: initialClient?.id,
       date: initialDate || new Date(),
       time: initialTime || "10:00",
       request: editData?.request || "",
@@ -74,8 +75,22 @@ export function ExistingClientForm({
     }
   }, [form.watch("consultationType")]);
   
+  // Set default client if initialClient is provided and no clientId has been set yet
+  React.useEffect(() => {
+    const currentClientId = form.getValues().clientId;
+    
+    if (initialClient?.id && !currentClientId) {
+      form.setValue("clientId", initialClient.id);
+    }
+  }, [initialClient, form]);
+  
   // Обработка отправки формы
   const handleFormSubmit = (values: AppointmentFormValues) => {
+    // Make sure clientId is set before submitting
+    if (!values.clientId && initialClient?.id) {
+      values.clientId = initialClient.id;
+    }
+    
     // Собираем полные данные для создания встречи
     const appointmentData = {
       ...values,
@@ -87,9 +102,9 @@ export function ExistingClientForm({
         ? consultationTypes.find((type) => type.id === values.consultationType)?.duration || 60
         : 60,
       clientName: values.clientId
-        ? `${clientsData.find((c) => c.id === values.clientId)?.lastName} ${
-            clientsData.find((c) => c.id === values.clientId)?.firstName
-          } ${clientsData.find((c) => c.id === values.clientId)?.patronymic}`
+        ? `${clientsData.find((c) => c.id === values.clientId)?.lastName || ""} ${
+            clientsData.find((c) => c.id === values.clientId)?.firstName || ""
+          } ${clientsData.find((c) => c.id === values.clientId)?.patronymic || ""}`
         : "Новый клиент",
       cost: values.cost || 3500
     };
@@ -131,7 +146,7 @@ export function ExistingClientForm({
           <Button type="button" variant="outline" onClick={onClose}>
             Отмена
           </Button>
-          <Button type="submit" disabled={!form.getValues().clientId}>
+          <Button type="submit">
             {isEditing ? 'Сохранить изменения' : 'Создать встречу'}
           </Button>
         </DialogFooter>

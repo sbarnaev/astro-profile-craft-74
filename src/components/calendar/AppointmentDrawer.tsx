@@ -40,6 +40,9 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
     firstName: nameParts[1] || "",
     lastName: nameParts[0] || "",
     patronymic: nameParts[2] || "",
+    // Add these properties to avoid undefined errors
+    phone: "",
+    email: ""
   };
   
   return (
@@ -148,7 +151,9 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
             editData={{
               cost: appointment.cost,
               request: appointment.request,
-              consultationType: ["Экспресс-консультация", "Базовый анализ", "Отношения", "Целевой анализ"].indexOf(appointment.type) + 1 || 1
+              consultationType: appointment.type 
+                ? ["Экспресс-консультация", "Базовый анализ", "Отношения", "Целевой анализ"].indexOf(appointment.type) + 1 || 1 
+                : 1
             }}
           />
         )}
