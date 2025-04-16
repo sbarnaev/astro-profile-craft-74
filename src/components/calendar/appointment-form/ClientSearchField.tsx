@@ -29,15 +29,26 @@ export function ClientSearchField({ value, onChange, onCreateNew, isEditing = fa
   const [open, setOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
   
+  // Make sure clientsData is always an array, even if it's undefined or null
+  const safeClientsData = Array.isArray(clientsData) ? clientsData : [];
+  
   // Find and set the selected client based on the value
   useEffect(() => {
     if (value) {
-      const client = clientsData.find(client => client.id === value);
+      const client = safeClientsData.find(client => client.id === value);
       if (client) {
         setSelectedClient(client);
       }
     }
-  }, [value]);
+  }, [value, safeClientsData]);
+
+  // Make sure we have a valid client name to display
+  const getClientDisplayName = () => {
+    if (selectedClient) {
+      return `${selectedClient.lastName || ''} ${selectedClient.firstName || ''} ${selectedClient.patronymic || ''}`.trim();
+    }
+    return "Выберите клиента...";
+  };
 
   return (
     <FormField
@@ -55,7 +66,7 @@ export function ClientSearchField({ value, onChange, onCreateNew, isEditing = fa
                 disabled={isEditing && !open} // Disable button in edit mode unless opened
               >
                 {value && selectedClient
-                  ? `${selectedClient.lastName} ${selectedClient.firstName} ${selectedClient.patronymic}`
+                  ? getClientDisplayName()
                   : "Выберите клиента..."}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -73,8 +84,8 @@ export function ClientSearchField({ value, onChange, onCreateNew, isEditing = fa
                   </div>
                 </CommandEmpty>
                 <CommandGroup>
-                  {clientsData && clientsData.length > 0 ? (
-                    clientsData.map((client) => (
+                  {safeClientsData.length > 0 ? (
+                    safeClientsData.map((client) => (
                       <CommandItem
                         key={client.id}
                         value={client.id.toString()}

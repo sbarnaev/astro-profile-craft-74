@@ -41,11 +41,11 @@ export function ExistingClientForm({
 }: ExistingClientFormProps) {
   const [customCost, setCustomCost] = React.useState<number | null>(null);
   
-  // Создаем форму с учетом режима редактирования
+  // Create form with default values accounting for edit mode
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      clientId: initialClient?.id,
+      clientId: initialClient?.id || undefined,
       date: initialDate || new Date(),
       time: initialTime || "10:00",
       request: editData?.request || "",
@@ -67,7 +67,7 @@ export function ExistingClientForm({
   // Update cost when consultation type changes
   React.useEffect(() => {
     const typeId = form.getValues().consultationType;
-    if (typeId) {
+    if (typeId && Array.isArray(consultationTypes)) {
       const selectedType = consultationTypes.find(type => type.id === typeId);
       if (selectedType && !customCost) {
         form.setValue("cost", selectedType.cost);
@@ -84,24 +84,24 @@ export function ExistingClientForm({
     }
   }, [initialClient, form]);
   
-  // Обработка отправки формы
+  // Handle form submission
   const handleFormSubmit = (values: AppointmentFormValues) => {
     // Make sure clientId is set before submitting
     if (!values.clientId && initialClient?.id) {
       values.clientId = initialClient.id;
     }
     
-    // Собираем полные данные для создания встречи
+    // Gather complete data for appointment creation
     const appointmentData = {
       ...values,
-      // Преобразуем время и дату в объект Date
+      // Convert time and date to Date object
       appointmentDateTime: values.date
         ? parse(`${format(values.date, "yyyy-MM-dd")} ${values.time}`, "yyyy-MM-dd HH:mm", new Date())
         : null,
-      duration: values.consultationType
-        ? consultationTypes.find((type) => type.id === values.consultationType)?.duration || 60
+      duration: values.consultationType && Array.isArray(consultationTypes)
+        ? (consultationTypes.find((type) => type.id === values.consultationType)?.duration || 60)
         : 60,
-      clientName: values.clientId
+      clientName: values.clientId && Array.isArray(clientsData)
         ? `${clientsData.find((c) => c.id === values.clientId)?.lastName || ""} ${
             clientsData.find((c) => c.id === values.clientId)?.firstName || ""
           } ${clientsData.find((c) => c.id === values.clientId)?.patronymic || ""}`

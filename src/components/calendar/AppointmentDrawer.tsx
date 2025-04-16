@@ -33,8 +33,10 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
     setShowEditForm(false);
   };
   
+  // Make sure clientName is not undefined and has the expected format
+  const clientName = appointment.clientName || "";
   // Extract the client name parts correctly
-  const nameParts = appointment.clientName.split(' ');
+  const nameParts = clientName.split(' ');
   const clientInfo = {
     id: appointment.clientId,
     firstName: nameParts[1] || "",
@@ -63,7 +65,7 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
                 <Users className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-medium">{appointment.clientName}</h3>
+                <h3 className="font-medium">{appointment.clientName || "Клиент"}</h3>
                 <Link 
                   to={`/clients/${appointment.clientId}`} 
                   className="text-sm text-primary hover:underline"
@@ -72,7 +74,7 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
                 </Link>
               </div>
             </div>
-            <Badge>{appointment.type}</Badge>
+            <Badge>{appointment.type || "Консультация"}</Badge>
           </div>
           
           <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
@@ -107,7 +109,7 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
           
           <div className="border-t border-border pt-4">
             <p className="text-sm text-muted-foreground mb-1">Запрос клиента</p>
-            <p>{appointment.request}</p>
+            <p>{appointment.request || "Нет информации"}</p>
           </div>
           
           <div className="border-t border-border pt-4">
