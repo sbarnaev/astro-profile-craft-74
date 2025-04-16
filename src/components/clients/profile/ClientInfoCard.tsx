@@ -174,7 +174,15 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
           type: analysisData.type as "full" | "brief" | "relationship",
           status: analysisData.status as "completed" | "in-progress",
           title: analysisData.title,
-          codes: analysisData.codes || {},
+          codes: {
+            personality: analysisData.codes?.personality,
+            connector: analysisData.codes?.connector,
+            implementation: analysisData.codes?.implementation,
+            generator: analysisData.codes?.generator,
+            mission: analysisData.codes?.mission,
+            compatibility: analysisData.codes?.compatibility,
+            challenges: analysisData.codes?.challenges
+          },
           notes: ""
         };
         

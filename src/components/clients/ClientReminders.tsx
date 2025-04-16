@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -161,10 +160,31 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
       toast.error("Не удалось создать напоминание");
       console.error(error);
     } else {
-      setRemindersData(prev => [...prev, data[0]]);
+      // Process the returned data to match our component's data structure
+      const processedReminder = {
+        id: data[0].id,
+        clientId: parseInt(data[0].client_id),
+        date: new Date(data[0].date),
+        time: data[0].time,
+        title: data[0].title,
+        description: data[0].description,
+        completed: data[0].completed,
+        priority: data[0].priority
+      };
+      
+      setRemindersData(prev => [...prev, processedReminder]);
       toast.success("Напоминание сохранено");
       setIsReminderFormOpen(false);
+      resetReminderForm();
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setReminderText(e.target.value);
+  };
+
+  const handlePriorityChange = (priority: string) => {
+    setReminderPriority(priority);
   };
 
   useEffect(() => {
