@@ -24,12 +24,12 @@ interface DetailsPanelProps {
 export function DetailsPanel({ section, codes }: DetailsPanelProps) {
   const { personalityCode, connectorCode, realizationCode, generatorCode, missionCode } = codes;
 
-  // Получение интерпретаций для каждого кода
-  const personalityInterpretation = getCodeInterpretation(personalityCode, 'personality');
-  const connectorInterpretation = getCodeInterpretation(connectorCode, 'connector');
-  const realizationInterpretation = getCodeInterpretation(realizationCode, 'realization');
-  const generatorInterpretation = getCodeInterpretation(generatorCode, 'generator');
-  const missionInterpretation = getCodeInterpretation(missionCode, 'mission');
+  // Получение интерпретаций для каждого кода с правильной типизацией
+  const personalityInterpretation = getCodeInterpretation(personalityCode, 'personality') as PersonalityCodeInterpretation | undefined;
+  const connectorInterpretation = getCodeInterpretation(connectorCode, 'connector') as ConnectorCodeInterpretation | undefined;
+  const realizationInterpretation = getCodeInterpretation(realizationCode, 'realization') as RealizationCodeInterpretation | undefined;
+  const generatorInterpretation = getCodeInterpretation(generatorCode, 'generator') as GeneratorCodeInterpretation | undefined;
+  const missionInterpretation = getCodeInterpretation(missionCode, 'mission') as MissionCodeInterpretation | undefined;
 
   const renderPersonalityDetails = () => {
     if (!personalityInterpretation) {
