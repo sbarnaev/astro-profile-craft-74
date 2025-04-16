@@ -17,6 +17,7 @@ import { ReminderForm } from "./reminders/ReminderForm";
 import { EmptyRemindersState } from "./reminders/EmptyRemindersState";
 import { getPriorityLabel, getPriorityColor } from "./reminders/utilities";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const initialRemindersData = [
   { 
@@ -74,6 +75,7 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   const [reminderTime, setReminderTime] = useState("09:00");
   const [reminderPriority, setReminderPriority] = useState("medium");
   const [reminderDateText, setReminderDateText] = useState(format(new Date(), "dd.MM.yyyy"));
+  const { user } = useAuth();
   
   const clientReminders = remindersData
     .filter(reminder => reminder.clientId === clientId);
@@ -136,19 +138,20 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   };
 
   const handleSubmitReminder = async () => {
-    if (!reminderText || !reminderDate) {
+    if (!reminderText || !reminderDate || !user) {
       toast.error("Заполните текст и дату напоминания");
       return;
     }
 
     const newReminder = {
-      client_id: String(clientId), // Convert to string as expected by Supabase
+      client_id: String(clientId),
       title: reminderText,
       date: format(reminderDate, "yyyy-MM-dd"),
       time: reminderTime,
       priority: reminderPriority,
       description: null,
       completed: false,
+      user_id: user.id
     };
 
     const { data, error } = await supabase
@@ -190,10 +193,13 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   useEffect(() => {
     // Fetch reminders for this client when component mounts
     const fetchReminders = async () => {
+      if (!user) return;
+      
       const { data, error } = await supabase
         .from('reminders')
         .select('*')
-        .eq('client_id', String(clientId)) // Convert to string as expected by Supabase
+        .eq('client_id', String(clientId))
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -216,7 +222,7 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     };
 
     fetchReminders();
-  }, [clientId]);
+  }, [clientId, user]);
 
   return (
     <div className="space-y-6">

@@ -38,6 +38,7 @@ export function useConsultations() {
             dob
           )
         `)
+        .eq('user_id', user.id)
         .order('date', { ascending: true });
       
       if (error) {
@@ -108,8 +109,16 @@ export function useConsultations() {
   
   // Функция для добавления новой консультации
   const addConsultation = async (newConsultation: any) => {
+    if (!user) return;
+    
+    // Include user_id with the new consultation
+    const consultationWithUser = {
+      ...newConsultation,
+      user_id: user.id
+    };
+    
     // Сохраняем локально для немедленного обновления UI
-    setConsultations(prevConsultations => [...prevConsultations, newConsultation]);
+    setConsultations(prevConsultations => [...prevConsultations, consultationWithUser]);
     // Обновляем данные с сервера
     await fetchConsultations();
   };

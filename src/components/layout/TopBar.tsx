@@ -19,6 +19,7 @@ const TopBar: FC<TopBarProps> = ({ onMenuClick }) => {
   
   // Get first letter of email for avatar
   const userInitial = user?.email ? user.email[0].toUpperCase() : 'П';
+  const userEmail = user?.email || 'Пользователь';
   
   return (
     <header className="h-16 border-b border-border flex items-center justify-between px-4 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
@@ -48,8 +49,13 @@ const TopBar: FC<TopBarProps> = ({ onMenuClick }) => {
         
         <DropdownMenu>
           <DropdownMenuTrigger className="ml-2 focus:outline-none">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="text-sm font-medium text-primary">{userInitial}</span>
+            <div className="flex items-center">
+              <div className="mr-2 hidden md:block text-sm text-muted-foreground">
+                {userEmail}
+              </div>
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-sm font-medium text-primary">{userInitial}</span>
+              </div>
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

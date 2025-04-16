@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 type AuthContextType = {
   session: Session | null;
@@ -27,6 +28,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        if (event === 'SIGNED_IN') {
+          toast.success("Вы успешно вошли в систему");
+        } else if (event === 'SIGNED_OUT') {
+          toast.info("Вы вышли из системы");
+        }
       }
     );
 
@@ -49,10 +56,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!error) {
         navigate("/");
+      } else {
+        toast.error("Ошибка входа", {
+          description: error.message
+        });
       }
       
       return { error };
     } catch (error) {
+      toast.error("Произошла непредвиденная ошибка");
       return { error };
     }
   };

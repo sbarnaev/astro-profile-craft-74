@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Search, UserPlus, User, Phone, Calendar } from "lucide-react";
 import { format } from "date-fns";
@@ -14,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 interface ClientSearchProps {
   isOpen: boolean;
@@ -24,14 +24,18 @@ interface ClientSearchProps {
 
 export function ClientSearch({ isOpen, onClose, onSelect, onCreateNew }: ClientSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
   
   // Загрузка клиентов из Supabase
   const { data: clients = [], isLoading } = useQuery({
-    queryKey: ['clientsSearch'],
+    queryKey: ['clientsSearch', user?.id],
     queryFn: async () => {
+      if (!user) return [];
+      
       const { data, error } = await supabase
         .from('clients')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
         
       if (error) {
@@ -48,7 +52,8 @@ export function ClientSearch({ isOpen, onClose, onSelect, onCreateNew }: ClientS
         phone: client.phone,
         email: client.email || "",
       }));
-    }
+    },
+    enabled: !!user && isOpen
   });
   
   // Фильтрация клиентов по поисковому запросу

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { ClientsPagination } from "@/components/clients/ClientsPagination";
 import { AddClientDialog } from "@/components/clients/AddClientDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 const Clients = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -18,16 +18,20 @@ const Clients = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   const itemsPerPage = 20;
   
   // Загрузка клиентов из Supabase
   const { data: clients = [], isLoading } = useQuery({
-    queryKey: ['clients'],
+    queryKey: ['clients', user?.id],
     queryFn: async () => {
+      if (!user) return [];
+      
       const { data, error } = await supabase
         .from('clients')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
         
       if (error) {
@@ -45,6 +49,7 @@ const Clients = () => {
           .from('analysis')
           .select('created_at')
           .eq('client_id', client.id)
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false });
           
         if (analysisError) {
@@ -68,13 +73,16 @@ const Clients = () => {
       }
       
       return clientsWithAnalysisCount;
-    }
+    },
+    enabled: !!user
   });
   
   // Мутация для добавления клиента
   const addClientMutation = useMutation({
     mutationFn: async (clientData: any) => {
-      // Преобразование данных клиента для Supabase
+      if (!user) throw new Error('Пользователь не авторизован');
+      
+      // Преобразование данных клиента для Supabase с добавлением user_id
       const supabaseClient = {
         first_name: clientData.firstName,
         last_name: clientData.lastName,
@@ -88,7 +96,8 @@ const Clients = () => {
         connector_code: clientData.connectorCode || null,
         realization_code: clientData.realizationCode || null,
         generator_code: clientData.generatorCode || null,
-        mission_code: clientData.missionCode || null
+        mission_code: clientData.missionCode || null,
+        user_id: user.id
       };
       
       const { data, error } = await supabase
@@ -105,19 +114,22 @@ const Clients = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['clients', user?.id] });
     }
   });
   
   // Мутация для добавления анализа
   const addAnalysisMutation = useMutation({
     mutationFn: async (analysisData: any) => {
+      if (!user) throw new Error('Пользователь не авторизован');
+      
       const supabaseAnalysis = {
         client_id: analysisData.clientId,
         type: analysisData.type,
         title: analysisData.title,
         status: analysisData.status,
-        codes: analysisData.codes
+        codes: analysisData.codes,
+        user_id: user.id
       };
       
       const { data, error } = await supabase
@@ -143,7 +155,7 @@ const Clients = () => {
       window.history.replaceState({}, document.title);
       
       // Обновить список клиентов
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['clients', user?.id] });
     }
   }, [location.state, queryClient]);
   

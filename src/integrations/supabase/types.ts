@@ -18,6 +18,7 @@ export type Database = {
           status: string
           title: string
           type: string
+          user_id: string
         }
         Insert: {
           client_id: string
@@ -27,6 +28,7 @@ export type Database = {
           status: string
           title: string
           type: string
+          user_id: string
         }
         Update: {
           client_id?: string
@@ -36,6 +38,7 @@ export type Database = {
           status?: string
           title?: string
           type?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -64,6 +67,7 @@ export type Database = {
           phone: string
           realization_code: number | null
           source: string
+          user_id: string
         }
         Insert: {
           communication_channel: string
@@ -81,6 +85,7 @@ export type Database = {
           phone: string
           realization_code?: number | null
           source: string
+          user_id: string
         }
         Update: {
           communication_channel?: string
@@ -98,6 +103,7 @@ export type Database = {
           phone?: string
           realization_code?: number | null
           source?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -114,6 +120,7 @@ export type Database = {
           status: string
           time: string
           type: string
+          user_id: string
         }
         Insert: {
           client_id: string
@@ -127,6 +134,7 @@ export type Database = {
           status?: string
           time: string
           type: string
+          user_id: string
         }
         Update: {
           client_id?: string
@@ -140,6 +148,7 @@ export type Database = {
           status?: string
           time?: string
           type?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -162,6 +171,7 @@ export type Database = {
           priority: string
           time: string
           title: string
+          user_id: string
         }
         Insert: {
           client_id: string
@@ -173,6 +183,7 @@ export type Database = {
           priority?: string
           time: string
           title: string
+          user_id: string
         }
         Update: {
           client_id?: string
@@ -184,6 +195,7 @@ export type Database = {
           priority?: string
           time?: string
           title?: string
+          user_id?: string
         }
         Relationships: [
           {
