@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { AnalysisType } from "@/types/sessions";
 import { AnalysisView } from "@/components/analysis/AnalysisView";
 import { supabase } from "@/integrations/supabase/client";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 interface ClientInfoCardProps {
   client: {
@@ -106,7 +107,7 @@ const getArchetypeName = (code: number | string | null): string => {
 export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCardProps) => {
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [showAnalysisSheet, setShowAnalysisSheet] = useState(false);
   const [currentAnalysis, setCurrentAnalysis] = useState<AnalysisType | null>(null);
   const navigate = useNavigate();
 
@@ -181,7 +182,7 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
         };
         
         setCurrentAnalysis(mockAnalysis);
-        setShowAnalysis(true);
+        setShowAnalysisSheet(true);
       } catch (error) {
         console.error("Unexpected error:", error);
         toast.error("Произошла ошибка при загрузке анализа");
@@ -191,204 +192,210 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
     }
   };
 
-  if (showAnalysis && currentAnalysis) {
-    return (
-      <AnalysisView 
-        analysis={currentAnalysis} 
-        onBack={() => setShowAnalysis(false)} 
-      />
-    );
-  }
-
   return (
-    <Card className="border-none">
-      <CardHeader className="pb-2">
-        <CardTitle>Информация</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex justify-center mb-6">
-          <Dialog open={avatarUploadOpen} onOpenChange={setAvatarUploadOpen}>
-            <DialogTrigger asChild>
-              <div className="relative cursor-pointer group">
-                <Avatar className="w-24 h-24">
-                  {avatarPreview || client.avatar ? (
-                    <AvatarImage src={avatarPreview || client.avatar} alt={fullName} />
-                  ) : (
-                    <AvatarFallback className="text-3xl font-medium bg-primary/10 text-primary">
-                      {client.firstName.charAt(0)}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center">
-                  <Upload className="h-6 w-6 text-white" />
-                </div>
-              </div>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Загрузить аватар</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="flex justify-center">
-                  <Avatar className="w-32 h-32">
-                    {avatarPreview ? (
-                      <AvatarImage src={avatarPreview} alt={fullName} />
+    <>
+      <Card className="border-none">
+        <CardHeader className="pb-2">
+          <CardTitle>Информация</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-center mb-6">
+            <Dialog open={avatarUploadOpen} onOpenChange={setAvatarUploadOpen}>
+              <DialogTrigger asChild>
+                <div className="relative cursor-pointer group">
+                  <Avatar className="w-24 h-24">
+                    {avatarPreview || client.avatar ? (
+                      <AvatarImage src={avatarPreview || client.avatar} alt={fullName} />
                     ) : (
-                      <AvatarFallback className="text-4xl font-medium bg-primary/10 text-primary">
+                      <AvatarFallback className="text-3xl font-medium bg-primary/10 text-primary">
                         {client.firstName.charAt(0)}
                       </AvatarFallback>
                     )}
                   </Avatar>
+                  <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center">
+                    <Upload className="h-6 w-6 text-white" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label htmlFor="avatar-upload" className="block text-sm font-medium text-gray-700">
-                    Выберите изображение
-                  </label>
-                  <input
-                    id="avatar-upload"
-                    type="file"
-                    accept="image/*"
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-                    onChange={handleAvatarUpload}
-                  />
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Загрузить аватар</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="flex justify-center">
+                    <Avatar className="w-32 h-32">
+                      {avatarPreview ? (
+                        <AvatarImage src={avatarPreview} alt={fullName} />
+                      ) : (
+                        <AvatarFallback className="text-4xl font-medium bg-primary/10 text-primary">
+                          {client.firstName.charAt(0)}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="avatar-upload" className="block text-sm font-medium text-gray-700">
+                      Выберите изображение
+                    </label>
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                      onChange={handleAvatarUpload}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setAvatarUploadOpen(false)}>
+                      Отмена
+                    </Button>
+                    <Button onClick={handleSaveAvatar}>
+                      Сохранить
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setAvatarUploadOpen(false)}>
-                    Отмена
-                  </Button>
-                  <Button onClick={handleSaveAvatar}>
-                    Сохранить
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-        
-        <div>
-          <p className="text-sm text-muted-foreground">ФИО</p>
-          <p className="font-medium">{fullName}</p>
-        </div>
-        
-        <div>
-          <p className="text-sm text-muted-foreground">Дата рождения</p>
-          <p className="font-medium">{formattedDate}</p>
-        </div>
-        
-        <div>
-          <p className="text-sm text-muted-foreground">Телефон</p>
-          <p className="font-medium">{client.phone}</p>
-        </div>
-        
-        {client.email && (
+              </DialogContent>
+            </Dialog>
+          </div>
+          
           <div>
-            <p className="text-sm text-muted-foreground">Email</p>
-            <p className="font-medium">{client.email}</p>
+            <p className="text-sm text-muted-foreground">ФИО</p>
+            <p className="font-medium">{fullName}</p>
           </div>
-        )}
-        
-        <div>
-          <p className="text-sm text-muted-foreground">Источник</p>
-          <div className="flex items-center gap-1">
-            <Share2 className="h-4 w-4 text-muted-foreground" />
-            <p className="font-medium">{getSourceLabel(client.source)}</p>
+          
+          <div>
+            <p className="text-sm text-muted-foreground">Дата рождения</p>
+            <p className="font-medium">{formattedDate}</p>
           </div>
-        </div>
-        
-        <div>
-          <p className="text-sm text-muted-foreground">Канал общения</p>
-          <div className="flex items-center gap-1">
-            {getCommunicationIcon(client.communicationChannel)}
-            <p className="font-medium">{getCommunicationLabel(client.communicationChannel)}</p>
+          
+          <div>
+            <p className="text-sm text-muted-foreground">Телефон</p>
+            <p className="font-medium">{client.phone}</p>
           </div>
-        </div>
-        
-        <div className="border-t pt-4 mt-4">
-          <p className="text-sm text-muted-foreground mb-2">Коды</p>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
-                <span className="text-lg font-bold text-primary">{client.personalityCode}</span>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Личность</p>
-                <p className="text-sm font-medium">{client.personalityCode} | {getArchetypeName(client.personalityCode)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
-                <span className="text-lg font-bold text-primary">{client.connectorCode}</span>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Коннектор</p>
-                <p className="text-sm font-medium">{client.connectorCode} | {getArchetypeName(client.connectorCode)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
-                <span className="text-lg font-bold text-primary">{client.realizationCode}</span>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Реализация</p>
-                <p className="text-sm font-medium">{client.realizationCode} | {getArchetypeName(client.realizationCode)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
-                <span className="text-lg font-bold text-primary">{client.generatorCode}</span>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Генератор</p>
-                <p className="text-sm font-medium">{client.generatorCode} | {getArchetypeName(client.generatorCode)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
-                <span className="text-lg font-bold text-primary">{client.missionCode}</span>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Миссия</p>
-                <p className="text-sm font-medium">{client.missionCode} | {getArchetypeName(client.missionCode)}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="border-t pt-4 mt-4">
-          <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="text-green-600 h-5 w-5" />
+          
+          {client.email && (
             <div>
-              <p className="text-sm text-muted-foreground">Доход от клиента</p>
-              <p className="text-xl font-bold text-green-600">{client.revenue.toLocaleString('ru-RU')} ₽</p>
+              <p className="text-sm text-muted-foreground">Email</p>
+              <p className="font-medium">{client.email}</p>
+            </div>
+          )}
+          
+          <div>
+            <p className="text-sm text-muted-foreground">Источник</p>
+            <div className="flex items-center gap-1">
+              <Share2 className="h-4 w-4 text-muted-foreground" />
+              <p className="font-medium">{getSourceLabel(client.source)}</p>
             </div>
           </div>
-        </div>
-        
-        <div className="pt-4 space-y-2">
-          <Button className="w-full" onClick={handleOpenAnalysis}>
-            <FileText className="mr-2 h-4 w-4" />
-            {client.hasAnalysis && client.analysisId ? "Анализ" : "Создать анализ"}
-          </Button>
           
-          <Button 
-            variant="outline" 
-            className="w-full" 
-            onClick={handleOpenSessionDialog}
-          >
-            <Calendar className="mr-2 h-4 w-4" />
-            Записать на сессию
-          </Button>
+          <div>
+            <p className="text-sm text-muted-foreground">Канал общения</p>
+            <div className="flex items-center gap-1">
+              {getCommunicationIcon(client.communicationChannel)}
+              <p className="font-medium">{getCommunicationLabel(client.communicationChannel)}</p>
+            </div>
+          </div>
           
-          <Button 
-            variant="outline" 
-            className="w-full" 
-            onClick={() => setOpenReminderDialog(true)}
-          >
-            <Bell className="mr-2 h-4 w-4" />
-            Создать напоминание
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="border-t pt-4 mt-4">
+            <p className="text-sm text-muted-foreground mb-2">Коды</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
+                  <span className="text-lg font-bold text-primary">{client.personalityCode}</span>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Личность</p>
+                  <p className="text-sm font-medium">{client.personalityCode} | {getArchetypeName(client.personalityCode)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
+                  <span className="text-lg font-bold text-primary">{client.connectorCode}</span>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Коннектор</p>
+                  <p className="text-sm font-medium">{client.connectorCode} | {getArchetypeName(client.connectorCode)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
+                  <span className="text-lg font-bold text-primary">{client.realizationCode}</span>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Реализация</p>
+                  <p className="text-sm font-medium">{client.realizationCode} | {getArchetypeName(client.realizationCode)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
+                  <span className="text-lg font-bold text-primary">{client.generatorCode}</span>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Генератор</p>
+                  <p className="text-sm font-medium">{client.generatorCode} | {getArchetypeName(client.generatorCode)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
+                  <span className="text-lg font-bold text-primary">{client.missionCode}</span>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Миссия</p>
+                  <p className="text-sm font-medium">{client.missionCode} | {getArchetypeName(client.missionCode)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t pt-4 mt-4">
+            <div className="flex items-center gap-2 mb-4">
+              <DollarSign className="text-green-600 h-5 w-5" />
+              <div>
+                <p className="text-sm text-muted-foreground">Доход от клиента</p>
+                <p className="text-xl font-bold text-green-600">{client.revenue.toLocaleString('ru-RU')} ₽</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="pt-4 space-y-2">
+            <Button className="w-full" onClick={handleOpenAnalysis}>
+              <FileText className="mr-2 h-4 w-4" />
+              {client.hasAnalysis && client.analysisId ? "Анализ" : "Создать анализ"}
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={handleOpenSessionDialog}
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              Записать на сессию
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={() => setOpenReminderDialog(true)}
+            >
+              <Bell className="mr-2 h-4 w-4" />
+              Создать напоминание
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Sheet open={showAnalysisSheet} onOpenChange={setShowAnalysisSheet}>
+        <SheetContent side="bottom" className="h-[100vh] sm:max-w-full p-0 overflow-y-auto">
+          {currentAnalysis && (
+            <div className="p-6">
+              <AnalysisView 
+                analysis={currentAnalysis} 
+                onBack={() => setShowAnalysisSheet(false)} 
+              />
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+    </>
   );
 };
