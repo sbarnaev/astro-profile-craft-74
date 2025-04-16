@@ -36,7 +36,7 @@ export function TextAreaField({
           <FormControl>
             <Textarea
               placeholder={placeholder}
-              className={`min-h-[${minHeight}]`}
+              style={{ minHeight }}
               {...field}
             />
           </FormControl>

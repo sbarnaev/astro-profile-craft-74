@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { z } from "zod";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -13,31 +12,10 @@ import { ConsultationTypeField } from "./form/ConsultationTypeField";
 import { FormatField } from "./form/FormatField";
 import { TextAreaField } from "./form/TextAreaFields";
 import { toast } from "sonner";
-
-const consultationFormSchema = z.object({
-  clientId: z.number().optional(),
-  date: z.date({
-    required_error: "Выберите дату консультации",
-  }),
-  time: z.string({
-    required_error: "Выберите время консультации",
-  }),
-  duration: z.number({
-    required_error: "Выберите продолжительность",
-  }),
-  type: z.string({
-    required_error: "Выберите тип консультации",
-  }),
-  format: z.enum(["video", "in-person"], {
-    required_error: "Выберите формат консультации",
-  }),
-  request: z.string().min(3, {
-    message: "Опишите запрос клиента",
-  }),
-  notes: z.string().optional(),
-});
-
-type ConsultationFormValues = z.infer<typeof consultationFormSchema>;
+import { 
+  consultationFormSchema, 
+  type ConsultationFormValues 
+} from "./form/consultationFormSchema";
 
 interface ConsultationFormProps {
   client?: any;
