@@ -21,6 +21,12 @@ interface ExistingClientFormProps {
   onClose: () => void;
   onCreateNew: () => void;
   initialClient?: any;
+  isEditing?: boolean;
+  editData?: {
+    cost?: number;
+    request?: string;
+    consultationType?: number;
+  };
 }
 
 export function ExistingClientForm({ 
@@ -29,7 +35,9 @@ export function ExistingClientForm({
   onSubmit, 
   onClose, 
   onCreateNew,
-  initialClient
+  initialClient,
+  isEditing = false,
+  editData
 }: ExistingClientFormProps) {
   const [customCost, setCustomCost] = React.useState<number | null>(null);
   
@@ -39,9 +47,9 @@ export function ExistingClientForm({
     defaultValues: {
       date: initialDate || new Date(),
       time: initialTime || "10:00",
-      request: initialClient?.editData?.request || "",
-      cost: initialClient?.editData?.cost || 3500,
-      consultationType: initialClient?.editData?.consultationType || 1,
+      request: editData?.request || "",
+      cost: editData?.cost || 3500,
+      consultationType: editData?.consultationType || 1,
     },
   });
   
@@ -117,7 +125,7 @@ export function ExistingClientForm({
             Отмена
           </Button>
           <Button type="submit" disabled={!form.getValues().clientId}>
-            Создать встречу
+            {isEditing ? 'Сохранить изменения' : 'Создать встречу'}
           </Button>
         </DialogFooter>
       </form>
