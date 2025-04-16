@@ -1,47 +1,83 @@
+
 import { z } from "zod";
 
-// Схема формы
+// Схема валидации формы
 export const formSchema = z.object({
   clientId: z.number().optional(),
-  consultationType: z.number({
-    required_error: "Выберите тип консультации",
-  }),
-  date: z.date({
-    required_error: "Выберите дату консультации",
-  }),
-  time: z.string({
-    required_error: "Выберите время консультации",
-  }),
-  request: z.string().optional(),
-  cost: z.number().optional(),
+  date: z.date(),
+  time: z.string(),
+  consultationType: z.number(),
+  request: z.string().min(1, { message: "Введите запрос клиента" }),
+  cost: z.number(),
 });
 
+// Тип значений формы
 export type AppointmentFormValues = z.infer<typeof formSchema>;
 
 // Пример данных о клиентах
 export const clientsData = [
-  { id: 1, firstName: "Анна", lastName: "Смирнова", patronymic: "Ивановна" },
-  { id: 2, firstName: "Иван", lastName: "Петров", patronymic: "Сергеевич" },
-  { id: 3, firstName: "Мария", lastName: "Иванова", patronymic: "Александровна" },
-  { id: 4, firstName: "Александр", lastName: "Козлов", patronymic: "Дмитриевич" },
-  { id: 5, firstName: "Екатерина", lastName: "Новикова", patronymic: "Андреевна" },
+  {
+    id: 1,
+    firstName: "Иван",
+    lastName: "Иванов",
+    patronymic: "Иванович",
+    phone: "+7 (999) 123-45-67",
+    email: "ivan@example.com"
+  },
+  {
+    id: 2,
+    firstName: "Мария",
+    lastName: "Петрова",
+    patronymic: "Сергеевна",
+    phone: "+7 (999) 765-43-21",
+    email: "maria@example.com"
+  },
+  {
+    id: 3,
+    firstName: "Алексей",
+    lastName: "Смирнов",
+    patronymic: "Александрович",
+    phone: "+7 (999) 111-22-33",
+    email: "alex@example.com"
+  }
 ];
 
 // Типы консультаций
 export const consultationTypes = [
-  { id: 1, name: "Экспресс-консультация", duration: 30, cost: 2000 },
-  { id: 2, name: "Базовый анализ", duration: 60, cost: 3500 },
-  { id: 3, name: "Отношения", duration: 90, cost: 5000 },
-  { id: 4, name: "Целевой анализ", duration: 120, cost: 7000 },
+  {
+    id: 1,
+    name: "Экспресс-консультация",
+    duration: 60,
+    cost: 3500
+  },
+  {
+    id: 2,
+    name: "Базовый анализ",
+    duration: 90,
+    cost: 5500
+  },
+  {
+    id: 3,
+    name: "Отношения",
+    duration: 120,
+    cost: 7500
+  },
+  {
+    id: 4,
+    name: "Целевой анализ",
+    duration: 120,
+    cost: 8500
+  }
 ];
 
+// Props для формы записи на прием
 export interface AppointmentFormProps {
   isOpen: boolean;
   onClose: () => void;
   initialDate?: Date;
   initialTime?: string;
   onSubmit: (values: any) => void;
-  initialClient?: any; // Add the initialClient property
+  initialClient?: any;
   isEditing?: boolean;
   editData?: {
     cost?: number;

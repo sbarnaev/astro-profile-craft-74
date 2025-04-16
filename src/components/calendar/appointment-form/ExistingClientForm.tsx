@@ -57,6 +57,9 @@ export function ExistingClientForm({
   useEffect(() => {
     if (initialClient?.id) {
       form.setValue("clientId", initialClient.id);
+      
+      // Log to debug
+      console.log("Setting initial client ID:", initialClient.id);
     }
   }, [initialClient, form]);
   
@@ -99,13 +102,17 @@ export function ExistingClientForm({
     form.setValue("clientId", clientId);
   };
   
+  // Find the current selected client ID for the ClientSearchField
+  const currentClientId = form.getValues().clientId;
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <ClientSearchField 
-          value={form.getValues().clientId} 
+          value={currentClientId} 
           onChange={handleSelectClient} 
           onCreateNew={onCreateNew} 
+          isEditing={isEditing}
         />
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

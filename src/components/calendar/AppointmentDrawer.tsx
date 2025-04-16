@@ -32,6 +32,16 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
     // В реальном приложении здесь должен быть код для обновления встречи
     setShowEditForm(false);
   };
+  
+  // Extract the client name parts correctly
+  const nameParts = appointment.clientName.split(' ');
+  const clientInfo = {
+    id: appointment.clientId,
+    firstName: nameParts[1] || "",
+    lastName: nameParts[0] || "",
+    patronymic: nameParts[2] || "",
+  };
+  
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent>
@@ -132,12 +142,7 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
             onClose={handleEditClose}
             initialDate={appointment.date}
             initialTime={format(appointment.date, "HH:mm")}
-            initialClient={{
-              id: appointment.clientId,
-              firstName: appointment.clientName.split(" ")[1] || "",
-              lastName: appointment.clientName.split(" ")[0] || "",
-              patronymic: appointment.clientName.split(" ")[2] || "",
-            }}
+            initialClient={clientInfo}
             onSubmit={handleEditSubmit}
             isEditing={true}
             editData={{

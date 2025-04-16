@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
-import { FormItem, FormLabel } from "@/components/ui/form";
+import React, { useEffect, useState } from "react";
+import { Check, ChevronsUpDown, UserPlus } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -9,109 +9,94 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
 } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { clientsData } from "./types";
 
 interface ClientSearchFieldProps {
-  value: number | undefined;
-  onChange: (clientId: number) => void;
+  value?: number;
+  onChange: (value: number) => void;
   onCreateNew: () => void;
+  isEditing?: boolean;
 }
 
-export function ClientSearchField({ value, onChange, onCreateNew }: ClientSearchFieldProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredClients, setFilteredClients] = useState<typeof clientsData>([]);
-  const [isOpen, setIsOpen] = useState(false);
+export function ClientSearchField({ value, onChange, onCreateNew, isEditing = false }: ClientSearchFieldProps) {
+  const [open, setOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
   
-  // Установить начальное значение поиска, если уже выбран клиент
+  // Find and set the selected client based on the value
   useEffect(() => {
     if (value) {
-      const client = clientsData.find(c => c.id === value);
+      const client = clientsData.find(client => client.id === value);
       if (client) {
-        setSearchQuery(`${client.lastName} ${client.firstName} ${client.patronymic}`);
+        setSelectedClient(client);
       }
     }
   }, [value]);
-  
-  // Фильтрация клиентов по поисковому запросу
-  useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilteredClients([]);
-    } else {
-      const query = searchQuery.toLowerCase().trim();
-      const filtered = clientsData.filter(
-        (client) =>
-          `${client.lastName} ${client.firstName} ${client.patronymic}`
-            .toLowerCase()
-            .includes(query)
-      );
-      setFilteredClients(filtered);
-    }
-  }, [searchQuery]);
-  
-  // Open dropdown when typing
-  useEffect(() => {
-    if (searchQuery.trim() !== "") {
-      setIsOpen(true);
-    }
-  }, [searchQuery]);
-  
-  // Выбор клиента из списка
-  const handleSelectClient = (clientId: number) => {
-    onChange(clientId);
-    const client = clientsData.find((c) => c.id === clientId);
-    if (client) {
-      setSearchQuery(`${client.lastName} ${client.firstName} ${client.patronymic}`);
-    }
-    setIsOpen(false); // Close dropdown after selection
-  };
 
   return (
-    <FormItem className="flex flex-col">
-      <FormLabel>Поиск клиента</FormLabel>
-      <div className="relative">
-        <Command className="rounded-lg border shadow-md">
-          <CommandInput
-            placeholder="Поиск по ФИО..."
-            value={searchQuery}
-            onValueChange={setSearchQuery}
-            onFocus={() => setIsOpen(true)}
-          />
-          {isOpen && (
-            <CommandList>
-              <CommandEmpty>
-                <div className="py-6 text-center">
-                  <p className="text-sm text-muted-foreground">Клиент не найден</p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="mt-2"
-                    onClick={() => {
-                      setIsOpen(false);
-                      onCreateNew();
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Создать нового клиента
-                  </Button>
-                </div>
-              </CommandEmpty>
-              <CommandGroup>
-                {filteredClients.map((client) => (
-                  <CommandItem
-                    key={client.id}
-                    value={`${client.lastName} ${client.firstName} ${client.patronymic}`}
-                    onSelect={() => handleSelectClient(client.id)}
-                  >
-                    {client.lastName} {client.firstName} {client.patronymic}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          )}
-        </Command>
-      </div>
-    </FormItem>
+    <FormField
+      name="clientId"
+      render={() => (
+        <FormItem className="flex flex-col">
+          <FormLabel>Клиент {isEditing && selectedClient ? `(${selectedClient.lastName} ${selectedClient.firstName} ${selectedClient.patronymic})` : ""}</FormLabel>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="justify-between"
+              >
+                {value && selectedClient
+                  ? `${selectedClient.lastName} ${selectedClient.firstName} ${selectedClient.patronymic}`
+                  : "Выберите клиента..."}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Найти клиента..." />
+                <CommandEmpty>
+                  <div className="p-2 text-center">
+                    <p className="text-sm text-muted-foreground">Клиент не найден</p>
+                    <Button variant="outline" size="sm" onClick={onCreateNew} className="mt-2">
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Создать нового клиента
+                    </Button>
+                  </div>
+                </CommandEmpty>
+                <CommandGroup>
+                  {clientsData.map((client) => (
+                    <CommandItem
+                      key={client.id}
+                      value={client.id.toString()}
+                      onSelect={() => {
+                        onChange(client.id);
+                        setSelectedClient(client);
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value === client.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {client.lastName} {client.firstName} {client.patronymic}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </FormItem>
+      )}
+    />
   );
 }

@@ -5,8 +5,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ExistingClientForm } from "./appointment-form/ExistingClientForm";
 import { NewClientTab } from "./appointment-form/NewClientTab";
 import { AppointmentFormProps } from "./appointment-form/types";
@@ -27,6 +30,7 @@ export function AppointmentForm({
   useEffect(() => {
     if (initialClient) {
       setActiveTab("existing");
+      console.log("Initial client data:", initialClient);
     }
   }, [initialClient]);
   
@@ -46,8 +50,13 @@ export function AppointmentForm({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="flex justify-between items-center">
           <DialogTitle>{isEditing ? 'Редактирование консультации' : 'Запись на консультацию'}</DialogTitle>
+          <DialogClose asChild>
+            <Button variant="ghost" size="icon">
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogClose>
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
