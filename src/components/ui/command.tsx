@@ -12,13 +12,7 @@ const Command = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive>
 >(({ className, children, ...props }, ref) => {
   // Safely handle undefined or null children
-  const safeChildren = React.useMemo(() => {
-    // If children is undefined or null, return an empty array
-    if (children === undefined || children === null) {
-      return [];
-    }
-    return children;
-  }, [children]);
+  const safeChildren = React.Children.toArray(children).filter(Boolean);
 
   return (
     <CommandPrimitive
@@ -39,12 +33,7 @@ interface CommandDialogProps extends DialogProps {}
 
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   // Safely handle undefined or null children
-  const safeChildren = React.useMemo(() => {
-    if (children === undefined || children === null) {
-      return [];
-    }
-    return children;
-  }, [children]);
+  const safeChildren = React.Children.toArray(children).filter(Boolean);
   
   return (
     <Dialog {...props}>
@@ -106,21 +95,9 @@ const CommandGroup = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Group>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Group>
 >(({ className, children, ...props }, ref) => {
-  // Safe handling of children to prevent "undefined is not iterable" errors
-  const safeChildren = React.useMemo(() => {
-    // If children is an array, ensure it's not undefined or null
-    if (Array.isArray(children)) {
-      // Filter out any undefined or null items
-      return children.filter(child => child !== undefined && child !== null);
-    }
-    // If children is not an array but exists, return it
-    if (children !== undefined && children !== null) {
-      return children;
-    }
-    // If children is undefined or null, return empty array
-    return [];
-  }, [children]);
-
+  // Handle undefined or empty children arrays
+  const safeChildren = React.Children.toArray(children).filter(Boolean);
+  
   return (
     <CommandPrimitive.Group
       ref={ref}

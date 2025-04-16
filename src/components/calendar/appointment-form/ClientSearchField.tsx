@@ -138,10 +138,14 @@ export function ClientSearchField({
                     </Button>
                   </div>
                 </CommandEmpty>
+                
                 {safeClientsData.length > 0 ? (
                   <CommandGroup>
-                    {safeClientsData.map((client) => (
-                      client && (
+                    {safeClientsData.map((client) => {
+                      // Ensure client is not null or undefined before rendering
+                      if (!client) return null;
+                      
+                      return (
                         <CommandItem
                           key={client.id}
                           value={client.id.toString()}
@@ -159,8 +163,8 @@ export function ClientSearchField({
                           />
                           {client.lastName} {client.firstName} {client.patronymic}
                         </CommandItem>
-                      )
-                    ))}
+                      );
+                    })}
                   </CommandGroup>
                 ) : (
                   <div className="p-2 text-center text-sm text-muted-foreground">
