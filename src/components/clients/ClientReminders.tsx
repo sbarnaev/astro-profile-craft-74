@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Bell, Calendar, Check, AlarmClock, PlusCircle, Edit, Clock } from "lucide-react";
+import { Bell, Calendar as CalendarIcon, Check, AlarmClock, PlusCircle, Edit, Clock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,9 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 
-// Пример данных о напоминаниях
 const initialRemindersData = [
   { 
     id: 1,
@@ -77,15 +77,14 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   const [reminderPriority, setReminderPriority] = useState("medium");
   const [reminderDateText, setReminderDateText] = useState("");
   
-  // Фильтрация напоминаний для текущего клиента и сортировка по дате и статусу
   const clientReminders = remindersData
     .filter(reminder => reminder.clientId === clientId);
   
   const activeReminders = clientReminders.filter(r => !r.completed)
-    .sort((a, b) => a.date.getTime() - b.date.getTime()); // Сначала ближайшие
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
   
   const completedReminders = clientReminders.filter(r => r.completed)
-    .sort((a, b) => b.date.getTime() - a.date.getTime()); // Сначала недавние
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
   
   const formatReminderDate = (date: Date) => {
     return format(date, "d MMMM yyyy", { locale: ru });
@@ -118,7 +117,6 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   };
 
   const handleCompleteReminder = (id: number) => {
-    // Отметить напоминание как выполненное
     setRemindersData(prevData => 
       prevData.map(reminder => 
         reminder.id === id 
@@ -161,11 +159,9 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   const handleDateTextChange = (value: string) => {
     setReminderDateText(value);
     
-    // Try to parse the date from text
-    const parts = value.split('.');
     if (parts.length === 3) {
       const day = parseInt(parts[0]);
-      const month = parseInt(parts[1]) - 1; // Months are 0-indexed in JS Date
+      const month = parseInt(parts[1]) - 1;
       const year = parseInt(parts[2]);
       
       if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
@@ -193,7 +189,6 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     }
 
     if (editingReminder) {
-      // Обновление существующего напоминания
       setRemindersData(prev => prev.map(rem => 
         rem.id === editingReminder 
           ? {
@@ -210,7 +205,6 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
         description: "Изменения сохранены"
       });
     } else {
-      // Создать новое напоминание
       const newReminder = {
         id: Math.floor(Math.random() * 10000),
         clientId,
@@ -260,7 +254,7 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="icon" className="h-10 w-10">
-                  <Calendar className="h-4 w-4" />
+                  <CalendarIcon className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
