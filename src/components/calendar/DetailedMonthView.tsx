@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   format, 
@@ -19,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { AppointmentForm } from "./AppointmentForm";
 import { AppointmentInterface } from "@/types/calendar";
+import { AppointmentDrawer } from "./AppointmentDrawer";
 
 // Russian holidays (some major ones for example)
 const russianHolidays = [
@@ -58,6 +58,7 @@ export function DetailedMonthView({
 }: DetailedMonthViewProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<number | null>(null);
   
   // Получаем первый день месяца
   const monthStart = startOfMonth(currentDate);
@@ -111,6 +112,15 @@ export function DetailedMonthView({
     return appointments.filter(appointment => 
       format(appointment.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
     );
+  };
+  
+  const getAppointmentById = (id: number) => {
+    return appointments.find(appointment => appointment.id === id);
+  };
+  
+  const handleAppointmentClick = (id: number) => {
+    setSelectedAppointment(id);
+    onAppointmentClick(id);
   };
   
   const handleAddAppointment = (day: Date) => {
@@ -189,10 +199,21 @@ export function DetailedMonthView({
                           {getAppointmentsForDay(day).map((appointment) => (
                             <div 
                               key={appointment.id}
-                              className="text-xs p-1 rounded bg-primary/20 cursor-pointer hover:bg-primary/30 truncate"
-                              onClick={() => onAppointmentClick(appointment.id)}
+                              className={cn(
+                                "text-xs p-1 rounded cursor-pointer hover:bg-primary/30 truncate",
+                                isPast(day) ? "bg-gray-200 text-gray-600" : "bg-primary/20"
+                              )}
+                              onClick={() => handleAppointmentClick(appointment.id)}
                             >
-                              {format(appointment.date, 'HH:mm')} - {appointment.clientName}
+                              <div className="flex flex-col">
+                                <span>{format(appointment.date, 'HH:mm')} - {appointment.clientName}</span>
+                                {appointment.request && (
+                                  <span className="text-xs truncate opacity-80">{appointment.request}</span>
+                                )}
+                                {appointment.cost && (
+                                  <span className="text-xs font-medium">{appointment.cost.toLocaleString('ru-RU')} ₽</span>
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -211,6 +232,14 @@ export function DetailedMonthView({
             onClose={() => setShowAddForm(false)}
             initialDate={selectedDate}
             onSubmit={onAddAppointment}
+          />
+        )}
+        
+        {selectedAppointment && getAppointmentById(selectedAppointment) && (
+          <AppointmentDrawer
+            appointment={getAppointmentById(selectedAppointment)!}
+            isOpen={selectedAppointment !== null}
+            onClose={() => setSelectedAppointment(null)}
           />
         )}
       </CardContent>

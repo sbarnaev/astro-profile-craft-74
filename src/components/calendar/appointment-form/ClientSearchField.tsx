@@ -22,6 +22,7 @@ interface ClientSearchFieldProps {
 export function ClientSearchField({ value, onChange, onCreateNew }: ClientSearchFieldProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredClients, setFilteredClients] = useState<typeof clientsData>([]);
+  const [isOpen, setIsOpen] = useState(false);
   
   // Установить начальное значение поиска, если уже выбран клиент
   useEffect(() => {
@@ -49,16 +50,21 @@ export function ClientSearchField({ value, onChange, onCreateNew }: ClientSearch
     }
   }, [searchQuery]);
   
+  // Open dropdown when typing
+  useEffect(() => {
+    if (searchQuery.trim() !== "") {
+      setIsOpen(true);
+    }
+  }, [searchQuery]);
+  
   // Выбор клиента из списка
   const handleSelectClient = (clientId: number) => {
     onChange(clientId);
-    setSearchQuery(
-      clientsData.find((c) => c.id === clientId)
-        ? `${clientsData.find((c) => c.id === clientId)?.lastName} ${
-            clientsData.find((c) => c.id === clientId)?.firstName
-          } ${clientsData.find((c) => c.id === clientId)?.patronymic}`
-        : ""
-    );
+    const client = clientsData.find((c) => c.id === clientId);
+    if (client) {
+      setSearchQuery(`${client.lastName} ${client.firstName} ${client.patronymic}`);
+    }
+    setIsOpen(false); // Close dropdown after selection
   };
 
   return (
@@ -70,34 +76,40 @@ export function ClientSearchField({ value, onChange, onCreateNew }: ClientSearch
             placeholder="Поиск по ФИО..."
             value={searchQuery}
             onValueChange={setSearchQuery}
+            onFocus={() => setIsOpen(true)}
           />
-          <CommandList>
-            <CommandEmpty>
-              <div className="py-6 text-center">
-                <p className="text-sm text-muted-foreground">Клиент не найден</p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={onCreateNew}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Создать нового клиента
-                </Button>
-              </div>
-            </CommandEmpty>
-            <CommandGroup>
-              {filteredClients.map((client) => (
-                <CommandItem
-                  key={client.id}
-                  value={`${client.lastName} ${client.firstName} ${client.patronymic}`}
-                  onSelect={() => handleSelectClient(client.id)}
-                >
-                  {client.lastName} {client.firstName} {client.patronymic}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
+          {isOpen && (
+            <CommandList>
+              <CommandEmpty>
+                <div className="py-6 text-center">
+                  <p className="text-sm text-muted-foreground">Клиент не найден</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => {
+                      setIsOpen(false);
+                      onCreateNew();
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Создать нового клиента
+                  </Button>
+                </div>
+              </CommandEmpty>
+              <CommandGroup>
+                {filteredClients.map((client) => (
+                  <CommandItem
+                    key={client.id}
+                    value={`${client.lastName} ${client.firstName} ${client.patronymic}`}
+                    onSelect={() => handleSelectClient(client.id)}
+                  >
+                    {client.lastName} {client.firstName} {client.patronymic}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          )}
         </Command>
       </div>
     </FormItem>

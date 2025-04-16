@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { format, isToday, startOfWeek, endOfWeek, eachDayOfInterval, isPast, isWeekend } from "date-fns";
 import { ru } from "date-fns/locale";
 import { CalendarIcon, ArrowLeft, ArrowRight } from "lucide-react";
@@ -9,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { WeekViewCell } from "./WeekViewCell";
 import { AppointmentInterface } from "@/types/calendar";
 import { cn } from "@/lib/utils";
+import { AppointmentDrawer } from "./AppointmentDrawer";
 
 // Russian holidays (some major ones for example)
 const russianHolidays = [
@@ -52,6 +52,8 @@ export function CalendarWeek({
   goToPrevWeek,
   goToNextWeek
 }: CalendarWeekProps) {
+  const [selectedAppointment, setSelectedAppointment] = useState<number | null>(null);
+  
   // Получение дней текущей недели
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
@@ -63,6 +65,15 @@ export function CalendarWeek({
       format(appointment.date, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd') && 
       appointment.date.getHours() === hour
     );
+  };
+
+  const getAppointmentById = (id: number) => {
+    return appointments.find(appointment => appointment.id === id);
+  };
+
+  const handleAppointmentClick = (id: number) => {
+    setSelectedAppointment(id);
+    onAppointmentClick(id);
   };
 
   return (
@@ -135,7 +146,7 @@ export function CalendarWeek({
                     day={day}
                     hour={hour}
                     appointments={getAppointmentsForHourAndDay(hour, day)}
-                    onAppointmentClick={onAppointmentClick}
+                    onAppointmentClick={handleAppointmentClick}
                     onAddAppointment={onAddAppointment}
                     isPast={isPast(day)}
                     isWeekend={isWeekend(day)}
@@ -147,6 +158,14 @@ export function CalendarWeek({
           </div>
         </ScrollArea>
       </CardContent>
+      
+      {selectedAppointment && getAppointmentById(selectedAppointment) && (
+        <AppointmentDrawer
+          appointment={getAppointmentById(selectedAppointment)!}
+          isOpen={selectedAppointment !== null}
+          onClose={() => setSelectedAppointment(null)}
+        />
+      )}
     </Card>
   );
 }
