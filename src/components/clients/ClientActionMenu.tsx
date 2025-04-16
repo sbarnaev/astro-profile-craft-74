@@ -20,11 +20,7 @@ export function ClientActionMenu({ clientId }: ClientActionMenuProps) {
   const handleSessionSchedule = (e: React.MouseEvent) => {
     e.preventDefault();
     try {
-      // Create a custom event to handle session scheduling
-      const event = new CustomEvent('openSessionDialog', {
-        detail: { clientId }
-      });
-      document.dispatchEvent(event);
+      navigate(`/sessions/schedule?client=${clientId}`);
     } catch (error) {
       console.error("Ошибка при открытии диалога сессии:", error);
       toast.error("Не удалось открыть форму записи на сессию");

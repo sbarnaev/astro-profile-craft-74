@@ -99,6 +99,20 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
     onSubmit(values);
   };
 
+  // Safely format date only if it's a valid Date object
+  const formatClientDob = (date: any) => {
+    if (!date) return "";
+    // Ensure date is a valid Date object
+    const dateObj = date instanceof Date ? date : new Date(date);
+    
+    // Check if the date is valid before formatting
+    if (isNaN(dateObj.getTime())) {
+      return "Некорректная дата";
+    }
+    
+    return format(dateObj, "d MMMM yyyy", { locale: ru });
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -119,7 +133,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
               <div>
                 <span className="text-muted-foreground">Дата рождения:</span>
                 <span className="ml-2 font-medium">
-                  {format(client.dob, "d MMMM yyyy", { locale: ru })}
+                  {formatClientDob(client.dob)}
                 </span>
               </div>
               {client.email && (
@@ -167,6 +181,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
                         date < new Date(new Date().setHours(0, 0, 0, 0))
                       }
                       initialFocus
+                      className={cn("p-3 pointer-events-auto")}
                     />
                   </PopoverContent>
                 </Popover>
