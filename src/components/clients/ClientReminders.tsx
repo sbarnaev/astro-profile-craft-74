@@ -1,24 +1,21 @@
+
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Bell, Calendar as CalendarIcon, Check, AlarmClock, PlusCircle, Edit, Clock } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+
+import { RemindersList } from "./reminders/RemindersList";
+import { ReminderForm } from "./reminders/ReminderForm";
+import { EmptyRemindersState } from "./reminders/EmptyRemindersState";
+import { getPriorityLabel, getPriorityColor } from "./reminders/utilities";
 
 const initialRemindersData = [
   { 
@@ -90,32 +87,6 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     return format(date, "d MMMM yyyy", { locale: ru });
   };
   
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "Высокий";
-      case "medium":
-        return "Средний";
-      case "low":
-        return "Низкий";
-      default:
-        return "Стандартный";
-    }
-  };
-  
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100";
-      case "low":
-        return "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100";
-    }
-  };
-
   const handleCompleteReminder = (id: number) => {
     setRemindersData(prevData => 
       prevData.map(reminder => 
@@ -156,28 +127,10 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     setIsReminderFormOpen(true);
   };
 
-  const handleDateTextChange = (value: string) => {
-    setReminderDateText(value);
-    
-    if (parts.length === 3) {
-      const day = parseInt(parts[0]);
-      const month = parseInt(parts[1]) - 1;
-      const year = parseInt(parts[2]);
-      
-      if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-        const newDate = new Date(year, month, day);
-        if (newDate.toString() !== "Invalid Date") {
-          setReminderDate(newDate);
-        }
-      }
-    }
-  };
-
-  const handleCalendarSelect = (date: Date | undefined) => {
-    if (date) {
-      setReminderDate(date);
-      setReminderDateText(format(date, "dd.MM.yyyy"));
-    }
+  const handleCancelReminderForm = () => {
+    setIsReminderFormOpen(false);
+    setEditingReminder(null);
+    resetReminderForm();
   };
 
   const handleSubmitReminder = () => {
@@ -228,92 +181,6 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     resetReminderForm();
   };
 
-  const ReminderForm = () => (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="reminder-text">Текст напоминания</Label>
-        <Input 
-          id="reminder-text" 
-          value={reminderText} 
-          onChange={(e) => setReminderText(e.target.value)}
-          placeholder="Введите текст напоминания" 
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="reminder-date">Дата</Label>
-          <div className="flex space-x-2">
-            <Input 
-              id="reminder-date" 
-              value={reminderDateText} 
-              onChange={(e) => handleDateTextChange(e.target.value)}
-              placeholder="ДД.ММ.ГГГГ" 
-              className="flex-grow"
-            />
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="h-10 w-10">
-                  <CalendarIcon className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={reminderDate || undefined}
-                  onSelect={handleCalendarSelect}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="reminder-time">Время</Label>
-          <Input 
-            id="reminder-time" 
-            type="time" 
-            value={reminderTime} 
-            onChange={(e) => setReminderTime(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="reminder-priority">Приоритет</Label>
-        <select
-          id="reminder-priority"
-          value={reminderPriority}
-          onChange={(e) => setReminderPriority(e.target.value)}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <option value="low">Низкий</option>
-          <option value="medium">Средний</option>
-          <option value="high">Высокий</option>
-        </select>
-      </div>
-
-      <div className="flex justify-end gap-2 pt-4">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={() => {
-            setIsReminderFormOpen(false);
-            setEditingReminder(null);
-            resetReminderForm();
-          }}
-        >
-          Отмена
-        </Button>
-        <Button type="button" onClick={handleSubmitReminder}>
-          {editingReminder ? "Сохранить" : "Создать"}
-        </Button>
-      </div>
-    </div>
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -325,109 +192,33 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
       </div>
       
       {activeReminders.length > 0 && (
-        <Card className="border-none">
-          <CardHeader className="pb-2">
-            <CardTitle>Активные напоминания</CardTitle>
-            <CardDescription>
-              Текущие и предстоящие напоминания
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {activeReminders.map((reminder) => (
-                <div id={`reminder-${reminder.id}`} key={reminder.id} className="flex flex-col md:flex-row md:items-start justify-between p-4 border rounded-lg">
-                  <div className="space-y-2 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium">{reminder.title}</span>
-                      <Badge variant="outline" className={getPriorityColor(reminder.priority)}>
-                        {getPriorityLabel(reminder.priority)}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">{formatReminderDate(reminder.date)}</span>
-                      </div>
-                      {reminder.time && (
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">{reminder.time}</span>
-                        </div>
-                      )}
-                    </div>
-                    {reminder.description && (
-                      <p className="text-sm mt-2">{reminder.description}</p>
-                    )}
-                  </div>
-                  <div className="flex gap-2 mt-4 md:mt-0">
-                    <Button size="sm" variant="outline" onClick={() => handleCompleteReminder(reminder.id)}>
-                      <Check className="mr-2 h-4 w-4" />
-                      Выполнено
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleEditReminder(reminder.id)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Изменить
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <RemindersList
+          reminders={activeReminders}
+          title="Активные напоминания"
+          description="Текущие и предстоящие напоминания"
+          formatReminderDate={formatReminderDate}
+          getPriorityLabel={getPriorityLabel}
+          getPriorityColor={getPriorityColor}
+          onComplete={handleCompleteReminder}
+          onEdit={handleEditReminder}
+        />
       )}
       
       {completedReminders.length > 0 && (
-        <Card className="border-none">
-          <CardHeader className="pb-2">
-            <CardTitle>Выполненные напоминания</CardTitle>
-            <CardDescription>
-              История напоминаний для клиента
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {completedReminders.map((reminder) => (
-                <div key={reminder.id} className="flex flex-col md:flex-row md:items-start justify-between p-4 border rounded-lg opacity-70">
-                  <div className="space-y-2 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium line-through">{reminder.title}</span>
-                      <Badge variant="outline">Выполнено</Badge>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">{formatReminderDate(reminder.date)}</span>
-                      </div>
-                      {reminder.time && (
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">{reminder.time}</span>
-                        </div>
-                      )}
-                    </div>
-                    {reminder.description && (
-                      <p className="text-sm mt-2 line-through">{reminder.description}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <RemindersList
+          reminders={completedReminders}
+          title="Выполненные напоминания"
+          description="История напоминаний для клиента"
+          formatReminderDate={formatReminderDate}
+          getPriorityLabel={getPriorityLabel}
+          getPriorityColor={getPriorityColor}
+          onComplete={handleCompleteReminder}
+          onEdit={handleEditReminder}
+        />
       )}
       
       {clientReminders.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Bell className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">Нет напоминаний</h3>
-          <p className="text-muted-foreground mb-6">
-            Для этого клиента нет активных или выполненных напоминаний
-          </p>
-          <Button onClick={handleOpenNewReminderForm}>
-            <AlarmClock className="mr-2 h-4 w-4" />
-            Создать напоминание
-          </Button>
-        </div>
+        <EmptyRemindersState onCreateReminder={handleOpenNewReminderForm} />
       )}
 
       <Dialog open={isReminderFormOpen} onOpenChange={setIsReminderFormOpen}>
@@ -437,7 +228,21 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
               {editingReminder ? "Редактировать напоминание" : "Создать напоминание"}
             </DialogTitle>
           </DialogHeader>
-          <ReminderForm />
+          <ReminderForm
+            reminderText={reminderText}
+            setReminderText={setReminderText}
+            reminderDate={reminderDate}
+            setReminderDate={setReminderDate}
+            reminderDateText={reminderDateText}
+            setReminderDateText={setReminderDateText}
+            reminderTime={reminderTime}
+            setReminderTime={setReminderTime}
+            reminderPriority={reminderPriority}
+            setReminderPriority={setReminderPriority}
+            handleSubmitReminder={handleSubmitReminder}
+            onCancel={handleCancelReminderForm}
+            isEditing={editingReminder !== null}
+          />
         </DialogContent>
       </Dialog>
     </div>
