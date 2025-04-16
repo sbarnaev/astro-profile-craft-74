@@ -46,6 +46,7 @@ export function MonthViewDayCell({
                   : isWeekend(day)
                     ? "bg-secondary/10"
                     : "bg-background"
+            : "bg-muted/20 text-muted-foreground"
         ) : "bg-muted/20 text-muted-foreground"
       )}
     >
