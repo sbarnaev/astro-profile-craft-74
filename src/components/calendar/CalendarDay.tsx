@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { AppointmentForm } from "./AppointmentForm";
 import { AppointmentInterface } from "@/types/calendar";
 import { AppointmentDrawer } from "./AppointmentDrawer";
+import { toast } from "sonner";
 
 interface CalendarDayProps {
   date: Date | undefined;
@@ -15,6 +16,7 @@ interface CalendarDayProps {
   onAddAppointment: (data: any) => void;
   selectedAppointment: number | null;
   setSelectedAppointment: (id: number | null) => void;
+  onCancelAppointment?: (id: number) => void;
 }
 
 export function CalendarDay({
@@ -22,7 +24,8 @@ export function CalendarDay({
   appointments,
   onAddAppointment,
   selectedAppointment,
-  setSelectedAppointment
+  setSelectedAppointment,
+  onCancelAppointment
 }: CalendarDayProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   
@@ -40,6 +43,18 @@ export function CalendarDay({
   const selectedAppointmentDetails = selectedAppointment 
     ? getAppointmentById(selectedAppointment) 
     : null;
+    
+  const handleCancelAppointment = (id: number) => {
+    if (onCancelAppointment) {
+      onCancelAppointment(id);
+    } else {
+      // Fallback implementation if no cancel handler provided
+      toast.success("Встреча отменена", {
+        description: "Встреча была успешно отменена"
+      });
+      setSelectedAppointment(null);
+    }
+  };
 
   return (
     <Card className="astro-card border-none md:col-span-7 lg:col-span-8">
@@ -61,7 +76,9 @@ export function CalendarDay({
             {sortedAppointments.map((appointment) => (
               <div 
                 key={appointment.id} 
-                className="p-4 rounded-lg border border-border/50 hover:bg-background/50 transition-colors cursor-pointer"
+                className={`p-4 rounded-lg border border-border/50 hover:bg-background/50 transition-colors cursor-pointer ${
+                  appointment.status === 'cancelled' ? 'opacity-60 bg-muted/40' : ''
+                }`}
                 onClick={() => setSelectedAppointment(appointment.id)}
               >
                 <div className="flex items-start justify-between">
@@ -72,6 +89,11 @@ export function CalendarDay({
                     <div>
                       <h3 className="font-medium">{appointment.clientName}</h3>
                       <p className="text-sm text-muted-foreground">{appointment.type}</p>
+                      {appointment.status === 'cancelled' && (
+                        <Badge variant="outline" className="text-destructive border-destructive">
+                          Отменена
+                        </Badge>
+                      )}
                       {appointment.request && (
                         <p className="text-sm mt-1 text-muted-foreground">{appointment.request}</p>
                       )}
@@ -127,6 +149,7 @@ export function CalendarDay({
           appointment={getAppointmentById(selectedAppointment)!}
           isOpen={selectedAppointment !== null}
           onClose={() => setSelectedAppointment(null)}
+          onCancelAppointment={handleCancelAppointment}
         />
       )}
     </Card>

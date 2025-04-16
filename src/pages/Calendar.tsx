@@ -9,6 +9,7 @@ import { CalendarHeader } from "@/components/calendar/CalendarHeader";
 import { CalendarTabContent } from "@/components/calendar/CalendarTabContent";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 // Часы работы (с 9:00 до 19:00)
 const workHours = Array.from({ length: 11 }, (_, i) => i + 9);
@@ -36,6 +37,7 @@ const Calendar = () => {
     selectedAppointment,
     setSelectedAppointment,
     handleAddAppointment,
+    handleCancelAppointment,
     getAppointmentsForDay
   } = useAppointments();
   
@@ -57,7 +59,7 @@ const Calendar = () => {
           
           if (data) {
             setClientInfo({
-              id: data.id,
+              id: parseInt(data.id),
               firstName: data.first_name,
               lastName: data.last_name,
               patronymic: data.patronymic || "",
@@ -119,6 +121,7 @@ const Calendar = () => {
             handleAddAppointment={handleAddAppointment}
             goToPrevWeek={goToPrevWeek}
             goToNextWeek={goToNextWeek}
+            onCancelAppointment={handleCancelAppointment}
           />
         </TabsContent>
       </Tabs>

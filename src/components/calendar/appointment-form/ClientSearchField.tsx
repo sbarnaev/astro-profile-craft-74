@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { clientsData } from "./types";
 
 interface ClientSearchFieldProps {
@@ -23,9 +23,16 @@ interface ClientSearchFieldProps {
   onChange: (value: number) => void;
   onCreateNew: () => void;
   isEditing?: boolean;
+  required?: boolean;
 }
 
-export function ClientSearchField({ value, onChange, onCreateNew, isEditing = false }: ClientSearchFieldProps) {
+export function ClientSearchField({ 
+  value, 
+  onChange, 
+  onCreateNew, 
+  isEditing = false,
+  required = false 
+}: ClientSearchFieldProps) {
   const [open, setOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
   
@@ -53,16 +60,19 @@ export function ClientSearchField({ value, onChange, onCreateNew, isEditing = fa
   return (
     <FormField
       name="clientId"
-      render={() => (
+      render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>Клиент {isEditing && selectedClient ? `(${selectedClient.lastName} ${selectedClient.firstName} ${selectedClient.patronymic})` : ""}</FormLabel>
+          <FormLabel>{required && <span className="text-destructive mr-1">*</span>}Клиент {isEditing && selectedClient ? `(${selectedClient.lastName} ${selectedClient.firstName} ${selectedClient.patronymic})` : ""}</FormLabel>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
-                className="justify-between"
+                className={cn(
+                  "justify-between",
+                  required && !value && "border-destructive"
+                )}
                 disabled={isEditing && !open} // Disable button in edit mode unless opened
               >
                 {value && selectedClient
@@ -105,7 +115,7 @@ export function ClientSearchField({ value, onChange, onCreateNew, isEditing = fa
                       </CommandItem>
                     ))
                   ) : (
-                    <CommandItem value="no-clients">
+                    <CommandItem className="py-3 text-center text-muted-foreground" disabled>
                       Нет доступных клиентов
                     </CommandItem>
                   )}
@@ -113,6 +123,9 @@ export function ClientSearchField({ value, onChange, onCreateNew, isEditing = fa
               </Command>
             </PopoverContent>
           </Popover>
+          {required && !value && (
+            <FormMessage>Выберите клиента</FormMessage>
+          )}
         </FormItem>
       )}
     />

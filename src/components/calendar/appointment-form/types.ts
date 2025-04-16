@@ -3,7 +3,7 @@ import { z } from "zod";
 
 // Схема валидации формы
 export const formSchema = z.object({
-  clientId: z.number().optional(),
+  clientId: z.number({ required_error: "Выберите клиента" }),
   date: z.date(),
   time: z.string(),
   consultationType: z.number(),
@@ -69,6 +69,9 @@ export const consultationTypes = [
     cost: 8500
   }
 ];
+
+// Статусы встреч
+export type AppointmentStatus = "active" | "completed" | "cancelled";
 
 // Props для формы записи на прием
 export interface AppointmentFormProps {

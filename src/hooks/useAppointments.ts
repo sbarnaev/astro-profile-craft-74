@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { AppointmentInterface } from "@/types/calendar";
+import { toast } from "sonner";
 
 // Пример данных о встречах
 const appointmentsData = [
@@ -12,7 +13,8 @@ const appointmentsData = [
     duration: 60, 
     type: "Консультация",
     request: "Вопросы по личностному росту",
-    cost: 3500
+    cost: 3500,
+    status: "active" as const
   },
   { 
     id: 2, 
@@ -22,7 +24,8 @@ const appointmentsData = [
     duration: 90, 
     type: "Полный анализ",
     request: "Проблемы в карьере, поиск направления",
-    cost: 5000
+    cost: 5000,
+    status: "active" as const
   },
   { 
     id: 3, 
@@ -32,7 +35,8 @@ const appointmentsData = [
     duration: 45, 
     type: "Консультация",
     request: "Сложности в отношениях с партнером",
-    cost: 2000
+    cost: 2000,
+    status: "active" as const
   },
   { 
     id: 4, 
@@ -42,7 +46,8 @@ const appointmentsData = [
     duration: 60, 
     type: "Базовый анализ",
     request: "Поиск предназначения",
-    cost: 3500
+    cost: 3500,
+    status: "active" as const
   },
   { 
     id: 5, 
@@ -52,7 +57,8 @@ const appointmentsData = [
     duration: 60, 
     type: "Консультация",
     request: "Вопросы самореализации",
-    cost: 3500
+    cost: 3500,
+    status: "active" as const
   },
   { 
     id: 6, 
@@ -62,7 +68,8 @@ const appointmentsData = [
     duration: 45, 
     type: "Консультация",
     request: "Финансовые вопросы",
-    cost: 2000
+    cost: 2000,
+    status: "active" as const
   },
 ];
 
@@ -74,21 +81,43 @@ export function useAppointments() {
   const handleAddAppointment = (data: any) => {
     console.log("Новая встреча:", data);
     
+    // Validate that a client is selected
+    if (!data.clientId) {
+      toast.error("Невозможно создать встречу без выбора клиента");
+      return;
+    }
+    
     // Для примера, добавим встречу в список
     const newAppointment = {
       id: appointments.length + 1,
       clientName: data.clientName,
-      clientId: data.clientId || 999, // ID клиента или временное значение
+      clientId: data.clientId, // ID клиента или временное значение
       date: data.appointmentDateTime || new Date(),
       duration: data.duration || 60,
       type: data.consultationType 
         ? ["Экспресс-консультация", "Базовый анализ", "Отношения", "Целевой анализ"][data.consultationType - 1] 
         : "Консультация",
       request: data.request || "",
-      cost: data.cost || 3500
+      cost: data.cost || 3500,
+      status: "active" as const
     };
     
     setAppointments([...appointments, newAppointment]);
+    toast.success("Встреча успешно создана");
+  };
+  
+  // Обработчик отмены встречи
+  const handleCancelAppointment = (id: number) => {
+    setAppointments(appointments.map(appointment => 
+      appointment.id === id 
+        ? { ...appointment, status: "cancelled" as const } 
+        : appointment
+    ));
+    
+    toast.success("Встреча отменена", {
+      description: "Встреча была успешно отменена и сохранена в истории"
+    });
+    setSelectedAppointment(null);
   };
   
   // Получение встреч для конкретного дня
@@ -111,6 +140,7 @@ export function useAppointments() {
     selectedAppointment,
     setSelectedAppointment,
     handleAddAppointment,
+    handleCancelAppointment,
     getAppointmentsForDay,
     getAppointmentById
   };

@@ -58,8 +58,6 @@ export function ExistingClientForm({
   useEffect(() => {
     if (initialClient?.id) {
       form.setValue("clientId", initialClient.id);
-      
-      // Log to debug
       console.log("Setting initial client ID:", initialClient.id);
     }
   }, [initialClient, form]);
@@ -91,6 +89,15 @@ export function ExistingClientForm({
       values.clientId = initialClient.id;
     }
     
+    // Validate that a client is selected
+    if (!values.clientId) {
+      form.setError("clientId", {
+        type: "manual",
+        message: "Пожалуйста, выберите клиента"
+      });
+      return;
+    }
+    
     // Gather complete data for appointment creation
     const appointmentData = {
       ...values,
@@ -115,6 +122,7 @@ export function ExistingClientForm({
   
   const handleSelectClient = (clientId: number) => {
     form.setValue("clientId", clientId);
+    form.clearErrors("clientId");
   };
   
   // Find the current selected client ID for the ClientSearchField
@@ -128,6 +136,7 @@ export function ExistingClientForm({
           onChange={handleSelectClient} 
           onCreateNew={onCreateNew} 
           isEditing={isEditing}
+          required={true}
         />
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

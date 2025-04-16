@@ -5,6 +5,7 @@ import { CalendarSidebar } from "./CalendarSidebar";
 import { CalendarDay } from "./CalendarDay";
 import { CalendarWeek } from "./CalendarWeek";
 import { DetailedMonthView } from "./DetailedMonthView";
+import { Badge } from "@/components/ui/badge";
 
 interface CalendarTabContentProps {
   selectedTab: string;
@@ -19,6 +20,7 @@ interface CalendarTabContentProps {
   handleAddAppointment: (data: any) => void;
   goToPrevWeek: () => void;
   goToNextWeek: () => void;
+  onCancelAppointment?: (id: number) => void;
 }
 
 export function CalendarTabContent({
@@ -33,7 +35,8 @@ export function CalendarTabContent({
   handleDateSelect,
   handleAddAppointment,
   goToPrevWeek,
-  goToNextWeek
+  goToNextWeek,
+  onCancelAppointment
 }: CalendarTabContentProps) {
   // Render appropriate view based on selected tab
   const renderContent = () => {
@@ -48,6 +51,7 @@ export function CalendarTabContent({
               onAddAppointment={handleAddAppointment}
               selectedAppointment={selectedAppointment}
               setSelectedAppointment={setSelectedAppointment}
+              onCancelAppointment={onCancelAppointment}
             />
           </div>
         );

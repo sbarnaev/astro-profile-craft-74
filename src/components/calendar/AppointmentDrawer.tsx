@@ -2,21 +2,28 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Users, Eye, DollarSign, X, Edit } from "lucide-react";
+import { Users, Eye, DollarSign, X, Edit, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { Link } from "react-router-dom";
 import { AppointmentInterface } from "@/types/calendar";
 import { AppointmentForm } from "./AppointmentForm";
+import { toast } from "sonner";
 
 interface AppointmentDrawerProps {
   appointment: AppointmentInterface;
   isOpen: boolean;
   onClose: () => void;
+  onCancelAppointment?: (id: number) => void;
 }
 
-export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentDrawerProps) {
+export function AppointmentDrawer({ 
+  appointment, 
+  isOpen, 
+  onClose,
+  onCancelAppointment 
+}: AppointmentDrawerProps) {
   const [showEditForm, setShowEditForm] = useState(false);
 
   const handleEditClick = () => {
@@ -31,6 +38,15 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
     console.log("Обновленные данные встречи:", updatedData);
     // В реальном приложении здесь должен быть код для обновления встречи
     setShowEditForm(false);
+  };
+  
+  const handleCancelAppointment = () => {
+    if (onCancelAppointment && appointment.id) {
+      onCancelAppointment(appointment.id);
+      onClose();
+    } else {
+      toast.error("Не удалось отменить встречу");
+    }
   };
   
   // Make sure clientName is not undefined and has the expected format
@@ -66,12 +82,16 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
               </div>
               <div>
                 <h3 className="font-medium">{appointment.clientName || "Клиент"}</h3>
-                <Link 
-                  to={`/clients/${appointment.clientId}`} 
-                  className="text-sm text-primary hover:underline"
-                >
-                  Профиль клиента
-                </Link>
+                {appointment.clientId ? (
+                  <Link 
+                    to={`/clients/${appointment.clientId}`} 
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Профиль клиента
+                  </Link>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Клиент не выбран</span>
+                )}
               </div>
             </div>
             <Badge>{appointment.type || "Консультация"}</Badge>
@@ -137,7 +157,10 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
               <Edit className="h-4 w-4 mr-2" />
               Редактировать
             </Button>
-            <Button variant="destructive">Отменить встречу</Button>
+            <Button variant="destructive" onClick={handleCancelAppointment}>
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Отменить встречу
+            </Button>
           </div>
         </div>
 
