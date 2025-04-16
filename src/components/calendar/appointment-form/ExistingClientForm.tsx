@@ -33,14 +33,15 @@ export function ExistingClientForm({
 }: ExistingClientFormProps) {
   const [customCost, setCustomCost] = React.useState<number | null>(null);
   
-  // Создаем форму
+  // Создаем форму с учетом режима редактирования
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       date: initialDate || new Date(),
       time: initialTime || "10:00",
-      request: "",
-      cost: 3500,
+      request: initialClient?.editData?.request || "",
+      cost: initialClient?.editData?.cost || 3500,
+      consultationType: initialClient?.editData?.consultationType || 1,
     },
   });
   

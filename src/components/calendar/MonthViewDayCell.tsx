@@ -40,7 +40,7 @@ export function MonthViewDayCell({
             ? isToday(day)
               ? "bg-primary/10 border-primary"
               : isPast(day) 
-                ? "bg-gray-100"
+                ? "bg-gray-200 text-gray-500"
                 : isRussianHoliday(day)
                   ? "bg-purple-100"
                   : isWeekend(day)

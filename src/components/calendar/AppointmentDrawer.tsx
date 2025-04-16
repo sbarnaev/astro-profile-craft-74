@@ -1,13 +1,14 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Users, Eye, DollarSign } from "lucide-react";
+import { Users, Eye, DollarSign, X, Edit } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { Link } from "react-router-dom";
 import { AppointmentInterface } from "@/types/calendar";
+import { AppointmentForm } from "./AppointmentForm";
 
 interface AppointmentDrawerProps {
   appointment: AppointmentInterface;
@@ -16,11 +17,31 @@ interface AppointmentDrawerProps {
 }
 
 export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentDrawerProps) {
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  const handleEditClick = () => {
+    setShowEditForm(true);
+  };
+
+  const handleEditClose = () => {
+    setShowEditForm(false);
+  };
+
+  const handleEditSubmit = (updatedData: any) => {
+    console.log("Обновленные данные встречи:", updatedData);
+    // В реальном приложении здесь должен быть код для обновления встречи
+    setShowEditForm(false);
+  };
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent>
-        <DrawerHeader>
+        <DrawerHeader className="flex justify-between items-center">
           <DrawerTitle>Детали консультации</DrawerTitle>
+          <DrawerClose asChild>
+            <Button variant="ghost" size="icon">
+              <X className="h-4 w-4" />
+            </Button>
+          </DrawerClose>
         </DrawerHeader>
         <div className="p-4 space-y-4">
           <div className="flex items-center justify-between">
@@ -97,10 +118,35 @@ export function AppointmentDrawer({ appointment, isOpen, onClose }: AppointmentD
           </div>
           
           <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline">Редактировать</Button>
+            <Button variant="outline" onClick={handleEditClick}>
+              <Edit className="h-4 w-4 mr-2" />
+              Редактировать
+            </Button>
             <Button variant="destructive">Отменить встречу</Button>
           </div>
         </div>
+
+        {showEditForm && (
+          <AppointmentForm
+            isOpen={showEditForm}
+            onClose={handleEditClose}
+            initialDate={appointment.date}
+            initialTime={format(appointment.date, "HH:mm")}
+            initialClient={{
+              id: appointment.clientId,
+              firstName: appointment.clientName.split(" ")[1] || "",
+              lastName: appointment.clientName.split(" ")[0] || "",
+              patronymic: appointment.clientName.split(" ")[2] || "",
+            }}
+            onSubmit={handleEditSubmit}
+            isEditing={true}
+            editData={{
+              cost: appointment.cost,
+              request: appointment.request,
+              consultationType: ["Экспресс-консультация", "Базовый анализ", "Отношения", "Целевой анализ"].indexOf(appointment.type) + 1 || 1
+            }}
+          />
+        )}
       </DrawerContent>
     </Drawer>
   );

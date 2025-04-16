@@ -42,4 +42,10 @@ export interface AppointmentFormProps {
   initialTime?: string;
   onSubmit: (values: any) => void;
   initialClient?: any; // Add the initialClient property
+  isEditing?: boolean;
+  editData?: {
+    cost?: number;
+    request?: string;
+    consultationType?: number;
+  };
 }

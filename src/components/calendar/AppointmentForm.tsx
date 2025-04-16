@@ -18,6 +18,8 @@ export function AppointmentForm({
   initialTime,
   onSubmit,
   initialClient,
+  isEditing = false,
+  editData,
 }: AppointmentFormProps) {
   const [activeTab, setActiveTab] = useState<string>("existing");
   
@@ -45,7 +47,7 @@ export function AppointmentForm({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Запись на консультацию</DialogTitle>
+          <DialogTitle>{isEditing ? 'Редактирование консультации' : 'Запись на консультацию'}</DialogTitle>
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -62,6 +64,8 @@ export function AppointmentForm({
               onClose={onClose} 
               onCreateNew={handleCreateNew}
               initialClient={initialClient} 
+              editData={editData}
+              isEditing={isEditing}
             />
           </TabsContent>
           
