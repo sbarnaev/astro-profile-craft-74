@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -9,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ConsultationList, getConsultationTypeText } from "@/components/consultations/ConsultationList";
 
-// Временные данные для сессий клиента
 const sessionsData = [
   { 
     id: 1,
@@ -17,7 +15,7 @@ const sessionsData = [
     clientName: "Иванов Иван",
     clientPhone: "+7 (900) 123-45-67",
     clientDob: new Date(1990, 5, 15),
-    date: new Date(2025, 3, 10, 14, 0), // 10 апреля 2025, 14:00
+    date: new Date(2025, 3, 10, 14, 0),
     duration: 60,
     type: "basic",
     format: "video",
@@ -30,7 +28,7 @@ const sessionsData = [
     clientName: "Иванов Иван",
     clientPhone: "+7 (900) 123-45-67",
     clientDob: new Date(1990, 5, 15),
-    date: new Date(2025, 2, 15, 15, 30), // 15 марта 2025, 15:30
+    date: new Date(2025, 2, 15, 15, 30),
     duration: 45,
     type: "express",
     format: "in-person",
@@ -43,7 +41,7 @@ const sessionsData = [
     clientName: "Петрова Анна",
     clientPhone: "+7 (900) 987-65-43",
     clientDob: new Date(1985, 8, 20),
-    date: new Date(2025, 3, 12, 10, 0), // 12 апреля 2025, 10:00
+    date: new Date(2025, 3, 12, 10, 0),
     duration: 90,
     type: "relationship",
     format: "video",
@@ -60,7 +58,6 @@ export const ClientSessions = ({ clientId }: ClientSessionsProps) => {
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const navigate = useNavigate();
   
-  // Фильтрация сессий для текущего клиента и сортировка по дате
   const clientSessions = sessionsData
     .filter(session => session.clientId === clientId)
     .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -73,11 +70,7 @@ export const ClientSessions = ({ clientId }: ClientSessionsProps) => {
     .sort((a, b) => b.date.getTime() - a.date.getTime());
   
   const handleScheduleSession = () => {
-    // Create a custom event to handle session scheduling
-    const event = new CustomEvent('openSessionDialog', {
-      detail: { clientId }
-    });
-    document.dispatchEvent(event);
+    navigate(`/calendar?view=week&client=${clientId}`);
   };
   
   const handleSessionClick = (session: any) => {

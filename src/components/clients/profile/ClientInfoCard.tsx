@@ -138,12 +138,7 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
   };
   
   const handleOpenSessionDialog = () => {
-    try {
-      navigate(`/sessions/schedule?client=${client.id}`);
-    } catch (error) {
-      console.error("Ошибка при открытии диалога сессии:", error);
-      toast.error("Не удалось открыть форму записи на сессию");
-    }
+    navigate('/calendar?view=week&client=' + client.id);
   };
   
   const handleOpenAnalysis = async () => {
