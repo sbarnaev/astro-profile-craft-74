@@ -14,7 +14,7 @@ export const formSchema = z.object({
 // Тип значений формы
 export type AppointmentFormValues = z.infer<typeof formSchema>;
 
-// Пример данных о клиентах
+// Ensure clientsData is always defined with a default empty array if needed
 export const clientsData = [
   {
     id: 1,
