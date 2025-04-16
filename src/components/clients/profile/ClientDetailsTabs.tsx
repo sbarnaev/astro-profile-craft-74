@@ -1,7 +1,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Bell, FileText } from "lucide-react";
-import { ClientConsultations } from "@/components/clients/ClientConsultations";
+import { ClientSessions } from "@/components/clients/ClientSessions";
 import { ClientReminders } from "@/components/clients/ClientReminders";
 import { ClientAnalysis } from "@/components/clients/ClientAnalysis";
 
@@ -30,7 +30,7 @@ export const ClientDetailsTabs = ({ clientId, activeTab, setActiveTab }: ClientD
       </TabsList>
       
       <TabsContent value="consultations">
-        <ClientConsultations clientId={parseInt(clientId)} />
+        <ClientSessions clientId={parseInt(clientId)} />
       </TabsContent>
       
       <TabsContent value="analysis">

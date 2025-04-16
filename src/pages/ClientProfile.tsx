@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { useParams, useLocation, Link } from "react-router-dom";
+import { useParams, useLocation, Link, useNavigate } from "react-router-dom";
 import { 
   Dialog,
   DialogContent,
@@ -16,10 +17,12 @@ import { ClientProfileHeader } from "@/components/clients/profile/ClientProfileH
 import { ClientInfoCard } from "@/components/clients/profile/ClientInfoCard";
 import { ClientDetailsTabs } from "@/components/clients/profile/ClientDetailsTabs";
 import { ClientEditDialog } from "@/components/clients/profile/ClientEditDialog";
+import { ReminderForm } from "@/components/consultations/ReminderForm";
 
 const ClientProfile = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("consultations");
   const [openReminderDialog, setOpenReminderDialog] = useState(false);
@@ -86,7 +89,7 @@ const ClientProfile = () => {
     const handleOpenSessionDialog = (event: CustomEvent) => {
       const clientId = event.detail?.clientId;
       if (clientId) {
-        navigate(`/consultations/schedule?client=${clientId}`);
+        navigate(`/sessions/schedule?client=${clientId}`);
       }
     };
     

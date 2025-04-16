@@ -13,8 +13,8 @@ import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
-// Новые страницы для будущей реализации
-import Consultations from "./pages/Consultations";
+// Переименованные страницы (консультации -> сессии)
+import Sessions from "./pages/Sessions";
 import Analytics from "./pages/Analytics";
 import Knowledge from "./pages/Knowledge";
 import Reminders from "./pages/Reminders";
@@ -39,8 +39,8 @@ const App = () => (
             <Route path="/analysis" element={<Analysis />} />
             <Route path="/analysis/:id" element={<Analysis />} />
             <Route path="/calendar" element={<Calendar />} />
-            <Route path="/sessions" element={<Consultations />} />
-            <Route path="/sessions/schedule" element={<Consultations />} />
+            <Route path="/sessions" element={<Sessions />} />
+            <Route path="/sessions/schedule" element={<Sessions />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/knowledge" element={<Knowledge />} />
             <Route path="/reminders" element={<Reminders />} />
