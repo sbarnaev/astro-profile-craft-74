@@ -13,6 +13,7 @@ import { ClientForm } from "@/components/clients/ClientForm";
 import { ConsultationForm } from "@/components/consultations/ConsultationForm";
 import { ReminderForm } from "@/components/consultations/ReminderForm";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SessionsDialogsProps {
   isClientSearchOpen: boolean;
@@ -53,25 +54,54 @@ export function SessionsDialogs({
     setIsConsultationFormOpen(true);
   };
   
-  const handleCreateClient = (data: any) => {
-    setIsClientFormOpen(false);
-    setSelectedClient({
-      id: Date.now(),
-      firstName: data.firstName,
-      lastName: data.lastName,
-      patronymic: data.patronymic,
-      dob: data.dob,
-      phone: data.phone,
-      email: data.email
-    });
-    setIsConsultationFormOpen(true);
+  const handleCreateClient = async (data: any) => {
+    try {
+      // Сохраняем нового клиента в Supabase
+      const { data: newClient, error } = await supabase
+        .from('clients')
+        .insert({
+          first_name: data.firstName,
+          last_name: data.lastName,
+          patronymic: data.patronymic || null,
+          dob: data.dob,
+          phone: data.phone,
+          email: data.email || null,
+          source: data.source || 'другое',
+          communication_channel: data.communicationChannel || 'телефон'
+        })
+        .select()
+        .single();
+        
+      if (error) {
+        console.error("Ошибка при создании клиента:", error);
+        toast.error("Произошла ошибка при создании клиента");
+        return;
+      }
+      
+      toast.success("Клиент успешно создан");
+      
+      setIsClientFormOpen(false);
+      setSelectedClient({
+        id: newClient.id,
+        firstName: newClient.first_name,
+        lastName: newClient.last_name,
+        patronymic: newClient.patronymic,
+        dob: newClient.dob,
+        phone: newClient.phone,
+        email: newClient.email
+      });
+      setIsConsultationFormOpen(true);
+    } catch (error) {
+      console.error("Ошибка при создании клиента:", error);
+      toast.error("Произошла ошибка при создании клиента");
+    }
   };
   
   const handleCreateConsultation = (data: any) => {
     console.log("Creating consultation:", { ...data, client: selectedClient });
     
     const newConsultation = {
-      id: Date.now(),
+      id: data.id || Date.now().toString(),
       clientId: selectedClient.id,
       clientName: `${selectedClient.lastName} ${selectedClient.firstName}`,
       date: data.date,
@@ -85,8 +115,6 @@ export function SessionsDialogs({
     };
     
     addConsultation(newConsultation);
-    
-    toast.success("Консультация успешно запланирована");
     
     navigate('/sessions', { replace: true });
     

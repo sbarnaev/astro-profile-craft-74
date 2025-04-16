@@ -12,6 +12,7 @@ import { ConsultationTypeField } from "./form/ConsultationTypeField";
 import { FormatField } from "./form/FormatField";
 import { TextAreaField } from "./form/TextAreaFields";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   consultationFormSchema, 
   type ConsultationFormValues 
@@ -43,8 +44,35 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
     try {
       setIsSubmitting(true);
       
-      // Call the onSubmit prop with the form values
-      onSubmit(values);
+      // Подготовка данных для сохранения в базу данных
+      const consultationData = {
+        client_id: client?.id,
+        date: values.date?.toISOString().split('T')[0],
+        time: values.time,
+        duration: values.duration,
+        type: values.type,
+        format: values.format,
+        request: values.request,
+        notes: values.notes || "",
+      };
+      
+      // Сохранение данных в Supabase
+      const { data, error } = await supabase
+        .from('consultations')
+        .insert(consultationData)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Ошибка при создании консультации:", error);
+        toast.error("Произошла ошибка при записи на консультацию");
+        return;
+      }
+      
+      toast.success("Консультация успешно запланирована");
+      
+      // Call the onSubmit prop with the form values and DB response
+      onSubmit({...values, id: data.id});
       
     } catch (error) {
       console.error("Ошибка при создании консультации:", error);

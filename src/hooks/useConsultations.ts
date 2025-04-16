@@ -1,52 +1,69 @@
 
 import { useState, useEffect } from "react";
-
-// Example consultation data - in a real app this would come from your database
-const initialConsultations = [
-  {
-    id: 1,
-    clientId: 101,
-    clientName: "Иванов Иван",
-    date: new Date(2025, 4, 25),
-    time: "10:00",
-    duration: 60,
-    type: "basic",
-    format: "video",
-    status: "scheduled",
-    request: "Консультация по вопросам карьеры",
-    notes: ""
-  },
-  {
-    id: 2,
-    clientId: 102,
-    clientName: "Петрова Анна",
-    date: new Date(2025, 4, 20),
-    time: "14:30",
-    duration: 90,
-    type: "relationship",
-    format: "in-person",
-    status: "scheduled",
-    request: "Проблемы в отношениях с партнером",
-    notes: "Клиент записан повторно"
-  },
-  {
-    id: 3,
-    clientId: 103,
-    clientName: "Сидоров Михаил",
-    date: new Date(2025, 3, 15),
-    time: "11:00",
-    duration: 60,
-    type: "express",
-    format: "video",
-    status: "completed",
-    request: "Вопросы личностного роста",
-    notes: ""
-  }
-];
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 export function useConsultations() {
-  const [consultations, setConsultations] = useState(initialConsultations);
+  const [consultations, setConsultations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Загрузка данных при монтировании компонента
+  useEffect(() => {
+    fetchConsultations();
+  }, []);
+  
+  // Функция для загрузки консультаций из Supabase
+  const fetchConsultations = async () => {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('consultations')
+        .select(`
+          *,
+          clients (
+            id,
+            first_name,
+            last_name,
+            patronymic,
+            phone
+          )
+        `)
+        .order('date', { ascending: true });
+      
+      if (error) {
+        console.error("Ошибка при загрузке консультаций:", error);
+        toast.error("Не удалось загрузить список консультаций");
+        return;
+      }
+      
+      // Преобразование данных в нужный формат
+      const formattedConsultations = data.map(item => ({
+        id: item.id,
+        clientId: item.client_id,
+        clientName: item.clients ? `${item.clients.last_name} ${item.clients.first_name}` : "Неизвестный клиент",
+        clientPhone: item.clients?.phone || "",
+        clientDob: item.clients?.dob ? new Date(item.clients.dob) : null,
+        date: new Date(item.date),
+        time: item.time,
+        duration: item.duration,
+        type: item.type,
+        format: item.format,
+        status: item.status,
+        request: item.request,
+        notes: item.notes || ""
+      }));
+      
+      setConsultations(formattedConsultations);
+    } catch (error) {
+      console.error("Ошибка при загрузке консультаций:", error);
+      toast.error("Произошла ошибка при загрузке данных");
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Filter consultations based on search query
   const filteredConsultations = consultations.filter(consultation => {
@@ -58,7 +75,7 @@ export function useConsultations() {
       consultation.request.toLowerCase().includes(searchLower) ||
       consultation.type.toLowerCase().includes(searchLower) ||
       (consultation.date && 
-        consultation.date.toLocaleDateString().includes(searchQuery))
+        format(consultation.date, 'dd.MM.yyyy').includes(searchQuery))
     );
   });
   
@@ -81,9 +98,12 @@ export function useConsultations() {
     );
   });
   
-  // Function to add a new consultation
-  const addConsultation = (newConsultation: any) => {
+  // Функция для добавления новой консультации
+  const addConsultation = async (newConsultation: any) => {
+    // Сохраняем локально для немедленного обновления UI
     setConsultations(prevConsultations => [...prevConsultations, newConsultation]);
+    // Обновляем данные с сервера
+    await fetchConsultations();
   };
   
   return {
@@ -94,6 +114,8 @@ export function useConsultations() {
     filteredConsultations,
     upcomingConsultations,
     pastConsultations,
-    addConsultation
+    addConsultation,
+    loading,
+    refetch: fetchConsultations
   };
 }

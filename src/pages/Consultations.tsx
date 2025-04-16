@@ -31,7 +31,9 @@ export default function Consultations() {
     setSearchQuery,
     upcomingConsultations,
     pastConsultations,
-    filteredConsultations
+    filteredConsultations,
+    addConsultation,
+    refetch
   } = useConsultations();
   
   const [activeTab, setActiveTab] = useState("upcoming");
@@ -47,7 +49,7 @@ export default function Consultations() {
   useEffect(() => {
     if (consultationId) {
       const consultation = filteredConsultations.find(
-        c => c.id === Number(consultationId)
+        c => c.id === consultationId
       );
       if (consultation) {
         setSelectedConsultation(consultation);
@@ -62,24 +64,35 @@ export default function Consultations() {
     setIsConsultationFormOpen(true);
   };
   
-  const handleCreateClient = (data: any) => {
-    setIsClientFormOpen(false);
-    // После создания клиента, открываем форму консультации с новым клиентом
-    setSelectedClient({
-      id: Date.now(), // Временный ID
-      firstName: data.firstName,
-      lastName: data.lastName,
-      patronymic: data.patronymic,
-      dob: data.dob,
-      phone: data.phone,
-      email: data.email
-    });
-    setIsConsultationFormOpen(true);
+  const handleCreateClient = async (data: any) => {
+    try {
+      // Здесь должен быть API-запрос для создания клиента
+      console.log("Creating client:", data);
+      setIsClientFormOpen(false);
+      
+      // После создания клиента, открываем форму консультации с новым клиентом
+      setSelectedClient({
+        id: data.id || Date.now(), // Временный ID или полученный от сервера
+        firstName: data.firstName,
+        lastName: data.lastName,
+        patronymic: data.patronymic,
+        dob: data.dob,
+        phone: data.phone,
+        email: data.email
+      });
+      setIsConsultationFormOpen(true);
+    } catch (error) {
+      console.error("Ошибка при создании клиента:", error);
+    }
   };
   
   const handleCreateConsultation = (data: any) => {
     setIsConsultationFormOpen(false);
     console.log("Created consultation:", { ...data, client: selectedClient });
+    
+    // Обновляем список консультаций после создания новой
+    refetch();
+    
     setSelectedClient(null);
   };
   

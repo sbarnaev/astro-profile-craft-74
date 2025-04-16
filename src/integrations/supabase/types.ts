@@ -101,6 +101,56 @@ export type Database = {
         }
         Relationships: []
       }
+      consultations: {
+        Row: {
+          client_id: string
+          created_at: string
+          date: string
+          duration: number
+          format: string
+          id: string
+          notes: string | null
+          request: string
+          status: string
+          time: string
+          type: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          date: string
+          duration: number
+          format: string
+          id?: string
+          notes?: string | null
+          request: string
+          status?: string
+          time: string
+          type: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          date?: string
+          duration?: number
+          format?: string
+          id?: string
+          notes?: string | null
+          request?: string
+          status?: string
+          time?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reminders: {
         Row: {
           client_id: string
