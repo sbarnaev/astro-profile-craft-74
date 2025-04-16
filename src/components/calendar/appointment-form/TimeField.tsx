@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   FormControl,
   FormField,
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
 import { AppointmentFormValues } from "./types";
 
@@ -60,7 +61,7 @@ export function TimeField({ form }: TimeFieldProps) {
             </div>
           ) : (
             <div className="flex space-x-2">
-              <Select onValueChange={field.onChange} value={field.value} className="flex-1">
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите время" />
@@ -90,7 +91,3 @@ export function TimeField({ form }: TimeFieldProps) {
     />
   );
 }
-
-// Need to import Button
-import { Button } from "@/components/ui/button";
-import { useState } from "react";

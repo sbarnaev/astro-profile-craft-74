@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -105,9 +106,6 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
       // This allows the parent component to handle the submission
       onSubmit(values);
       
-      // Show success message
-      toast.success("Консультация успешно запланирована");
-      
     } catch (error) {
       console.error("Ошибка при создании консультации:", error);
       toast.error("Произошла ошибка при записи на консультацию");
@@ -211,7 +209,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
               <FormItem>
                 <FormLabel>Время начала</FormLabel>
                 <div className="flex space-x-2">
-                  <Select onValueChange={field.onChange} value={field.value} className="flex-1">
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Выберите время" />

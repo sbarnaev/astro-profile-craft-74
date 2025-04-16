@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { ClientSearch } from "@/components/analysis/ClientSearch";
 import { ClientForm } from "@/components/clients/ClientForm";
@@ -19,6 +20,7 @@ import { ConsultationList } from "@/components/consultations/ConsultationList";
 import { ConsultationDetails } from "@/components/consultations/ConsultationDetails";
 import { EmptyConsultationsList } from "@/components/consultations/EmptyConsultationsList";
 import { useConsultations } from "@/hooks/useConsultations";
+import { toast } from "sonner";
 
 export default function Sessions() {
   const location = useLocation();
@@ -108,6 +110,9 @@ export default function Sessions() {
       notes: data.notes || "",
       status: "scheduled"
     };
+    
+    // Show success message
+    toast.success("Консультация успешно запланирована");
     
     // Clear URL parameters
     navigate('/sessions', { replace: true });
@@ -251,6 +256,9 @@ export default function Sessions() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Создание нового клиента</DialogTitle>
+            <DialogDescription>
+              Заполните информацию о новом клиенте
+            </DialogDescription>
           </DialogHeader>
           <ClientForm 
             onSubmit={handleCreateClient}
@@ -276,6 +284,9 @@ export default function Sessions() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Запись на сессию</DialogTitle>
+            <DialogDescription>
+              Заполните информацию о новой консультации
+            </DialogDescription>
           </DialogHeader>
           <ConsultationForm 
             client={selectedClient}
@@ -289,6 +300,9 @@ export default function Sessions() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Создание напоминания</DialogTitle>
+            <DialogDescription>
+              Укажите детали напоминания
+            </DialogDescription>
           </DialogHeader>
           {selectedConsultation && (
             <ReminderForm
