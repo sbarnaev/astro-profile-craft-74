@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, FileText, Bell, Share2, MessageCircle, User, Upload, DollarSign } from "lucide-react";
@@ -133,13 +134,19 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
   };
   
   const handleOpenSessionDialog = () => {
-    navigate(`/sessions/schedule?client=${client.id}`);
+    // Create a custom event to handle session scheduling
+    const event = new CustomEvent('openSessionDialog', {
+      detail: { clientId: client.id }
+    });
+    document.dispatchEvent(event);
   };
   
   const handleOpenAnalysis = () => {
     if (client.hasAnalysis && client.analysisId) {
+      // Directly navigate to the analysis page with the ID
       navigate(`/analysis/${client.analysisId}`);
     } else {
+      // Navigate to create new analysis page with client ID
       navigate(`/analysis/new?client=${client.id}`);
     }
   };
@@ -309,17 +316,10 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
         </div>
         
         <div className="pt-4 space-y-2">
-          {client.hasAnalysis && client.analysisId ? (
-            <Button className="w-full" onClick={handleOpenAnalysis}>
-              <FileText className="mr-2 h-4 w-4" />
-              Анализ
-            </Button>
-          ) : (
-            <Button className="w-full" onClick={handleOpenAnalysis}>
-              <FileText className="mr-2 h-4 w-4" />
-              Создать анализ
-            </Button>
-          )}
+          <Button className="w-full" onClick={handleOpenAnalysis}>
+            <FileText className="mr-2 h-4 w-4" />
+            {client.hasAnalysis && client.analysisId ? "Анализ" : "Создать анализ"}
+          </Button>
           
           <Button 
             variant="outline" 

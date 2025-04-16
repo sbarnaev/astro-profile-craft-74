@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription
 } from "@/components/ui/dialog";
 
 import { RemindersList } from "./reminders/RemindersList";
@@ -69,10 +70,10 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   const [isReminderFormOpen, setIsReminderFormOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<number | null>(null);
   const [reminderText, setReminderText] = useState("");
-  const [reminderDate, setReminderDate] = useState<Date | null>(null);
-  const [reminderTime, setReminderTime] = useState("");
+  const [reminderDate, setReminderDate] = useState<Date | null>(new Date());
+  const [reminderTime, setReminderTime] = useState("09:00");
   const [reminderPriority, setReminderPriority] = useState("medium");
-  const [reminderDateText, setReminderDateText] = useState("");
+  const [reminderDateText, setReminderDateText] = useState(format(new Date(), "dd.MM.yyyy"));
   
   const clientReminders = remindersData
     .filter(reminder => reminder.clientId === clientId);
@@ -116,14 +117,15 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
 
   const resetReminderForm = () => {
     setReminderText("");
-    setReminderDate(null);
-    setReminderDateText("");
-    setReminderTime("");
+    setReminderDate(new Date());
+    setReminderDateText(format(new Date(), "dd.MM.yyyy"));
+    setReminderTime("09:00");
     setReminderPriority("medium");
   };
 
   const handleOpenNewReminderForm = () => {
     resetReminderForm();
+    setEditingReminder(null);
     setIsReminderFormOpen(true);
   };
 
@@ -178,7 +180,6 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     
     setIsReminderFormOpen(false);
     setEditingReminder(null);
-    resetReminderForm();
   };
 
   return (
@@ -227,6 +228,9 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
             <DialogTitle>
               {editingReminder ? "Редактировать напоминание" : "Создать напоминание"}
             </DialogTitle>
+            <DialogDescription>
+              Заполните данные для создания напоминания
+            </DialogDescription>
           </DialogHeader>
           <ReminderForm
             reminderText={reminderText}

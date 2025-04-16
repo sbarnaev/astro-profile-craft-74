@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -73,12 +73,32 @@ export const ClientSessions = ({ clientId }: ClientSessionsProps) => {
     .sort((a, b) => b.date.getTime() - a.date.getTime());
   
   const handleScheduleSession = () => {
-    navigate(`/sessions/schedule?client=${clientId}`);
+    // Create a custom event to handle session scheduling
+    const event = new CustomEvent('openSessionDialog', {
+      detail: { clientId }
+    });
+    document.dispatchEvent(event);
   };
   
   const handleSessionClick = (session: any) => {
     setSelectedSession(session);
+    navigate(`/sessions?id=${session.id}`);
   };
+  
+  useEffect(() => {
+    const handleOpenSessionDialog = (event: CustomEvent) => {
+      const clientId = event.detail?.clientId;
+      if (clientId) {
+        navigate(`/sessions/schedule?client=${clientId}`);
+      }
+    };
+    
+    document.addEventListener('openSessionDialog', handleOpenSessionDialog as EventListener);
+    
+    return () => {
+      document.removeEventListener('openSessionDialog', handleOpenSessionDialog as EventListener);
+    };
+  }, [navigate]);
   
   const EmptySessionsState = () => (
     <div className="flex flex-col items-center justify-center py-12 text-center">

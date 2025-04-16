@@ -18,7 +18,16 @@ export function ClientActionMenu({ clientId }: ClientActionMenuProps) {
 
   const handleSessionSchedule = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(`/sessions/schedule?client=${clientId}`);
+    // Create a custom event to handle session scheduling
+    const event = new CustomEvent('openSessionDialog', {
+      detail: { clientId }
+    });
+    document.dispatchEvent(event);
+  };
+
+  const handleOpenAnalysis = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate(`/analysis/${clientId}`);
   };
 
   return (
@@ -32,11 +41,9 @@ export function ClientActionMenu({ clientId }: ClientActionMenuProps) {
         <DropdownMenuItem asChild>
           <Link to={`/clients/${clientId}`}>Профиль</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to={`/analysis/${clientId}`}>
-            <FileText className="mr-2 h-4 w-4" />
-            <span>Анализ</span>
-          </Link>
+        <DropdownMenuItem onClick={handleOpenAnalysis}>
+          <FileText className="mr-2 h-4 w-4" />
+          <span>Анализ</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleSessionSchedule}>
           <Calendar className="mr-2 h-4 w-4" />

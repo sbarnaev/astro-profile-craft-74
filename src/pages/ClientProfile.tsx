@@ -5,7 +5,8 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
@@ -130,6 +131,12 @@ const ClientProfile = () => {
     );
   }
 
+  const handleReminderSubmit = (data: any) => {
+    console.log("Created reminder:", data);
+    toast.success("Напоминание создано");
+    setOpenReminderDialog(false);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <ClientProfileHeader 
@@ -166,17 +173,16 @@ const ClientProfile = () => {
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Создать напоминание</DialogTitle>
+            <DialogDescription>
+              Заполните данные для создания напоминания
+            </DialogDescription>
           </DialogHeader>
           <div className="mt-4">
             {client && (
               <ReminderForm
                 isOpen={openReminderDialog}
                 onClose={() => setOpenReminderDialog(false)}
-                onSubmit={(data) => {
-                  console.log("Created reminder:", data);
-                  toast.success("Напоминание создано");
-                  setOpenReminderDialog(false);
-                }}
+                onSubmit={handleReminderSubmit}
                 consultationId={parseInt(client.id)}
               />
             )}
