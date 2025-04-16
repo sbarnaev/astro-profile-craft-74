@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { format, isToday, isSameDay } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -6,22 +5,12 @@ import { Plus, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppointmentForm } from "./AppointmentForm";
 import { AppointmentDrawer } from "./AppointmentDrawer";
-
-interface Appointment {
-  id: number;
-  clientName: string;
-  clientId: number;
-  date: Date;
-  duration: number;
-  type: string;
-  request: string;
-  cost?: number;
-}
+import { AppointmentInterface } from "@/types/calendar";
 
 interface WeekViewCellProps {
   day: Date;
   hour: number;
-  appointments: Appointment[];
+  appointments: AppointmentInterface[];
   onAppointmentClick: (id: number) => void;
   onAddAppointment: (data: any) => void;
   isPast?: boolean;

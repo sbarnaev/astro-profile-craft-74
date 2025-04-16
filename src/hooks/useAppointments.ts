@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { AppointmentInterface } from "@/types/calendar";
 import { toast } from "sonner";
@@ -95,7 +96,7 @@ export function useAppointments() {
       duration: data.duration || 60,
       type: data.consultationType 
         ? ["Экспресс-консультация", "Базовый анализ", "Отношения", "Целевой анализ"][data.consultationType - 1] 
-        : "Консультация",
+        : "Консультация", // Ensure type is always provided
       request: data.request || "",
       cost: data.cost || 3500,
       status: "active" as const

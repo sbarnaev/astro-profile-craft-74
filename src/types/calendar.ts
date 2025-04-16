@@ -5,7 +5,7 @@ export interface AppointmentInterface {
   clientName: string;
   date: Date;
   duration: number;
-  type?: string;
+  type: string; // Changed from optional to required
   request?: string;
   cost?: number;
   status?: "active" | "completed" | "cancelled";
