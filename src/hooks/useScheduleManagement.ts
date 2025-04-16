@@ -24,6 +24,21 @@ export interface BreakPeriod {
   reason: string;
 }
 
+export interface ConsultationType {
+  id: number;
+  name: string;
+  duration: number;
+  price: number;
+  description?: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+}
+
 export interface ScheduleSettings {
   workSchedule: WorkSchedule;
   appointmentDuration: number;
@@ -31,6 +46,11 @@ export interface ScheduleSettings {
   bookingLinkEnabled: boolean;
   bookingLink: string;
   breaks: BreakPeriod[];
+  consultationTypes: ConsultationType[];
+  paymentMethods: PaymentMethod[];
+  autoConfirmBookings: boolean;
+  notificationEmail: string;
+  cancellationPolicy: string;
 }
 
 // Начальные настройки графика работы
@@ -49,6 +69,18 @@ const defaultScheduleSettings: ScheduleSettings = {
   bookingLinkEnabled: true,
   bookingLink: "consultant",
   breaks: [],
+  consultationTypes: [
+    { id: 1, name: "Индивидуальная консультация", duration: 60, price: 3500, description: "Стандартная консультация длительностью 1 час" },
+    { id: 2, name: "Семейная консультация", duration: 90, price: 5000, description: "Расширенная консультация для пар и семей" },
+    { id: 3, name: "Экспресс-консультация", duration: 30, price: 1500, description: "Короткая консультация по конкретному вопросу" },
+  ],
+  paymentMethods: [
+    { id: "online", name: "Онлайн-оплата", description: "Оплата банковской картой через интернет", enabled: true },
+    { id: "office", name: "Оплата при встрече", description: "Оплата наличными или картой при встрече", enabled: true },
+  ],
+  autoConfirmBookings: false,
+  notificationEmail: "",
+  cancellationPolicy: "Отмена записи возможна не менее чем за 24 часа до начала консультации. В противном случае оплата не возвращается.",
 };
 
 export function useScheduleManagement() {
@@ -72,6 +104,27 @@ export function useScheduleManagement() {
               ...breakItem,
               date: new Date(breakItem.date),
             }));
+          }
+          
+          // Добавляем новые поля, если они отсутствуют в сохраненных настройках
+          if (!parsedSettings.consultationTypes) {
+            parsedSettings.consultationTypes = defaultScheduleSettings.consultationTypes;
+          }
+          
+          if (!parsedSettings.paymentMethods) {
+            parsedSettings.paymentMethods = defaultScheduleSettings.paymentMethods;
+          }
+          
+          if (parsedSettings.autoConfirmBookings === undefined) {
+            parsedSettings.autoConfirmBookings = defaultScheduleSettings.autoConfirmBookings;
+          }
+          
+          if (!parsedSettings.notificationEmail) {
+            parsedSettings.notificationEmail = defaultScheduleSettings.notificationEmail;
+          }
+          
+          if (!parsedSettings.cancellationPolicy) {
+            parsedSettings.cancellationPolicy = defaultScheduleSettings.cancellationPolicy;
           }
           
           setSettings(parsedSettings);
@@ -170,6 +223,73 @@ export function useScheduleManagement() {
     }));
   };
   
+  // Добавление типа консультации
+  const addConsultationType = (type: Omit<ConsultationType, "id">) => {
+    // Находим максимальный ID и добавляем 1
+    const maxId = Math.max(0, ...settings.consultationTypes.map(t => t.id));
+    const newType: ConsultationType = {
+      ...type,
+      id: maxId + 1,
+    };
+    
+    setSettings(prev => ({
+      ...prev,
+      consultationTypes: [...prev.consultationTypes, newType],
+    }));
+  };
+  
+  // Обновление типа консультации
+  const updateConsultationType = (id: number, type: Partial<ConsultationType>) => {
+    setSettings(prev => ({
+      ...prev,
+      consultationTypes: prev.consultationTypes.map(t => 
+        t.id === id ? { ...t, ...type } : t
+      ),
+    }));
+  };
+  
+  // Удаление типа консультации
+  const removeConsultationType = (id: number) => {
+    setSettings(prev => ({
+      ...prev,
+      consultationTypes: prev.consultationTypes.filter(t => t.id !== id),
+    }));
+  };
+  
+  // Обновление статуса метода оплаты
+  const updatePaymentMethodEnabled = (id: string, enabled: boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      paymentMethods: prev.paymentMethods.map(m => 
+        m.id === id ? { ...m, enabled } : m
+      ),
+    }));
+  };
+  
+  // Обновление автоматического подтверждения записей
+  const updateAutoConfirmBookings = (autoConfirm: boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      autoConfirmBookings: autoConfirm,
+    }));
+  };
+  
+  // Обновление email для уведомлений
+  const updateNotificationEmail = (email: string) => {
+    setSettings(prev => ({
+      ...prev,
+      notificationEmail: email,
+    }));
+  };
+  
+  // Обновление политики отмены
+  const updateCancellationPolicy = (policy: string) => {
+    setSettings(prev => ({
+      ...prev,
+      cancellationPolicy: policy,
+    }));
+  };
+  
   // Сохранение настроек
   const saveSettings = () => {
     try {
@@ -179,6 +299,11 @@ export function useScheduleManagement() {
       console.error("Ошибка при сохранении настроек:", error);
       return false;
     }
+  };
+  
+  // Получение полной ссылки для бронирования
+  const getBookingUrl = () => {
+    return `${window.location.origin}/booking/${settings.bookingLink}`;
   };
   
   return {
@@ -192,6 +317,14 @@ export function useScheduleManagement() {
     updateBookingLink,
     addBreak,
     removeBreak,
+    addConsultationType,
+    updateConsultationType,
+    removeConsultationType,
+    updatePaymentMethodEnabled,
+    updateAutoConfirmBookings,
+    updateNotificationEmail,
+    updateCancellationPolicy,
     saveSettings,
+    getBookingUrl,
   };
 }

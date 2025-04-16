@@ -11,6 +11,15 @@ const ScheduleSettingsPage = () => {
       </div>
       
       <ScheduleSettings />
+      
+      <div className="bg-muted/50 rounded-lg p-4 border border-dashed border-muted">
+        <h3 className="font-medium mb-2">Как это работает?</h3>
+        <p className="text-sm text-muted-foreground">
+          Настройте свой график работы и создайте публичную ссылку для записи на консультации. 
+          Клиенты смогут выбрать удобное время, указать свои данные и записаться к вам. 
+          Вы получите уведомление о новой записи и сможете подтвердить или отклонить запрос.
+        </p>
+      </div>
     </div>
   );
 };
