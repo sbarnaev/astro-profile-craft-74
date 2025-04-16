@@ -50,7 +50,7 @@ export function useDeepSeekAI(apiKey: string) {
       generator_code?: number | string;
       mission_code?: number | string;
     },
-    analysisType: 'full' | 'brief' = 'full'
+    analysisType: 'full' | 'brief' | 'relationship' = 'full'
   ) => {
     setLoading(true);
     setError(null);
@@ -59,7 +59,7 @@ export function useDeepSeekAI(apiKey: string) {
       // Создаем системное сообщение с инструкциями
       const systemMessage = `Ты опытный психолог-консультант, специализирующийся на анализе личности. 
       Проанализируй личность клиента на основе предоставленных кодов и создай ${
-        analysisType === 'full' ? 'подробный' : 'краткий'
+        analysisType === 'full' ? 'подробный' : analysisType === 'brief' ? 'краткий' : 'анализ совместимости'
       } психологический портрет.`;
 
       // Создаем сообщение пользователя с данными
@@ -88,7 +88,9 @@ export function useDeepSeekAI(apiKey: string) {
       userMessage += `\nПожалуйста, составь ${
         analysisType === 'full' 
           ? 'подробный психологический портрет, анализ сильных и слабых сторон, рекомендации по развитию' 
-          : 'краткий психологический портрет с основными характеристиками'
+          : analysisType === 'brief'
+          ? 'краткий психологический портрет с основными характеристиками'
+          : 'анализ совместимости с учетом психологических особенностей'
       }.`;
 
       // Подготавливаем данные для запроса
@@ -99,7 +101,7 @@ export function useDeepSeekAI(apiKey: string) {
           { role: "user", content: userMessage }
         ],
         temperature: 0.7,
-        max_tokens: analysisType === 'full' ? 2048 : 1024
+        max_tokens: analysisType === 'brief' ? 1024 : 2048
       };
 
       // Отправляем запрос к API
