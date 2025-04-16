@@ -11,9 +11,7 @@ interface ClientDetailsTabsProps {
 }
 
 export const ClientDetailsTabs = ({ clientId, activeTab, setActiveTab }: ClientDetailsTabsProps) => {
-  // Convert clientId to number for components that expect it as a number
-  const clientIdNumber = parseInt(clientId, 10);
-
+  // Передаем clientId как есть, без преобразования в число
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="grid grid-cols-2 w-full mb-4">
@@ -22,11 +20,11 @@ export const ClientDetailsTabs = ({ clientId, activeTab, setActiveTab }: ClientD
       </TabsList>
 
       <TabsContent value="consultations" className="space-y-6">
-        <ClientSessions clientId={clientIdNumber} />
+        <ClientSessions clientId={clientId} />
       </TabsContent>
 
       <TabsContent value="reminders" className="space-y-6">
-        <ClientReminders clientId={clientIdNumber} />
+        <ClientReminders clientId={clientId} />
       </TabsContent>
     </Tabs>
   );

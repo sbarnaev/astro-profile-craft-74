@@ -63,7 +63,7 @@ const initialRemindersData = [
 ];
 
 interface ClientRemindersProps {
-  clientId: number;
+  clientId: number | string;
 }
 
 export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
@@ -77,8 +77,10 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   const [reminderDateText, setReminderDateText] = useState(format(new Date(), "dd.MM.yyyy"));
   const { user } = useAuth();
   
+  const clientIdString = typeof clientId === 'string' ? clientId : String(clientId);
+  
   const clientReminders = remindersData
-    .filter(reminder => reminder.clientId === clientId);
+    .filter(reminder => reminder.clientId === clientId || reminder.clientId === clientIdString);
   
   const activeReminders = clientReminders.filter(r => !r.completed)
     .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -144,7 +146,7 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     }
 
     const newReminder = {
-      client_id: String(clientId),
+      client_id: clientIdString,
       title: reminderText,
       date: format(reminderDate, "yyyy-MM-dd"),
       time: reminderTime,
@@ -154,30 +156,35 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
       user_id: user.id
     };
 
-    const { data, error } = await supabase
-      .from('reminders')
-      .insert(newReminder)
-      .select();
+    try {
+      const { data, error } = await supabase
+        .from('reminders')
+        .insert(newReminder)
+        .select();
 
-    if (error) {
-      toast.error("Не удалось создать напоминание");
-      console.error(error);
-    } else {
-      const processedReminder = {
-        id: data[0].id,
-        clientId: parseInt(data[0].client_id),
-        date: new Date(data[0].date),
-        time: data[0].time,
-        title: data[0].title,
-        description: data[0].description,
-        completed: data[0].completed,
-        priority: data[0].priority
-      };
-      
-      setRemindersData(prev => [...prev, processedReminder]);
-      toast.success("Напоминание сохранено");
-      setIsReminderFormOpen(false);
-      resetReminderForm();
+      if (error) {
+        toast.error("Не удалось создать напоминание");
+        console.error("Ошибка при создании напоминания:", error);
+      } else {
+        const processedReminder = {
+          id: data[0].id,
+          clientId: clientIdString,
+          date: new Date(data[0].date),
+          time: data[0].time,
+          title: data[0].title,
+          description: data[0].description,
+          completed: data[0].completed,
+          priority: data[0].priority
+        };
+        
+        setRemindersData(prev => [...prev, processedReminder]);
+        toast.success("Напоминание сохранено");
+        setIsReminderFormOpen(false);
+        resetReminderForm();
+      }
+    } catch (err) {
+      toast.error("Ошибка при создании напоминания");
+      console.error("Исключение при создании напоминания:", err);
     }
   };
 
@@ -191,35 +198,40 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
 
   useEffect(() => {
     const fetchReminders = async () => {
-      if (!user) return;
+      if (!user || !clientId) return;
       
-      const { data, error } = await supabase
-        .from('reminders')
-        .select('*')
-        .eq('client_id', String(clientId))
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('reminders')
+          .select('*')
+          .eq('client_id', clientIdString)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        toast.error("Не удалось загрузить напоминания");
-        console.error(error);
-      } else {
-        const processedReminders = (data || []).map(reminder => ({
-          id: reminder.id,
-          clientId: parseInt(reminder.client_id),
-          date: new Date(reminder.date),
-          time: reminder.time,
-          title: reminder.title,
-          description: reminder.description,
-          completed: reminder.completed,
-          priority: reminder.priority
-        }));
-        setRemindersData(processedReminders);
+        if (error) {
+          toast.error("Не удалось загрузить напоминания");
+          console.error("Ошибка при загрузке напоминаний:", error);
+        } else {
+          const processedReminders = (data || []).map(reminder => ({
+            id: reminder.id,
+            clientId: reminder.client_id,
+            date: new Date(reminder.date),
+            time: reminder.time,
+            title: reminder.title,
+            description: reminder.description,
+            completed: reminder.completed,
+            priority: reminder.priority
+          }));
+          setRemindersData(processedReminders);
+        }
+      } catch (err) {
+        toast.error("Ошибка при загрузке напоминаний");
+        console.error("Исключение при загрузке напоминаний:", err);
       }
     };
 
     fetchReminders();
-  }, [clientId, user]);
+  }, [clientId, clientIdString, user]);
 
   return (
     <div className="space-y-6">
