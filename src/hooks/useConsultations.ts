@@ -1,94 +1,99 @@
 
-import { useState, useMemo } from "react";
-import { format } from "date-fns";
+import { useState, useEffect } from "react";
 
-// Mock consultation data
-const consultationsData = [
-  { 
+// Example consultation data - in a real app this would come from your database
+const initialConsultations = [
+  {
     id: 1,
-    clientId: 1,
+    clientId: 101,
     clientName: "Иванов Иван",
-    clientPhone: "+7 (900) 123-45-67",
-    clientDob: new Date(1990, 5, 15),
-    date: new Date(2025, 3, 5, 14, 30),
+    date: new Date(2025, 4, 25),
+    time: "10:00",
     duration: 60,
     type: "basic",
     format: "video",
     status: "scheduled",
-    notes: "Первичная консультация",
-    request: "Хочу разобраться с проблемами в личной жизни",
-    cost: 3500
+    request: "Консультация по вопросам карьеры",
+    notes: ""
   },
-  { 
+  {
     id: 2,
-    clientId: 1,
-    clientName: "Иванов Иван",
-    clientPhone: "+7 (900) 123-45-67",
-    clientDob: new Date(1990, 5, 15),
-    date: new Date(2025, 2, 20, 11, 0),
+    clientId: 102,
+    clientName: "Петрова Анна",
+    date: new Date(2025, 4, 20),
+    time: "14:30",
     duration: 90,
     type: "relationship",
     format: "in-person",
-    status: "completed",
-    notes: "Обсуждение результатов анализа",
-    request: "Нужна помощь в понимании направления развития карьеры",
-    cost: 5000
+    status: "scheduled",
+    request: "Проблемы в отношениях с партнером",
+    notes: "Клиент записан повторно"
   },
-  { 
+  {
     id: 3,
-    clientId: 2,
-    clientName: "Петрова Анна",
-    clientPhone: "+7 (900) 987-65-43",
-    clientDob: new Date(1985, 8, 20),
-    date: new Date(2025, 2, 1, 16, 0),
+    clientId: 103,
+    clientName: "Сидоров Михаил",
+    date: new Date(2025, 3, 15),
+    time: "11:00",
     duration: 60,
     type: "express",
     format: "video",
     status: "completed",
-    notes: "Разбор профиля и потенциала",
-    request: "Хочу понять свое предназначение и таланты",
-    cost: 3500
-  },
+    request: "Вопросы личностного роста",
+    notes: ""
+  }
 ];
 
-export const useConsultations = () => {
+export function useConsultations() {
+  const [consultations, setConsultations] = useState(initialConsultations);
   const [searchQuery, setSearchQuery] = useState("");
-
+  
   // Filter consultations based on search query
-  const filteredConsultations = useMemo(() => {
-    return consultationsData.filter(consultation => {
-      const query = searchQuery.toLowerCase();
-      return (
-        consultation.clientName.toLowerCase().includes(query) ||
-        consultation.clientPhone.includes(query) ||
-        consultation.request.toLowerCase().includes(query) ||
-        format(consultation.date, "dd.MM.yyyy").includes(query)
-      );
-    });
-  }, [searchQuery]);
+  const filteredConsultations = consultations.filter(consultation => {
+    if (!searchQuery.trim()) return true;
+    
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      consultation.clientName.toLowerCase().includes(searchLower) ||
+      consultation.request.toLowerCase().includes(searchLower) ||
+      consultation.type.toLowerCase().includes(searchLower) ||
+      (consultation.date && 
+        consultation.date.toLocaleDateString().includes(searchQuery))
+    );
+  });
   
-  // Split consultations into upcoming and past
-  const upcomingConsultations = useMemo(() => {
-    return filteredConsultations
-      .filter(consultation => 
-        consultation.status === "scheduled" && consultation.date > new Date()
-      )
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [filteredConsultations]);
+  // Separate consultations into upcoming and past
+  const currentDate = new Date();
   
-  const pastConsultations = useMemo(() => {
-    return filteredConsultations
-      .filter(consultation => 
-        consultation.status === "completed" || consultation.date <= new Date()
-      )
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
-  }, [filteredConsultations]);
-
+  const upcomingConsultations = filteredConsultations.filter(consultation => {
+    const consultationDate = new Date(consultation.date);
+    return (
+      consultationDate >= currentDate || 
+      consultation.status === "scheduled"
+    );
+  });
+  
+  const pastConsultations = filteredConsultations.filter(consultation => {
+    const consultationDate = new Date(consultation.date);
+    return (
+      consultationDate < currentDate || 
+      consultation.status === "completed"
+    );
+  });
+  
+  // Function to add a new consultation
+  const addConsultation = (newConsultation: any) => {
+    setConsultations(prevConsultations => [...prevConsultations, newConsultation]);
+  };
+  
   return {
+    consultations,
+    setConsultations,
     searchQuery,
     setSearchQuery,
     filteredConsultations,
     upcomingConsultations,
-    pastConsultations
+    pastConsultations,
+    addConsultation
   };
-};
+}

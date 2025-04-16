@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Search, Plus } from "lucide-react";
@@ -34,7 +33,8 @@ export default function Sessions() {
     setSearchQuery,
     upcomingConsultations,
     pastConsultations,
-    filteredConsultations
+    filteredConsultations,
+    addConsultation
   } = useConsultations();
   
   const [activeTab, setActiveTab] = useState("upcoming");
@@ -46,7 +46,6 @@ export default function Sessions() {
   const [isConsultationDetailsOpen, setIsConsultationDetailsOpen] = useState(false);
   const [isReminderFormOpen, setIsReminderFormOpen] = useState(false);
   
-  // Обработка параметров запроса для отображения деталей сессии
   useEffect(() => {
     if (sessionId) {
       const consultation = filteredConsultations.find(
@@ -58,12 +57,10 @@ export default function Sessions() {
       }
     }
     
-    // Если есть параметр client, открываем форму создания сессии для этого клиента
     if (clientId && !isConsultationFormOpen) {
-      // Имитация получения данных клиента
       setSelectedClient({
         id: clientId,
-        firstName: "Имя клиента", // В реальном приложении получаем из базы данных
+        firstName: "Имя клиента",
         lastName: "Фамилия клиента",
         phone: "+7 (XXX) XXX-XX-XX"
       });
@@ -79,9 +76,8 @@ export default function Sessions() {
   
   const handleCreateClient = (data: any) => {
     setIsClientFormOpen(false);
-    // После создания клиента, открываем форму сессии с новым клиентом
     setSelectedClient({
-      id: Date.now(), // Временный ID
+      id: Date.now(),
       firstName: data.firstName,
       lastName: data.lastName,
       patronymic: data.patronymic,
@@ -93,13 +89,11 @@ export default function Sessions() {
   };
   
   const handleCreateConsultation = (data: any) => {
-    setIsConsultationFormOpen(false);
-    console.log("Created session:", { ...data, client: selectedClient });
+    console.log("Creating consultation:", { ...data, client: selectedClient });
     
-    // Create a new consultation
     const newConsultation = {
       id: Date.now(),
-      clientId: parseInt(selectedClient.id),
+      clientId: selectedClient.id,
       clientName: `${selectedClient.lastName} ${selectedClient.firstName}`,
       date: data.date,
       time: data.time,
@@ -111,13 +105,14 @@ export default function Sessions() {
       status: "scheduled"
     };
     
-    // Show success message
+    if (addConsultation) {
+      addConsultation(newConsultation);
+    }
+    
     toast.success("Консультация успешно запланирована");
     
-    // Clear URL parameters
     navigate('/sessions', { replace: true });
     
-    // Redirect to the new consultation detail
     setTimeout(() => {
       setSelectedConsultation(newConsultation);
       setIsConsultationDetailsOpen(true);
@@ -135,19 +130,16 @@ export default function Sessions() {
   const handleCloseConsultationDetails = () => {
     setIsConsultationDetailsOpen(false);
     setSelectedConsultation(null);
-    // Удаляем параметр id из URL при закрытии деталей
     if (sessionId) {
       navigate('/sessions');
     }
   };
 
-  // Add handler to close the consultation form when pressing Escape
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         if (isConsultationFormOpen) {
           setIsConsultationFormOpen(false);
-          // Clear URL parameters
           if (clientId) {
             navigate('/sessions', { replace: true });
           }
@@ -162,7 +154,6 @@ export default function Sessions() {
     };
   }, [isConsultationFormOpen, navigate, clientId]);
 
-  // Если открыта детальная страница сессии, показываем только её
   if (isConsultationDetailsOpen && selectedConsultation) {
     return (
       <ConsultationDetails 
@@ -215,7 +206,6 @@ export default function Sessions() {
             onConsultationClick={(consultation) => {
               setSelectedConsultation(consultation);
               setIsConsultationDetailsOpen(true);
-              // Обновляем URL для отображения деталей сессии
               navigate(`/sessions?id=${consultation.id}`);
             }}
           />
@@ -233,14 +223,12 @@ export default function Sessions() {
             onConsultationClick={(consultation) => {
               setSelectedConsultation(consultation);
               setIsConsultationDetailsOpen(true);
-              // Обновляем URL для отображения деталей сессии
               navigate(`/sessions?id=${consultation.id}`);
             }}
           />
         </TabsContent>
       </Tabs>
       
-      {/* Диалог поиска клиента */}
       <ClientSearch 
         isOpen={isClientSearchOpen} 
         onClose={() => setIsClientSearchOpen(false)}
@@ -251,7 +239,6 @@ export default function Sessions() {
         }}
       />
       
-      {/* Диалог создания клиента */}
       <Dialog open={isClientFormOpen} onOpenChange={setIsClientFormOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -267,13 +254,11 @@ export default function Sessions() {
         </DialogContent>
       </Dialog>
       
-      {/* Диалог создания сессии */}
       <Dialog 
         open={isConsultationFormOpen} 
         onOpenChange={(open) => {
           setIsConsultationFormOpen(open);
           if (!open) {
-            // Clear URL parameters when dialog is closed
             if (clientId) {
               navigate('/sessions', { replace: true });
             }
@@ -295,7 +280,6 @@ export default function Sessions() {
         </DialogContent>
       </Dialog>
       
-      {/* Диалог создания напоминания */}
       <Dialog open={isReminderFormOpen} onOpenChange={setIsReminderFormOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>

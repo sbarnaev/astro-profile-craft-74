@@ -26,6 +26,8 @@ interface DateFieldProps {
 }
 
 export function DateField({ form }: DateFieldProps) {
+  const [open, setOpen] = React.useState(false);
+  
   return (
     <FormField
       control={form.control}
@@ -33,7 +35,7 @@ export function DateField({ form }: DateFieldProps) {
       render={({ field }) => (
         <FormItem className="flex flex-col">
           <FormLabel>Дата</FormLabel>
-          <Popover>
+          <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <FormControl>
                 <Button
@@ -56,7 +58,10 @@ export function DateField({ form }: DateFieldProps) {
               <Calendar
                 mode="single"
                 selected={field.value}
-                onSelect={field.onChange}
+                onSelect={(date) => {
+                  field.onChange(date);
+                  setOpen(false); // Close the calendar after selection
+                }}
                 locale={ru}
                 className={cn("p-3 pointer-events-auto")}
               />

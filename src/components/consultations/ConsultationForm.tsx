@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -84,6 +83,8 @@ interface ConsultationFormProps {
 
 export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  
   const form = useForm<ConsultationFormValues>({
     resolver: zodResolver(consultationFormSchema),
     defaultValues: {
@@ -165,7 +166,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Дата консультации</FormLabel>
-                <Popover>
+                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
@@ -188,7 +189,10 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
                     <Calendar
                       mode="single"
                       selected={field.value}
-                      onSelect={field.onChange}
+                      onSelect={(date) => {
+                        field.onChange(date);
+                        setIsCalendarOpen(false);
+                      }}
                       disabled={(date) =>
                         date < new Date(new Date().setHours(0, 0, 0, 0))
                       }
