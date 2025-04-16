@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 // Схема формы
@@ -42,4 +41,5 @@ export interface AppointmentFormProps {
   initialDate?: Date;
   initialTime?: string;
   onSubmit: (values: any) => void;
+  initialClient?: any; // Add the initialClient property
 }

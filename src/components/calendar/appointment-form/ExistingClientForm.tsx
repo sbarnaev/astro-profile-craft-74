@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { parse, format } from "date-fns";
@@ -20,6 +20,7 @@ interface ExistingClientFormProps {
   onSubmit: (values: any) => void;
   onClose: () => void;
   onCreateNew: () => void;
+  initialClient?: any;
 }
 
 export function ExistingClientForm({ 
@@ -27,7 +28,8 @@ export function ExistingClientForm({
   initialTime, 
   onSubmit, 
   onClose, 
-  onCreateNew 
+  onCreateNew,
+  initialClient
 }: ExistingClientFormProps) {
   const [customCost, setCustomCost] = React.useState<number | null>(null);
   
@@ -41,6 +43,13 @@ export function ExistingClientForm({
       cost: 3500,
     },
   });
+  
+  // Set form values when initialClient is provided
+  useEffect(() => {
+    if (initialClient?.id) {
+      form.setValue("clientId", initialClient.id);
+    }
+  }, [initialClient, form]);
   
   // Update cost when consultation type changes
   React.useEffect(() => {

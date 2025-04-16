@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,8 +17,16 @@ export function AppointmentForm({
   initialDate,
   initialTime,
   onSubmit,
+  initialClient,
 }: AppointmentFormProps) {
   const [activeTab, setActiveTab] = useState<string>("existing");
+  
+  // Set active tab to "existing" when initialClient is provided
+  useEffect(() => {
+    if (initialClient) {
+      setActiveTab("existing");
+    }
+  }, [initialClient]);
   
   // Обработка события создания нового клиента
   const handleCreateNewClient = (clientData: any) => {
@@ -52,7 +60,8 @@ export function AppointmentForm({
               initialTime={initialTime} 
               onSubmit={onSubmit} 
               onClose={onClose} 
-              onCreateNew={handleCreateNew} 
+              onCreateNew={handleCreateNew}
+              initialClient={initialClient} 
             />
           </TabsContent>
           
