@@ -295,12 +295,31 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
         </div>
         
         <div className="pt-4 space-y-2">
-          {client.hasAnalysis ? (
-            <Button className="w-full" asChild>
-              <Link to={`/analysis/${client.analysisId}`}>
-                <FileText className="mr-2 h-4 w-4" />
-                Анализ
-              </Link>
+          {client.hasAnalysis && client.analysisId ? (
+            <Button className="w-full" onClick={() => {
+              const analysis = {
+                id: parseInt(client.analysisId),
+                clientId: parseInt(client.id),
+                clientName: `${client.lastName} ${client.firstName} ${client.patronymic || ""}`.trim(),
+                clientPhone: client.phone,
+                clientDob: client.dob,
+                date: new Date(), 
+                type: "full" as const,
+                status: "completed" as const,
+                title: "Полный анализ личности",
+                codes: {
+                  personality: client.personalityCode,
+                  connector: client.connectorCode,
+                  implementation: client.realizationCode,
+                  generator: client.generatorCode,
+                  mission: client.missionCode,
+                }
+              };
+              
+              window.location.href = `/analysis/${client.analysisId}`;
+            }}>
+              <FileText className="mr-2 h-4 w-4" />
+              Анализ
             </Button>
           ) : (
             <Button className="w-full" asChild>
@@ -311,11 +330,18 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
             </Button>
           )}
           
-          <Button variant="outline" className="w-full" asChild>
-            <Link to={`/consultations/schedule?client=${client.id}`}>
-              <Calendar className="mr-2 h-4 w-4" />
-              Записать на консультацию
-            </Link>
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={() => {
+              const event = new CustomEvent('openSessionDialog', { 
+                detail: { clientId: client.id }
+              });
+              document.dispatchEvent(event);
+            }}
+          >
+            <Calendar className="mr-2 h-4 w-4" />
+            Записать на сессию
           </Button>
           
           <Button 

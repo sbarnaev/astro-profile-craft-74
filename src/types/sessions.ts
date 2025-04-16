@@ -1,11 +1,11 @@
 
-export interface ConsultationType {
+export interface SessionType {
   id: string;
   name: string;
   duration: number;
 }
 
-export interface Consultation {
+export interface Session {
   id: number;
   clientId: number;
   clientName: string;

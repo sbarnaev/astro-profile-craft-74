@@ -39,15 +39,15 @@ const App = () => (
             <Route path="/analysis" element={<Analysis />} />
             <Route path="/analysis/:id" element={<Analysis />} />
             <Route path="/calendar" element={<Calendar />} />
-            <Route path="/consultations" element={<Consultations />} />
-            <Route path="/consultations/schedule" element={<Consultations />} />
+            <Route path="/sessions" element={<Consultations />} />
+            <Route path="/sessions/schedule" element={<Consultations />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/knowledge" element={<Knowledge />} />
             <Route path="/reminders" element={<Reminders />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/settings/schedule" element={<ScheduleSettings />} />
           </Route>
-          {/* Публичная страница для записи на консультацию (без MainLayout) */}
+          {/* Публичная страница для записи на сессию (без MainLayout) */}
           <Route path="/booking/:consultantId" element={<PublicBooking />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

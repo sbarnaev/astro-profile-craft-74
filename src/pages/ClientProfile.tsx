@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useLocation, Link } from "react-router-dom";
 import { 
@@ -84,6 +83,21 @@ const ClientProfile = () => {
   });
   
   useEffect(() => {
+    const handleOpenSessionDialog = (event: CustomEvent) => {
+      const clientId = event.detail?.clientId;
+      if (clientId) {
+        navigate(`/consultations/schedule?client=${clientId}`);
+      }
+    };
+    
+    document.addEventListener('openSessionDialog', handleOpenSessionDialog as EventListener);
+    
+    return () => {
+      document.removeEventListener('openSessionDialog', handleOpenSessionDialog as EventListener);
+    };
+  }, [navigate]);
+  
+  useEffect(() => {
     if (location.state?.openReminder) {
       setActiveTab("reminders");
       setOpenReminderDialog(true);
@@ -151,8 +165,18 @@ const ClientProfile = () => {
             <DialogTitle>Создать напоминание</DialogTitle>
           </DialogHeader>
           <div className="mt-4">
-            {/* Компонент формы напоминания */}
-            {/* ...код формы напоминания... */}
+            {client && (
+              <ReminderForm
+                isOpen={openReminderDialog}
+                onClose={() => setOpenReminderDialog(false)}
+                onSubmit={(data) => {
+                  console.log("Created reminder:", data);
+                  toast.success("Напоминание создано");
+                  setOpenReminderDialog(false);
+                }}
+                clientId={parseInt(client.id)}
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>

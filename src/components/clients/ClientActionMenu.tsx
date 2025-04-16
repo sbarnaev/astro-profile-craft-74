@@ -14,6 +14,15 @@ interface ClientActionMenuProps {
 }
 
 export function ClientActionMenu({ clientId }: ClientActionMenuProps) {
+  const handleSessionSchedule = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Открытие диалога для записи на сессию
+    const event = new CustomEvent('openSessionDialog', { 
+      detail: { clientId: clientId }
+    });
+    document.dispatchEvent(event);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -31,11 +40,9 @@ export function ClientActionMenu({ clientId }: ClientActionMenuProps) {
             <span>Анализ</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to={`/consultations/schedule?client=${clientId}`}>
-            <Calendar className="mr-2 h-4 w-4" />
-            <span>Записать на консультацию</span>
-          </Link>
+        <DropdownMenuItem onClick={handleSessionSchedule}>
+          <Calendar className="mr-2 h-4 w-4" />
+          <span>Записать на сессию</span>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to={`/clients/${clientId}`} state={{ openReminder: true }}>
