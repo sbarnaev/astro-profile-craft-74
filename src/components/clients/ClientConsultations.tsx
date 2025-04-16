@@ -63,7 +63,7 @@ const consultationsData = [
 ];
 
 interface ClientConsultationsProps {
-  clientId: number;
+  clientId: string;
 }
 
 export const ClientConsultations = ({ clientId }: ClientConsultationsProps) => {
