@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -15,7 +14,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ReminderForm } from "@/components/consultations/ReminderForm";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 // Пример данных о напоминаниях
 const initialRemindersData = [
@@ -62,13 +64,18 @@ const initialRemindersData = [
 ];
 
 interface ClientRemindersProps {
-  clientId: string;
+  clientId: number;
 }
 
 export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   const [remindersData, setRemindersData] = useState(initialRemindersData);
   const [isReminderFormOpen, setIsReminderFormOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<number | null>(null);
+  const [reminderText, setReminderText] = useState("");
+  const [reminderDate, setReminderDate] = useState<Date | null>(null);
+  const [reminderTime, setReminderTime] = useState("");
+  const [reminderPriority, setReminderPriority] = useState("medium");
+  const [reminderDateText, setReminderDateText] = useState("");
   
   // Фильтрация напоминаний для текущего клиента и сортировка по дате и статусу
   const clientReminders = remindersData
@@ -126,53 +133,201 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   };
 
   const handleEditReminder = (id: number) => {
-    setEditingReminder(id);
+    const reminder = remindersData.find(r => r.id === id);
+    if (reminder) {
+      setReminderText(reminder.title);
+      setReminderDate(reminder.date);
+      setReminderDateText(format(reminder.date, "dd.MM.yyyy"));
+      setReminderTime(reminder.time);
+      setReminderPriority(reminder.priority);
+      setEditingReminder(id);
+      setIsReminderFormOpen(true);
+    }
+  };
+
+  const resetReminderForm = () => {
+    setReminderText("");
+    setReminderDate(null);
+    setReminderDateText("");
+    setReminderTime("");
+    setReminderPriority("medium");
+  };
+
+  const handleOpenNewReminderForm = () => {
+    resetReminderForm();
     setIsReminderFormOpen(true);
   };
 
-  const handleCreateReminder = (data: any) => {
-    // Создать новое напоминание
-    const newReminder = {
-      id: Math.floor(Math.random() * 10000),
-      clientId,
-      date: data.date,
-      time: data.time,
-      title: data.text,
-      description: null,
-      completed: false,
-      priority: data.priority
-    };
+  const handleDateTextChange = (value: string) => {
+    setReminderDateText(value);
     
-    setRemindersData(prev => [...prev, newReminder]);
-    setIsReminderFormOpen(false);
-    
-    toast.success("Напоминание создано", {
-      description: "Новое напоминание добавлено в список"
-    });
+    // Try to parse the date from text
+    const parts = value.split('.');
+    if (parts.length === 3) {
+      const day = parseInt(parts[0]);
+      const month = parseInt(parts[1]) - 1; // Months are 0-indexed in JS Date
+      const year = parseInt(parts[2]);
+      
+      if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+        const newDate = new Date(year, month, day);
+        if (newDate.toString() !== "Invalid Date") {
+          setReminderDate(newDate);
+        }
+      }
+    }
   };
+
+  const handleCalendarSelect = (date: Date | undefined) => {
+    if (date) {
+      setReminderDate(date);
+      setReminderDateText(format(date, "dd.MM.yyyy"));
+    }
+  };
+
+  const handleSubmitReminder = () => {
+    if (!reminderText || !reminderDate) {
+      toast.error("Ошибка создания напоминания", {
+        description: "Пожалуйста, заполните текст напоминания и выберите дату"
+      });
+      return;
+    }
+
+    if (editingReminder) {
+      // Обновление существующего напоминания
+      setRemindersData(prev => prev.map(rem => 
+        rem.id === editingReminder 
+          ? {
+              ...rem,
+              date: reminderDate,
+              time: reminderTime,
+              title: reminderText,
+              priority: reminderPriority
+            }
+          : rem
+      ));
+      
+      toast.success("Напоминание обновлено", {
+        description: "Изменения сохранены"
+      });
+    } else {
+      // Создать новое напоминание
+      const newReminder = {
+        id: Math.floor(Math.random() * 10000),
+        clientId,
+        date: reminderDate,
+        time: reminderTime,
+        title: reminderText,
+        description: null,
+        completed: false,
+        priority: reminderPriority
+      };
+      
+      setRemindersData(prev => [...prev, newReminder]);
+      
+      toast.success("Напоминание создано", {
+        description: "Новое напоминание добавлено в список"
+      });
+    }
+    
+    setIsReminderFormOpen(false);
+    setEditingReminder(null);
+    resetReminderForm();
+  };
+
+  const ReminderForm = () => (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="reminder-text">Текст напоминания</Label>
+        <Input 
+          id="reminder-text" 
+          value={reminderText} 
+          onChange={(e) => setReminderText(e.target.value)}
+          placeholder="Введите текст напоминания" 
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="reminder-date">Дата</Label>
+          <div className="flex space-x-2">
+            <Input 
+              id="reminder-date" 
+              value={reminderDateText} 
+              onChange={(e) => handleDateTextChange(e.target.value)}
+              placeholder="ДД.ММ.ГГГГ" 
+              className="flex-grow"
+            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" className="h-10 w-10">
+                  <Calendar className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={reminderDate || undefined}
+                  onSelect={handleCalendarSelect}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="reminder-time">Время</Label>
+          <Input 
+            id="reminder-time" 
+            type="time" 
+            value={reminderTime} 
+            onChange={(e) => setReminderTime(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="reminder-priority">Приоритет</Label>
+        <select
+          id="reminder-priority"
+          value={reminderPriority}
+          onChange={(e) => setReminderPriority(e.target.value)}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <option value="low">Низкий</option>
+          <option value="medium">Средний</option>
+          <option value="high">Высокий</option>
+        </select>
+      </div>
+
+      <div className="flex justify-end gap-2 pt-4">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={() => {
+            setIsReminderFormOpen(false);
+            setEditingReminder(null);
+            resetReminderForm();
+          }}
+        >
+          Отмена
+        </Button>
+        <Button type="button" onClick={handleSubmitReminder}>
+          {editingReminder ? "Сохранить" : "Создать"}
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Напоминания</h3>
-        <Dialog open={isReminderFormOpen} onOpenChange={setIsReminderFormOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Создать напоминание
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Создать напоминание</DialogTitle>
-            </DialogHeader>
-            <ReminderForm 
-              isOpen={isReminderFormOpen}
-              onClose={() => setIsReminderFormOpen(false)}
-              onSubmit={handleCreateReminder}
-            />
-          </DialogContent>
-        </Dialog>
+        <Button size="sm" onClick={handleOpenNewReminderForm}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Создать напоминание
+        </Button>
       </div>
       
       {activeReminders.length > 0 && (
@@ -274,40 +429,21 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
           <p className="text-muted-foreground mb-6">
             Для этого клиента нет активных или выполненных напоминаний
           </p>
-          <Button onClick={() => setIsReminderFormOpen(true)}>
+          <Button onClick={handleOpenNewReminderForm}>
             <AlarmClock className="mr-2 h-4 w-4" />
             Создать напоминание
           </Button>
         </div>
       )}
 
-      <Dialog open={editingReminder !== null} onOpenChange={(open) => !open && setEditingReminder(null)}>
+      <Dialog open={isReminderFormOpen} onOpenChange={setIsReminderFormOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Редактировать напоминание</DialogTitle>
+            <DialogTitle>
+              {editingReminder ? "Редактировать напоминание" : "Создать напоминание"}
+            </DialogTitle>
           </DialogHeader>
-          <ReminderForm 
-            isOpen={editingReminder !== null}
-            onClose={() => setEditingReminder(null)}
-            onSubmit={(data) => {
-              // Обновление существующего напоминания
-              setRemindersData(prev => prev.map(rem => 
-                rem.id === editingReminder 
-                  ? {
-                      ...rem,
-                      date: data.date,
-                      time: data.time,
-                      title: data.text,
-                      priority: data.priority
-                    }
-                  : rem
-              ));
-              setEditingReminder(null);
-              toast.success("Напоминание обновлено", {
-                description: "Изменения сохранены"
-              });
-            }}
-          />
+          <ReminderForm />
         </DialogContent>
       </Dialog>
     </div>
