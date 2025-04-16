@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -142,7 +143,7 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     }
 
     const newReminder = {
-      client_id: clientId,
+      client_id: String(clientId), // Convert to string as expected by Supabase
       title: reminderText,
       date: format(reminderDate, "yyyy-MM-dd"),
       time: reminderTime,
@@ -172,14 +173,25 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
       const { data, error } = await supabase
         .from('reminders')
         .select('*')
-        .eq('client_id', clientId)
+        .eq('client_id', String(clientId)) // Convert to string as expected by Supabase
         .order('created_at', { ascending: false });
 
       if (error) {
         toast.error("Не удалось загрузить напоминания");
         console.error(error);
       } else {
-        setRemindersData(data || []);
+        // Process reminders from supabase to match the format we use in the component
+        const processedReminders = (data || []).map(reminder => ({
+          id: reminder.id,
+          clientId: parseInt(reminder.client_id),
+          date: new Date(reminder.date),
+          time: reminder.time,
+          title: reminder.title,
+          description: reminder.description,
+          completed: reminder.completed,
+          priority: reminder.priority
+        }));
+        setRemindersData(processedReminders);
       }
     };
 

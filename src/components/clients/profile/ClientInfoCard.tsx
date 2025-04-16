@@ -165,10 +165,17 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
         }
 
         const mockAnalysis: AnalysisType = {
-          ...analysisData,
+          id: parseInt(analysisData.id),
+          clientId: parseInt(analysisData.client_id),
           clientName: fullName,
           clientPhone: client.phone,
           clientDob: client.dob,
+          date: new Date(analysisData.created_at),
+          type: analysisData.type as "full" | "brief" | "relationship",
+          status: analysisData.status as "completed" | "in-progress",
+          title: analysisData.title,
+          codes: analysisData.codes || {},
+          notes: ""
         };
         
         setCurrentAnalysis(mockAnalysis);
@@ -210,7 +217,7 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
                     </AvatarFallback>
                   )}
                 </Avatar>
-                <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center">
                   <Upload className="h-6 w-6 text-white" />
                 </div>
               </div>

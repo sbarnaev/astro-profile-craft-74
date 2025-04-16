@@ -30,6 +30,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const consultationTypes = [
   { id: "express", name: "Экспресс-консультация" },
@@ -128,13 +130,10 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
     }
   };
 
-  // Safely format date only if it's a valid Date object
   const formatClientDob = (date: any) => {
     if (!date) return "";
-    // Ensure date is a valid Date object
     const dateObj = date instanceof Date ? date : new Date(date);
     
-    // Check if the date is valid before formatting
     if (isNaN(dateObj.getTime())) {
       return "Некорректная дата";
     }
