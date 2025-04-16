@@ -175,24 +175,24 @@ const Analysis = () => {
                 <TabsTrigger value="standard">Стандартный анализ</TabsTrigger>
                 <TabsTrigger value="ai">AI анализ</TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="standard">
+                <AnalysisView 
+                  analysis={selectedAnalysis} 
+                  onBack={() => setSelectedAnalysis(null)} 
+                />
+              </TabsContent>
+              
+              <TabsContent value="ai">
+                <AIAnalysisView
+                  clientData={selectedAnalysis}
+                  analysisType={selectedAnalysis.type}
+                  partnerData={selectedAnalysis.partner}
+                  onAnalysisGenerated={handleAnalysisGenerated}
+                />
+              </TabsContent>
             </Tabs>
           </div>
-          
-          <TabsContent value="standard" forceMount={true} hidden={viewMode !== "standard"}>
-            <AnalysisView 
-              analysis={selectedAnalysis} 
-              onBack={() => setSelectedAnalysis(null)} 
-            />
-          </TabsContent>
-          
-          <TabsContent value="ai" forceMount={true} hidden={viewMode !== "ai"}>
-            <AIAnalysisView
-              clientData={selectedAnalysis}
-              analysisType={selectedAnalysis.type}
-              partnerData={selectedAnalysis.partner}
-              onAnalysisGenerated={handleAnalysisGenerated}
-            />
-          </TabsContent>
         </div>
       ) : (
         <>
