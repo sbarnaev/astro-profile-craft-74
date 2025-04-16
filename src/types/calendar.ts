@@ -1,7 +1,7 @@
 
 export interface AppointmentInterface {
   id: number;
-  clientId?: number;
+  clientId: number; // Changed from optional to required
   clientName: string;
   date: Date;
   duration: number;

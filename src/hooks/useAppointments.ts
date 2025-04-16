@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AppointmentInterface } from "@/types/calendar";
 import { toast } from "sonner";
@@ -87,11 +86,11 @@ export function useAppointments() {
       return;
     }
     
-    // Для примера, добавим встречу в список
-    const newAppointment = {
+    // For example, we'll add an appointment to the list
+    const newAppointment: AppointmentInterface = {
       id: appointments.length + 1,
       clientName: data.clientName,
-      clientId: data.clientId, // ID клиента или временное значение
+      clientId: data.clientId, // This is now required
       date: data.appointmentDateTime || new Date(),
       duration: data.duration || 60,
       type: data.consultationType 

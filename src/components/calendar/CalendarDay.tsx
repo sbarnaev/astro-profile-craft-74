@@ -5,6 +5,7 @@ import { ru } from "date-fns/locale";
 import { CalendarIcon, Clock, Users, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { AppointmentForm } from "./AppointmentForm";
 import { AppointmentInterface } from "@/types/calendar";
 import { AppointmentDrawer } from "./AppointmentDrawer";
