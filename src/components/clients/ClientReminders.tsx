@@ -62,7 +62,7 @@ const initialRemindersData = [
 ];
 
 interface ClientRemindersProps {
-  clientId: number;
+  clientId: string;
 }
 
 export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
