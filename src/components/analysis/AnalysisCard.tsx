@@ -12,6 +12,7 @@ import { PersonalityCodesSection } from "./PersonalityCodesSection";
 import { SummarySection } from "./SummarySection";
 import { DetailSections } from "./DetailSections";
 import { NotesSection } from "./NotesSection";
+import { toast } from "sonner";
 
 interface AnalysisCardProps {
   client: {
@@ -26,6 +27,7 @@ interface AnalysisCardProps {
 
 export function AnalysisCard({ client, analysis, onBack }: AnalysisCardProps) {
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const [notes, setNotes] = useState(analysis?.notes || "");
   const isMobile = useIsMobile();
   
   const birthDateString = format(client.dob, "yyyy-MM-dd");
@@ -37,6 +39,13 @@ export function AnalysisCard({ client, analysis, onBack }: AnalysisCardProps) {
     } else {
       setOpenSection(section);
     }
+  };
+
+  const handleSaveNotes = (newNotes: string) => {
+    setNotes(newNotes);
+    // Здесь будет код для сохранения заметок в базу данных
+    console.log("Сохранение заметок:", newNotes);
+    toast.success("Заметки сохранены");
   };
 
   return (
@@ -65,8 +74,8 @@ export function AnalysisCard({ client, analysis, onBack }: AnalysisCardProps) {
           codes={codes} 
         />
         <NotesSection 
-          initialNotes={analysis?.notes || ""} 
-          onSave={(notes) => console.log("Сохранение заметок:", notes)}
+          initialNotes={notes} 
+          onSave={handleSaveNotes}
         />
       </div>
     </div>

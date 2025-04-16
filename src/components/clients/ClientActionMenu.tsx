@@ -8,6 +8,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface ClientActionMenuProps {
   clientId: string;
@@ -18,16 +19,22 @@ export function ClientActionMenu({ clientId }: ClientActionMenuProps) {
 
   const handleSessionSchedule = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Create a custom event to handle session scheduling
-    const event = new CustomEvent('openSessionDialog', {
-      detail: { clientId }
-    });
-    document.dispatchEvent(event);
+    try {
+      // Create a custom event to handle session scheduling
+      const event = new CustomEvent('openSessionDialog', {
+        detail: { clientId }
+      });
+      document.dispatchEvent(event);
+    } catch (error) {
+      console.error("Ошибка при открытии диалога сессии:", error);
+      toast.error("Не удалось открыть форму записи на сессию");
+    }
   };
 
   const handleOpenAnalysis = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(`/analysis/${clientId}`);
+    // Перенаправление на страницу клиента, где будет показан анализ
+    navigate(`/clients/${clientId}`);
   };
 
   return (

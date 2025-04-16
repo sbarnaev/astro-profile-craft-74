@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { AnalysisType } from "@/types/sessions";
+import { AnalysisView } from "@/components/analysis/AnalysisView";
 
 interface ClientInfoCardProps {
   client: {
@@ -104,6 +106,8 @@ const getArchetypeName = (code: number | string | null): string => {
 export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCardProps) => {
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [currentAnalysis, setCurrentAnalysis] = useState<AnalysisType | null>(null);
   const navigate = useNavigate();
 
   const fullName = `${client.lastName} ${client.firstName} ${client.patronymic || ""}`.trim();
@@ -134,22 +138,58 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
   };
   
   const handleOpenSessionDialog = () => {
-    // Create a custom event to handle session scheduling
-    const event = new CustomEvent('openSessionDialog', {
-      detail: { clientId: client.id }
-    });
-    document.dispatchEvent(event);
+    try {
+      // Create a custom event to handle session scheduling
+      const event = new CustomEvent('openSessionDialog', {
+        detail: { clientId: client.id }
+      });
+      document.dispatchEvent(event);
+    } catch (error) {
+      console.error("Ошибка при открытии диалога сессии:", error);
+      toast.error("Не удалось открыть форму записи на сессию");
+    }
   };
   
   const handleOpenAnalysis = () => {
     if (client.hasAnalysis && client.analysisId) {
-      // Directly navigate to the analysis page with the ID
-      navigate(`/analysis/${client.analysisId}`);
+      // Вместо навигации, находим анализ и отображаем его
+      const mockAnalysis: AnalysisType = {
+        id: parseInt(client.analysisId),
+        clientId: parseInt(client.id),
+        clientName: fullName,
+        clientPhone: client.phone,
+        clientDob: client.dob,
+        date: new Date(),
+        type: "full",
+        status: "completed",
+        title: "Полный анализ личности",
+        codes: {
+          personality: client.personalityCode || 0,
+          connector: client.connectorCode || 0,
+          implementation: client.realizationCode || 0,
+          generator: client.generatorCode || 0,
+          mission: client.missionCode || "0"
+        },
+        notes: ""
+      };
+      
+      setCurrentAnalysis(mockAnalysis);
+      setShowAnalysis(true);
     } else {
-      // Navigate to create new analysis page with client ID
+      // Если анализа нет, перенаправляем на создание
       navigate(`/analysis/new?client=${client.id}`);
     }
   };
+
+  // Если показываем анализ, то рендерим его на весь экран
+  if (showAnalysis && currentAnalysis) {
+    return (
+      <AnalysisView 
+        analysis={currentAnalysis} 
+        onBack={() => setShowAnalysis(false)} 
+      />
+    );
+  }
 
   return (
     <Card className="border-none">

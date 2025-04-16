@@ -4,6 +4,7 @@ import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 interface NotesSectionProps {
   initialNotes: string;
@@ -16,8 +17,10 @@ export function NotesSection({ initialNotes, onSave }: NotesSectionProps) {
   const handleSaveNotes = () => {
     if (onSave) {
       onSave(notes);
+      toast.success("Заметки сохранены");
     } else {
       console.log("Сохранение заметок:", notes);
+      toast.success("Заметки сохранены");
       // Здесь будет логика сохранения заметок
     }
   };

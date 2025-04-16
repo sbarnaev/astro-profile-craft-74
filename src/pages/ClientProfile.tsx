@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useLocation, Link, useNavigate } from "react-router-dom";
 import { 
@@ -133,6 +132,7 @@ const ClientProfile = () => {
 
   const handleReminderSubmit = (data: any) => {
     console.log("Created reminder:", data);
+    // Здесь будет реальный код для сохранения напоминания
     toast.success("Напоминание создано");
     setOpenReminderDialog(false);
   };
