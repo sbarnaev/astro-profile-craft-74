@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +17,8 @@ import {
   Sun,
   Smartphone,
   Save,
-  UserCircle2
+  UserCircle2,
+  Calendar
 } from "lucide-react";
 
 const Settings = () => {
@@ -112,6 +114,21 @@ const Settings = () => {
                     defaultValue="Профессиональный мастер по анализу личности по дате рождения с опытом более 5 лет. Помогаю людям раскрыть их потенциал и понять свое предназначение."
                   />
                 </div>
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Настройки расписания и записи</h3>
+                <p className="text-muted-foreground">
+                  Настройте ваше рабочее расписание и параметры онлайн-записи для клиентов
+                </p>
+                <Button asChild>
+                  <Link to="/settings/schedule">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Настроить расписание
+                  </Link>
+                </Button>
               </div>
               
               <Button className="w-full sm:w-auto">

@@ -19,6 +19,10 @@ import Analytics from "./pages/Analytics";
 import Knowledge from "./pages/Knowledge";
 import Reminders from "./pages/Reminders";
 
+// Новые страницы для онлайн-записи
+import ScheduleSettings from "./pages/ScheduleSettings";
+import PublicBooking from "./pages/PublicBooking";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -41,7 +45,10 @@ const App = () => (
             <Route path="/knowledge" element={<Knowledge />} />
             <Route path="/reminders" element={<Reminders />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/schedule" element={<ScheduleSettings />} />
           </Route>
+          {/* Публичная страница для записи на консультацию (без MainLayout) */}
+          <Route path="/booking/:consultantId" element={<PublicBooking />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
