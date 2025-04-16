@@ -177,7 +177,7 @@ const ClientProfile = () => {
                   toast.success("Напоминание создано");
                   setOpenReminderDialog(false);
                 }}
-                clientId={parseInt(client.id)}
+                consultationId={parseInt(client.id)}
               />
             )}
           </div>

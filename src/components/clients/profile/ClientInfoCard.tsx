@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Calendar, FileText, Bell, Share2, MessageCircle, User, Upload, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,6 +103,7 @@ const getArchetypeName = (code: number | string | null): string => {
 export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCardProps) => {
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fullName = `${client.lastName} ${client.firstName} ${client.patronymic || ""}`.trim();
   const formattedDate = new Intl.DateTimeFormat('ru-RU', { 
@@ -130,6 +132,18 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
     setAvatarUploadOpen(false);
   };
   
+  const handleOpenSessionDialog = () => {
+    navigate(`/sessions/schedule?client=${client.id}`);
+  };
+  
+  const handleOpenAnalysis = () => {
+    if (client.hasAnalysis && client.analysisId) {
+      navigate(`/analysis/${client.analysisId}`);
+    } else {
+      navigate(`/analysis/new?client=${client.id}`);
+    }
+  };
+
   return (
     <Card className="border-none">
       <CardHeader className="pb-2">
@@ -296,49 +310,21 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
         
         <div className="pt-4 space-y-2">
           {client.hasAnalysis && client.analysisId ? (
-            <Button className="w-full" onClick={() => {
-              const analysis = {
-                id: parseInt(client.analysisId),
-                clientId: parseInt(client.id),
-                clientName: `${client.lastName} ${client.firstName} ${client.patronymic || ""}`.trim(),
-                clientPhone: client.phone,
-                clientDob: client.dob,
-                date: new Date(), 
-                type: "full" as const,
-                status: "completed" as const,
-                title: "Полный анализ личности",
-                codes: {
-                  personality: client.personalityCode,
-                  connector: client.connectorCode,
-                  implementation: client.realizationCode,
-                  generator: client.generatorCode,
-                  mission: client.missionCode,
-                }
-              };
-              
-              window.location.href = `/analysis/${client.analysisId}`;
-            }}>
+            <Button className="w-full" onClick={handleOpenAnalysis}>
               <FileText className="mr-2 h-4 w-4" />
               Анализ
             </Button>
           ) : (
-            <Button className="w-full" asChild>
-              <Link to={`/analysis/new?client=${client.id}`}>
-                <FileText className="mr-2 h-4 w-4" />
-                Создать анализ
-              </Link>
+            <Button className="w-full" onClick={handleOpenAnalysis}>
+              <FileText className="mr-2 h-4 w-4" />
+              Создать анализ
             </Button>
           )}
           
           <Button 
             variant="outline" 
             className="w-full" 
-            onClick={() => {
-              const event = new CustomEvent('openSessionDialog', { 
-                detail: { clientId: client.id }
-              });
-              document.dispatchEvent(event);
-            }}
+            onClick={handleOpenSessionDialog}
           >
             <Calendar className="mr-2 h-4 w-4" />
             Записать на сессию

@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { PlusCircle, Calendar, Video, Users } from "lucide-react";
@@ -7,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ConsultationList, getConsultationTypeText } from "@/components/consultations/ConsultationList";
-import { useNavigate } from "react-router-dom";
 
 // Временные данные для сессий клиента
 const sessionsData = [

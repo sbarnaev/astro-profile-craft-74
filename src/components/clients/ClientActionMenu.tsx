@@ -1,5 +1,5 @@
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MoreHorizontal, FileText, Calendar, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -10,17 +10,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface ClientActionMenuProps {
-  clientId: string; // Changed from number to string to match Supabase UUID format
+  clientId: string;
 }
 
 export function ClientActionMenu({ clientId }: ClientActionMenuProps) {
+  const navigate = useNavigate();
+
   const handleSessionSchedule = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Открытие диалога для записи на сессию
-    const event = new CustomEvent('openSessionDialog', { 
-      detail: { clientId: clientId }
-    });
-    document.dispatchEvent(event);
+    navigate(`/sessions/schedule?client=${clientId}`);
   };
 
   return (
