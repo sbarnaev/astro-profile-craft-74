@@ -33,6 +33,7 @@ export default function Sessions() {
     selectedConsultation,
     setSelectedConsultation,
     isConsultationDetailsOpen,
+    setIsConsultationDetailsOpen, // Fixed: Adding this to the destructured object
     isReminderFormOpen,
     setIsReminderFormOpen,
     // Handlers
