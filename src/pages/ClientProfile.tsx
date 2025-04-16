@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { Calendar, FileText, Bell, Clock, User, Edit, ChevronLeft, MessageCircle, Share2, Info, Eye, Upload, DollarSign } from "lucide-react";
@@ -194,11 +195,16 @@ const ClientProfile = () => {
           email: data.email || null,
           source: data.source,
           communication_channel: data.communicationChannel,
-          personality_code: Number(data.personalityCode),
-          connector_code: Number(data.connectorCode),
-          realization_code: Number(data.realizationCode),
-          generator_code: Number(data.generatorCode),
-          mission_code: String(data.missionCode)
+          personality_code: data.personalityCode !== undefined && data.personalityCode !== null ? 
+            Number(data.personalityCode) : null,
+          connector_code: data.connectorCode !== undefined && data.connectorCode !== null ? 
+            Number(data.connectorCode) : null,
+          realization_code: data.realizationCode !== undefined && data.realizationCode !== null ? 
+            Number(data.realizationCode) : null,
+          generator_code: data.generatorCode !== undefined && data.generatorCode !== null ? 
+            Number(data.generatorCode) : null,
+          mission_code: data.missionCode !== undefined && data.missionCode !== null ? 
+            String(data.missionCode) : null
         })
         .eq('id', client.id);
         

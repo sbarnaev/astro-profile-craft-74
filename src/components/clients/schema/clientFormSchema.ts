@@ -12,11 +12,11 @@ export const formSchema = z.object({
   email: z.string().email({ message: "Неверный формат email" }).optional().or(z.literal("")),
   source: z.string().min(1, { message: "Укажите источник" }),
   communicationChannel: z.string().min(1, { message: "Укажите канал общения" }),
-  personalityCode: z.number().optional(),
-  connectorCode: z.number().optional(),
-  realizationCode: z.number().optional(),
-  generatorCode: z.number().optional(),
-  missionCode: z.string().or(z.number()).optional(),
+  personalityCode: z.number().nullable().optional(),
+  connectorCode: z.number().nullable().optional(),
+  realizationCode: z.number().nullable().optional(),
+  generatorCode: z.number().nullable().optional(),
+  missionCode: z.union([z.string(), z.number()]).nullable().optional(),
 });
 
 export type ClientFormValues = z.infer<typeof formSchema>;
