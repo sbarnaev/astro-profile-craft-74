@@ -164,6 +164,8 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
           return;
         }
 
+        const safeCodes = analysisData.codes as Record<string, any> || {};
+
         const mockAnalysis: AnalysisType = {
           id: parseInt(analysisData.id),
           clientId: parseInt(analysisData.client_id),
@@ -175,13 +177,13 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
           status: analysisData.status as "completed" | "in-progress",
           title: analysisData.title,
           codes: {
-            personality: analysisData.codes?.personality,
-            connector: analysisData.codes?.connector,
-            implementation: analysisData.codes?.implementation,
-            generator: analysisData.codes?.generator,
-            mission: analysisData.codes?.mission,
-            compatibility: analysisData.codes?.compatibility,
-            challenges: analysisData.codes?.challenges
+            personality: safeCodes.personality ?? null,
+            connector: safeCodes.connector ?? null,
+            implementation: safeCodes.implementation ?? null,
+            generator: safeCodes.generator ?? null,
+            mission: safeCodes.mission ?? null,
+            compatibility: safeCodes.compatibility ?? null,
+            challenges: safeCodes.challenges ?? null,
           },
           notes: ""
         };
