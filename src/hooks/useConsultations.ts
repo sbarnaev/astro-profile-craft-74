@@ -28,7 +28,8 @@ export function useConsultations() {
             first_name,
             last_name,
             patronymic,
-            phone
+            phone,
+            dob
           )
         `)
         .order('date', { ascending: true });
@@ -45,6 +46,7 @@ export function useConsultations() {
         clientId: item.client_id,
         clientName: item.clients ? `${item.clients.last_name} ${item.clients.first_name}` : "Неизвестный клиент",
         clientPhone: item.clients?.phone || "",
+        // Проверяем наличие dob перед использованием
         clientDob: item.clients?.dob ? new Date(item.clients.dob) : null,
         date: new Date(item.date),
         time: item.time,
