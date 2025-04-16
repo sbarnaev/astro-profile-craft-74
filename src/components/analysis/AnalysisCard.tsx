@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -12,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { calculatePersonalityCodes, getArchetypeName } from "@/lib/calculations";
-import { AnalysisType } from "@/types/consultations";
+import { AnalysisType } from "@/types/sessions";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AnalysisCardProps {

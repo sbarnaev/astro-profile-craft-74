@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AnalysisView } from "@/components/analysis/AnalysisView";
+import { AnalysisType } from "@/types/sessions";
 
 // Пример данных об анализах
 const analysisData = [
