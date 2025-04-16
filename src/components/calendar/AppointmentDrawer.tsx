@@ -54,7 +54,7 @@ export function AppointmentDrawer({
   // Extract the client name parts correctly
   const nameParts = clientName.split(' ');
   const clientInfo = {
-    id: appointment.clientId,
+    id: appointment.clientId || 0,
     firstName: nameParts[1] || "",
     lastName: nameParts[0] || "",
     patronymic: nameParts[2] || "",

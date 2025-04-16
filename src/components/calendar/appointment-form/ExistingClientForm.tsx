@@ -41,6 +41,9 @@ export function ExistingClientForm({
 }: ExistingClientFormProps) {
   const [customCost, setCustomCost] = React.useState<number | null>(null);
   
+  // Make sure consultationTypes is always an array
+  const safeConsultationTypes = Array.isArray(consultationTypes) ? consultationTypes : [];
+  
   // Create form with default values accounting for edit mode
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(formSchema),
@@ -65,8 +68,8 @@ export function ExistingClientForm({
   // Update cost when consultation type changes
   React.useEffect(() => {
     const typeId = form.getValues().consultationType;
-    if (typeId && Array.isArray(consultationTypes)) {
-      const selectedType = consultationTypes.find(type => type.id === typeId);
+    if (typeId && safeConsultationTypes.length > 0) {
+      const selectedType = safeConsultationTypes.find(type => type.id === typeId);
       if (selectedType && !customCost) {
         form.setValue("cost", selectedType.cost);
       }
@@ -98,6 +101,9 @@ export function ExistingClientForm({
       return;
     }
     
+    // Ensure clientsData is always an array
+    const safeClientsData = Array.isArray(clientsData) ? clientsData : [];
+    
     // Gather complete data for appointment creation
     const appointmentData = {
       ...values,
@@ -105,13 +111,13 @@ export function ExistingClientForm({
       appointmentDateTime: values.date
         ? parse(`${format(values.date, "yyyy-MM-dd")} ${values.time}`, "yyyy-MM-dd HH:mm", new Date())
         : null,
-      duration: values.consultationType && Array.isArray(consultationTypes)
-        ? (consultationTypes.find((type) => type.id === values.consultationType)?.duration || 60)
+      duration: values.consultationType && safeConsultationTypes.length > 0
+        ? (safeConsultationTypes.find((type) => type.id === values.consultationType)?.duration || 60)
         : 60,
-      clientName: values.clientId && Array.isArray(clientsData)
-        ? `${clientsData.find((c) => c.id === values.clientId)?.lastName || ""} ${
-            clientsData.find((c) => c.id === values.clientId)?.firstName || ""
-          } ${clientsData.find((c) => c.id === values.clientId)?.patronymic || ""}`
+      clientName: values.clientId && safeClientsData.length > 0
+        ? `${safeClientsData.find((c) => c.id === values.clientId)?.lastName || ""} ${
+            safeClientsData.find((c) => c.id === values.clientId)?.firstName || ""
+          } ${safeClientsData.find((c) => c.id === values.clientId)?.patronymic || ""}`
         : "Новый клиент",
       cost: values.cost || 3500
     };
