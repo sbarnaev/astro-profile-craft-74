@@ -139,10 +139,7 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
   
   const handleOpenSessionDialog = () => {
     try {
-      const event = new CustomEvent('openSessionDialog', {
-        detail: { clientId: client.id }
-      });
-      document.dispatchEvent(event);
+      navigate(`/sessions/schedule?client=${client.id}`);
     } catch (error) {
       console.error("Ошибка при открытии диалога сессии:", error);
       toast.error("Не удалось открыть форму записи на сессию");

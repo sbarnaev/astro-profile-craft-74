@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -83,6 +82,7 @@ interface ConsultationFormProps {
 }
 
 export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<ConsultationFormValues>({
     resolver: zodResolver(consultationFormSchema),
     defaultValues: {
@@ -99,45 +99,20 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
 
   const handleSubmit = async (values: ConsultationFormValues) => {
     try {
-      // Since the 'consultations' table doesn't exist yet in Supabase,
-      // we'll handle this by calling the passed onSubmit prop
-      // which will allow the parent component to handle submission
-      toast.success("Консультация успешно запланирована");
+      setIsSubmitting(true);
       
-      // Close the form or reset it
+      // Call the onSubmit prop with the form values
+      // This allows the parent component to handle the submission
       onSubmit(values);
       
-      // This is the code we would use once the consultations table is created:
-      /*
-      const { data, error } = await supabase
-        .from('consultations')
-        .insert({
-          client_id: client?.id ? String(client.id) : null,
-          date: format(values.date, "yyyy-MM-dd"),
-          time: values.time,
-          duration: values.duration,
-          type: values.type,
-          format: values.format,
-          request: values.request,
-          notes: values.notes,
-          status: 'scheduled'
-        })
-        .select();
-
-      if (error) {
-        toast.error("Не удалось записать на консультацию");
-        console.error(error);
-        return;
-      }
-
+      // Show success message
       toast.success("Консультация успешно запланирована");
       
-      // Close the form or reset it
-      onSubmit(values);
-      */
     } catch (error) {
       console.error("Ошибка при создании консультации:", error);
       toast.error("Произошла ошибка при записи на консультацию");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -235,23 +210,31 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Время начала</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите время" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="max-h-[300px] z-50">
-                    {timeSlots.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        <div className="flex items-center">
-                          <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                          {time}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex space-x-2">
+                  <Select onValueChange={field.onChange} value={field.value} className="flex-1">
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите время" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="max-h-[300px] overflow-y-auto z-50">
+                      {timeSlots.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          <div className="flex items-center">
+                            <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                            {time}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="time"
+                    className="w-28"
+                    onChange={(e) => field.onChange(e.target.value)}
+                    value={field.value}
+                  />
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -373,7 +356,9 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
         />
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit">Записать на консультацию</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Создание..." : "Записать на консультацию"}
+          </Button>
         </div>
       </form>
     </Form>

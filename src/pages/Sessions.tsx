@@ -93,6 +93,32 @@ export default function Sessions() {
   const handleCreateConsultation = (data: any) => {
     setIsConsultationFormOpen(false);
     console.log("Created session:", { ...data, client: selectedClient });
+    
+    // Create a new consultation
+    const newConsultation = {
+      id: Date.now(),
+      clientId: parseInt(selectedClient.id),
+      clientName: `${selectedClient.lastName} ${selectedClient.firstName}`,
+      date: data.date,
+      time: data.time,
+      duration: data.duration,
+      type: data.type,
+      format: data.format,
+      request: data.request,
+      notes: data.notes || "",
+      status: "scheduled"
+    };
+    
+    // Clear URL parameters
+    navigate('/sessions', { replace: true });
+    
+    // Redirect to the new consultation detail
+    setTimeout(() => {
+      setSelectedConsultation(newConsultation);
+      setIsConsultationDetailsOpen(true);
+      navigate(`/sessions?id=${newConsultation.id}`);
+    }, 300);
+    
     setSelectedClient(null);
   };
   
@@ -109,6 +135,27 @@ export default function Sessions() {
       navigate('/sessions');
     }
   };
+
+  // Add handler to close the consultation form when pressing Escape
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (isConsultationFormOpen) {
+          setIsConsultationFormOpen(false);
+          // Clear URL parameters
+          if (clientId) {
+            navigate('/sessions', { replace: true });
+          }
+          setSelectedClient(null);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      window.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isConsultationFormOpen, navigate, clientId]);
 
   // Если открыта детальная страница сессии, показываем только её
   if (isConsultationDetailsOpen && selectedConsultation) {
@@ -213,7 +260,19 @@ export default function Sessions() {
       </Dialog>
       
       {/* Диалог создания сессии */}
-      <Dialog open={isConsultationFormOpen} onOpenChange={setIsConsultationFormOpen}>
+      <Dialog 
+        open={isConsultationFormOpen} 
+        onOpenChange={(open) => {
+          setIsConsultationFormOpen(open);
+          if (!open) {
+            // Clear URL parameters when dialog is closed
+            if (clientId) {
+              navigate('/sessions', { replace: true });
+            }
+            setSelectedClient(null);
+          }
+        }}
+      >
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Запись на сессию</DialogTitle>
