@@ -101,6 +101,50 @@ export type Database = {
         }
         Relationships: []
       }
+      reminders: {
+        Row: {
+          client_id: string
+          completed: boolean
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          priority: string
+          time: string
+          title: string
+        }
+        Insert: {
+          client_id: string
+          completed?: boolean
+          created_at?: string
+          date: string
+          description?: string | null
+          id?: string
+          priority?: string
+          time: string
+          title: string
+        }
+        Update: {
+          client_id?: string
+          completed?: boolean
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          priority?: string
+          time?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

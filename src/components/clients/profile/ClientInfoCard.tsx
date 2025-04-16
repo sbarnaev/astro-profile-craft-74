@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, FileText, Bell, Share2, MessageCircle, User, Upload, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -17,6 +16,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { AnalysisType } from "@/types/sessions";
 import { AnalysisView } from "@/components/analysis/AnalysisView";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ClientInfoCardProps {
   client: {
@@ -139,7 +139,6 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
   
   const handleOpenSessionDialog = () => {
     try {
-      // Create a custom event to handle session scheduling
       const event = new CustomEvent('openSessionDialog', {
         detail: { clientId: client.id }
       });
@@ -150,38 +149,39 @@ export const ClientInfoCard = ({ client, setOpenReminderDialog }: ClientInfoCard
     }
   };
   
-  const handleOpenAnalysis = () => {
+  const handleOpenAnalysis = async () => {
     if (client.hasAnalysis && client.analysisId) {
-      // Вместо навигации, находим анализ и отображаем его
-      const mockAnalysis: AnalysisType = {
-        id: parseInt(client.analysisId),
-        clientId: parseInt(client.id),
-        clientName: fullName,
-        clientPhone: client.phone,
-        clientDob: client.dob,
-        date: new Date(),
-        type: "full",
-        status: "completed",
-        title: "Полный анализ личности",
-        codes: {
-          personality: client.personalityCode || 0,
-          connector: client.connectorCode || 0,
-          implementation: client.realizationCode || 0,
-          generator: client.generatorCode || 0,
-          mission: client.missionCode || "0"
-        },
-        notes: ""
-      };
-      
-      setCurrentAnalysis(mockAnalysis);
-      setShowAnalysis(true);
+      try {
+        const { data: analysisData, error } = await supabase
+          .from('analysis')
+          .select('*')
+          .eq('id', client.analysisId)
+          .single();
+
+        if (error) {
+          console.error("Error fetching analysis:", error);
+          toast.error("Не удалось загрузить анализ");
+          return;
+        }
+
+        const mockAnalysis: AnalysisType = {
+          ...analysisData,
+          clientName: fullName,
+          clientPhone: client.phone,
+          clientDob: client.dob,
+        };
+        
+        setCurrentAnalysis(mockAnalysis);
+        setShowAnalysis(true);
+      } catch (error) {
+        console.error("Unexpected error:", error);
+        toast.error("Произошла ошибка при загрузке анализа");
+      }
     } else {
-      // Если анализа нет, перенаправляем на создание
       navigate(`/analysis/new?client=${client.id}`);
     }
   };
 
-  // Если показываем анализ, то рендерим его на весь экран
   if (showAnalysis && currentAnalysis) {
     return (
       <AnalysisView 

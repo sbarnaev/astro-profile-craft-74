@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -95,8 +94,38 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
     },
   });
 
-  const handleSubmit = (values: ConsultationFormValues) => {
-    onSubmit(values);
+  const handleSubmit = async (values: ConsultationFormValues) => {
+    try {
+      // Insert consultation into Supabase
+      const { data, error } = await supabase
+        .from('consultations')
+        .insert({
+          client_id: client?.id,
+          date: format(values.date, "yyyy-MM-dd"),
+          time: values.time,
+          duration: values.duration,
+          type: values.type,
+          format: values.format,
+          request: values.request,
+          notes: values.notes,
+          status: 'scheduled'
+        })
+        .select();
+
+      if (error) {
+        toast.error("Не удалось записать на консультацию");
+        console.error(error);
+        return;
+      }
+
+      toast.success("Консультация успешно запланирована");
+      
+      // Close the form or reset it
+      onSubmit(values);
+    } catch (error) {
+      console.error("Ошибка при создании консультации:", error);
+      toast.error("Произошла ошибка при записи на консультацию");
+    }
   };
 
   // Safely format date only if it's a valid Date object

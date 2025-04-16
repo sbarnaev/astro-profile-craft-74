@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { PlusCircle } from "lucide-react";
@@ -17,6 +16,7 @@ import { RemindersList } from "./reminders/RemindersList";
 import { ReminderForm } from "./reminders/ReminderForm";
 import { EmptyRemindersState } from "./reminders/EmptyRemindersState";
 import { getPriorityLabel, getPriorityColor } from "./reminders/utilities";
+import { supabase } from "@/integrations/supabase/client";
 
 const initialRemindersData = [
   { 
@@ -66,7 +66,7 @@ interface ClientRemindersProps {
 }
 
 export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
-  const [remindersData, setRemindersData] = useState(initialRemindersData);
+  const [remindersData, setRemindersData] = useState<any[]>([]);
   const [isReminderFormOpen, setIsReminderFormOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<number | null>(null);
   const [reminderText, setReminderText] = useState("");
@@ -135,52 +135,56 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
     resetReminderForm();
   };
 
-  const handleSubmitReminder = () => {
+  const handleSubmitReminder = async () => {
     if (!reminderText || !reminderDate) {
-      toast.error("Ошибка создания напоминания", {
-        description: "Пожалуйста, заполните текст напоминания и выберите дату"
-      });
+      toast.error("Заполните текст и дату напоминания");
       return;
     }
 
-    if (editingReminder) {
-      setRemindersData(prev => prev.map(rem => 
-        rem.id === editingReminder 
-          ? {
-              ...rem,
-              date: reminderDate,
-              time: reminderTime,
-              title: reminderText,
-              priority: reminderPriority
-            }
-          : rem
-      ));
-      
-      toast.success("Напоминание обновлено", {
-        description: "Изменения сохранены"
-      });
+    const newReminder = {
+      client_id: clientId,
+      title: reminderText,
+      date: format(reminderDate, "yyyy-MM-dd"),
+      time: reminderTime,
+      priority: reminderPriority,
+      description: null,
+      completed: false,
+    };
+
+    const { data, error } = await supabase
+      .from('reminders')
+      .insert(newReminder)
+      .select();
+
+    if (error) {
+      toast.error("Не удалось создать напоминание");
+      console.error(error);
     } else {
-      const newReminder = {
-        id: Math.floor(Math.random() * 10000),
-        clientId,
-        date: reminderDate,
-        time: reminderTime,
-        title: reminderText,
-        description: null,
-        completed: false,
-        priority: reminderPriority
-      };
-      
-      setRemindersData(prev => [...prev, newReminder]);
-      
-      toast.success("Напоминание создано", {
-        description: "Новое напоминание добавлено в список"
-      });
+      setRemindersData(prev => [...prev, data[0]]);
+      toast.success("Напоминание сохранено");
+      setIsReminderFormOpen(false);
     }
-    
-    setIsReminderFormOpen(false);
-    setEditingReminder(null);
   };
+
+  useEffect(() => {
+    // Fetch reminders for this client when component mounts
+    const fetchReminders = async () => {
+      const { data, error } = await supabase
+        .from('reminders')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        toast.error("Не удалось загрузить напоминания");
+        console.error(error);
+      } else {
+        setRemindersData(data || []);
+      }
+    };
+
+    fetchReminders();
+  }, [clientId]);
 
   return (
     <div className="space-y-6">
