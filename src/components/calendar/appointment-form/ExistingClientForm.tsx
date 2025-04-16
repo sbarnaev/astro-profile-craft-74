@@ -104,20 +104,37 @@ export function ExistingClientForm({
     // Ensure clientsData is always an array
     const safeClientsData = Array.isArray(clientsData) ? clientsData : [];
     
+    // Безопасный поиск клиента с проверкой на undefined
+    const findClientSafely = (id: number) => {
+      if (!Array.isArray(safeClientsData) || safeClientsData.length === 0) {
+        return undefined;
+      }
+      return safeClientsData.find((c) => c && c.id === id);
+    };
+    
+    // Безопасный поиск типа консультации с проверкой на undefined
+    const findConsultationTypeSafely = (id: number) => {
+      if (!Array.isArray(safeConsultationTypes) || safeConsultationTypes.length === 0) {
+        return undefined;
+      }
+      return safeConsultationTypes.find((type) => type && type.id === id);
+    };
+    
+    // Безопасно получаем данные клиента
+    const client = values.clientId ? findClientSafely(values.clientId) : undefined;
+    
     // Gather complete data for appointment creation
     const appointmentData = {
       ...values,
       // Convert time and date to Date object
       appointmentDateTime: values.date
-        ? parse(`${format(values.date, "yyyy-MM-dd")} ${values.time}`, "yyyy-MM-dd HH:mm", new Date())
-        : null,
-      duration: values.consultationType && safeConsultationTypes.length > 0
-        ? (safeConsultationTypes.find((type) => type.id === values.consultationType)?.duration || 60)
+        ? parse(`${format(values.date, "yyyy-MM-dd")} ${values.time || "00:00"}`, "yyyy-MM-dd HH:mm", new Date())
+        : new Date(),
+      duration: values.consultationType
+        ? (findConsultationTypeSafely(values.consultationType)?.duration || 60)
         : 60,
-      clientName: values.clientId && safeClientsData.length > 0
-        ? `${safeClientsData.find((c) => c.id === values.clientId)?.lastName || ""} ${
-            safeClientsData.find((c) => c.id === values.clientId)?.firstName || ""
-          } ${safeClientsData.find((c) => c.id === values.clientId)?.patronymic || ""}`
+      clientName: client
+        ? `${client.lastName || ""} ${client.firstName || ""} ${client.patronymic || ""}`
         : "Новый клиент",
       cost: values.cost || 3500
     };

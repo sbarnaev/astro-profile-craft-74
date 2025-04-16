@@ -94,25 +94,33 @@ export function ClientSearchField({
                   </div>
                 </CommandEmpty>
                 <CommandGroup>
-                  {safeClientsData.map((client) => (
-                    <CommandItem
-                      key={client.id}
-                      value={client.id.toString()}
-                      onSelect={() => {
-                        onChange(client.id);
-                        setSelectedClient(client);
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          value === client.id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {client.lastName} {client.firstName} {client.patronymic}
-                    </CommandItem>
-                  ))}
+                  {/* Проверяем, что safeClientsData - массив перед использованием .map() */}
+                  {Array.isArray(safeClientsData) && safeClientsData.length > 0 ? (
+                    safeClientsData.map((client) => (
+                      <CommandItem
+                        key={client.id}
+                        value={client.id.toString()}
+                        onSelect={() => {
+                          onChange(client.id);
+                          setSelectedClient(client);
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === client.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {client.lastName} {client.firstName} {client.patronymic}
+                      </CommandItem>
+                    ))
+                  ) : (
+                    // Если массив пуст, показываем сообщение
+                    <div className="p-2 text-center text-sm text-muted-foreground">
+                      Список клиентов пуст
+                    </div>
+                  )}
                 </CommandGroup>
               </Command>
             </PopoverContent>
