@@ -17,7 +17,9 @@ import {
 import { ClientForm } from "@/components/clients/ClientForm";
 import { ClientSearch } from "@/components/analysis/ClientSearch";
 import { AnalysisView } from "@/components/analysis/AnalysisView";
+import { AIAnalysisView } from "@/components/analysis/AIAnalysisView";
 import { Badge as BadgeIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Пример данных об анализах
 const analysisData = [
@@ -25,6 +27,8 @@ const analysisData = [
     id: 1,
     clientId: 1,
     clientName: "Иванов Иван",
+    firstName: "Иван",
+    lastName: "Иванов",
     clientPhone: "+7 (900) 123-45-67",
     clientDob: new Date(1990, 5, 15),
     date: new Date(2025, 2, 2),
@@ -37,12 +41,19 @@ const analysisData = [
       implementation: "4/6",
       generator: "1/3",
       mission: "5/2"
-    }
+    },
+    personality_code: "3/5",
+    connector_code: "2/1",
+    realization_code: "4/6",
+    generator_code: "1/3",
+    mission_code: "5/2"
   },
   { 
     id: 2,
     clientId: 1,
     clientName: "Иванов Иван",
+    firstName: "Иван",
+    lastName: "Иванов",
     clientPhone: "+7 (900) 123-45-67",
     clientDob: new Date(1990, 5, 15),
     date: new Date(2025, 1, 15),
@@ -52,12 +63,16 @@ const analysisData = [
     codes: {
       personality: "3/5",
       connector: "2/1",
-    }
+    },
+    personality_code: "3/5",
+    connector_code: "2/1"
   },
   { 
     id: 3,
     clientId: 2,
     clientName: "Петрова Анна",
+    firstName: "Анна",
+    lastName: "Петрова",
     clientPhone: "+7 (900) 987-65-43",
     clientDob: new Date(1985, 8, 20),
     date: new Date(2025, 0, 5),
@@ -65,10 +80,20 @@ const analysisData = [
     status: "completed",
     title: "Анализ совместимости",
     partnerName: "Иван Петров",
+    partner: {
+      id: "partner1",
+      clientName: "Иван Петров",
+      firstName: "Иван",
+      lastName: "Петров",
+      personality_code: "2/4",
+      connector_code: "3/5"
+    },
     codes: {
       compatibility: "75%",
       challenges: "25%"
-    }
+    },
+    personality_code: "3/5",
+    connector_code: "2/1"
   },
 ];
 
@@ -77,6 +102,7 @@ const Analysis = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isClientSearchOpen, setIsClientSearchOpen] = useState(false);
   const [selectedAnalysis, setSelectedAnalysis] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<"standard" | "ai">("standard");
   
   // Фильтрация анализов по поисковому запросу
   const filteredAnalysis = analysisData.filter(analysis => {
@@ -126,13 +152,48 @@ const Analysis = () => {
     }
   };
 
+  const handleAnalysisGenerated = (analysisText: string) => {
+    console.log("AI Analysis generated:", analysisText.substring(0, 100) + "...");
+    // Здесь можно сохранить анализ в базу данных или выполнить другие действия
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {selectedAnalysis ? (
-        <AnalysisView 
-          analysis={selectedAnalysis} 
-          onBack={() => setSelectedAnalysis(null)} 
-        />
+        <div>
+          <div className="flex items-center mb-6">
+            <Button
+              variant="outline"
+              onClick={() => setSelectedAnalysis(null)}
+              className="mr-4"
+            >
+              ← Назад к списку
+            </Button>
+            
+            <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as "standard" | "ai")}>
+              <TabsList>
+                <TabsTrigger value="standard">Стандартный анализ</TabsTrigger>
+                <TabsTrigger value="ai">AI анализ</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          
+          <TabsContent value="standard" forceMount={true} hidden={viewMode !== "standard"}>
+            <AnalysisView 
+              analysis={selectedAnalysis} 
+              onBack={() => setSelectedAnalysis(null)} 
+            />
+          </TabsContent>
+          
+          <TabsContent value="ai" forceMount={true} hidden={viewMode !== "ai"}>
+            <AIAnalysisView
+              clientData={selectedAnalysis}
+              analysisType={selectedAnalysis.type}
+              partnerData={selectedAnalysis.partner}
+              onAnalysisGenerated={handleAnalysisGenerated}
+            />
+          </TabsContent>
+        </div>
       ) : (
         <>
           <div className="flex justify-between items-center">
