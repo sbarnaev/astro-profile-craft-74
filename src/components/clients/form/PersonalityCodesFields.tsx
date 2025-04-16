@@ -26,7 +26,11 @@ export function PersonalityCodesFields({
             <FormItem>
               <FormLabel>Код личности</FormLabel>
               <FormControl>
-                <Input readOnly {...field} value={field.value || ""} />
+                <Input 
+                  readOnly 
+                  {...field} 
+                  value={field.value !== undefined && field.value !== null ? String(field.value) : ""} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -40,7 +44,11 @@ export function PersonalityCodesFields({
             <FormItem>
               <FormLabel>Код коннектора</FormLabel>
               <FormControl>
-                <Input readOnly {...field} value={field.value || ""} />
+                <Input 
+                  readOnly 
+                  {...field} 
+                  value={field.value !== undefined && field.value !== null ? String(field.value) : ""} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -54,7 +62,11 @@ export function PersonalityCodesFields({
             <FormItem>
               <FormLabel>Код реализации</FormLabel>
               <FormControl>
-                <Input readOnly {...field} value={field.value || ""} />
+                <Input 
+                  readOnly 
+                  {...field} 
+                  value={field.value !== undefined && field.value !== null ? String(field.value) : ""} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -68,7 +80,11 @@ export function PersonalityCodesFields({
             <FormItem>
               <FormLabel>Код генератора</FormLabel>
               <FormControl>
-                <Input readOnly {...field} value={field.value || ""} />
+                <Input 
+                  readOnly 
+                  {...field} 
+                  value={field.value !== undefined && field.value !== null ? String(field.value) : ""} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -82,7 +98,11 @@ export function PersonalityCodesFields({
             <FormItem>
               <FormLabel>Код миссии</FormLabel>
               <FormControl>
-                <Input readOnly {...field} value={field.value || ""} />
+                <Input 
+                  readOnly 
+                  {...field} 
+                  value={field.value !== undefined && field.value !== null ? String(field.value) : ""} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
