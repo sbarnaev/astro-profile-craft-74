@@ -38,6 +38,7 @@ export function ClientSearchField({
   const [open, setOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [clients, setClients] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   
   // Fetch real clients from Supabase
@@ -46,6 +47,7 @@ export function ClientSearchField({
       if (!user) return;
       
       try {
+        setIsLoading(true);
         const { data, error } = await supabase
           .from('clients')
           .select('*')
@@ -69,6 +71,8 @@ export function ClientSearchField({
         }
       } catch (error) {
         console.error('Error in client fetch:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -134,9 +138,9 @@ export function ClientSearchField({
                     </Button>
                   </div>
                 </CommandEmpty>
-                <CommandGroup>
-                  {safeClientsData.length > 0 ? (
-                    safeClientsData.map((client) => (
+                {safeClientsData.length > 0 ? (
+                  <CommandGroup>
+                    {safeClientsData.map((client) => (
                       client && (
                         <CommandItem
                           key={client.id}
@@ -156,13 +160,19 @@ export function ClientSearchField({
                           {client.lastName} {client.firstName} {client.patronymic}
                         </CommandItem>
                       )
-                    ))
-                  ) : (
-                    <div className="p-2 text-center text-sm text-muted-foreground">
-                      Список клиентов пуст
-                    </div>
-                  )}
-                </CommandGroup>
+                    ))}
+                  </CommandGroup>
+                ) : (
+                  <div className="p-2 text-center text-sm text-muted-foreground">
+                    {isLoading ? (
+                      <div className="flex justify-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      </div>
+                    ) : (
+                      "Список клиентов пуст"
+                    )}
+                  </div>
+                )}
               </Command>
             </PopoverContent>
           </Popover>
