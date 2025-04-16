@@ -17,7 +17,7 @@ import { ReminderForm } from "./reminders/ReminderForm";
 import { EmptyRemindersState } from "./reminders/EmptyRemindersState";
 import { getPriorityLabel, getPriorityColor } from "./reminders/utilities";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 
 const initialRemindersData = [
   { 
@@ -163,7 +163,6 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
       toast.error("Не удалось создать напоминание");
       console.error(error);
     } else {
-      // Process the returned data to match our component's data structure
       const processedReminder = {
         id: data[0].id,
         clientId: parseInt(data[0].client_id),
@@ -191,7 +190,6 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
   };
 
   useEffect(() => {
-    // Fetch reminders for this client when component mounts
     const fetchReminders = async () => {
       if (!user) return;
       
@@ -206,7 +204,6 @@ export const ClientReminders = ({ clientId }: ClientRemindersProps) => {
         toast.error("Не удалось загрузить напоминания");
         console.error(error);
       } else {
-        // Process reminders from supabase to match the format we use in the component
         const processedReminders = (data || []).map(reminder => ({
           id: reminder.id,
           clientId: parseInt(reminder.client_id),

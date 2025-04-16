@@ -14,6 +14,7 @@ import { ConsultationForm } from "@/components/consultations/ConsultationForm";
 import { ReminderForm } from "@/components/consultations/ReminderForm";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 interface SessionsDialogsProps {
   isClientSearchOpen: boolean;
@@ -47,6 +48,7 @@ export function SessionsDialogs({
   clientId
 }: SessionsDialogsProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleClientSelect = (client: any) => {
     setIsClientSearchOpen(false);
@@ -56,6 +58,11 @@ export function SessionsDialogs({
   
   const handleCreateClient = async (data: any) => {
     try {
+      if (!user) {
+        toast.error("Вы не авторизованы");
+        return;
+      }
+      
       // Сохраняем нового клиента в Supabase
       const { data: newClient, error } = await supabase
         .from('clients')
@@ -67,7 +74,8 @@ export function SessionsDialogs({
           phone: data.phone,
           email: data.email || null,
           source: data.source || 'другое',
-          communication_channel: data.communicationChannel || 'телефон'
+          communication_channel: data.communicationChannel || 'телефон',
+          user_id: user.id
         })
         .select()
         .single();

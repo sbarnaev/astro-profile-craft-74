@@ -17,6 +17,7 @@ import {
   consultationFormSchema, 
   type ConsultationFormValues 
 } from "./form/consultationFormSchema";
+import { useAuth } from "@/context/AuthContext";
 
 interface ConsultationFormProps {
   client?: any;
@@ -25,6 +26,7 @@ interface ConsultationFormProps {
 
 export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
   
   const form = useForm<ConsultationFormValues>({
     resolver: zodResolver(consultationFormSchema),
@@ -42,6 +44,11 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
 
   const handleSubmit = async (values: ConsultationFormValues) => {
     try {
+      if (!user) {
+        toast.error("Вы не авторизованы");
+        return;
+      }
+      
       setIsSubmitting(true);
       
       // Подготовка данных для сохранения в базу данных
@@ -54,6 +61,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
         format: values.format,
         request: values.request,
         notes: values.notes || "",
+        user_id: user.id
       };
       
       // Сохранение данных в Supabase
