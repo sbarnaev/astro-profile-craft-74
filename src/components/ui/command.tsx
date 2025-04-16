@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { type DialogProps } from "@radix-ui/react-dialog"
 import { Command as CommandPrimitive } from "cmdk"
@@ -10,10 +11,9 @@ const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive>
 >(({ className, children, ...props }, ref) => {
-  // Обертка для защиты от undefined в children
-  // Это предотвращает ошибку "undefined is not iterable"
+  // Safely handle undefined or null children
   const safeChildren = React.useMemo(() => {
-    // Проверка на undefined или null
+    // If children is undefined or null, return an empty array
     if (children === undefined || children === null) {
       return [];
     }
@@ -38,11 +38,19 @@ Command.displayName = CommandPrimitive.displayName
 interface CommandDialogProps extends DialogProps {}
 
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
+  // Safely handle undefined or null children
+  const safeChildren = React.useMemo(() => {
+    if (children === undefined || children === null) {
+      return [];
+    }
+    return children;
+  }, [children]);
+  
   return (
     <Dialog {...props}>
       <DialogContent className="overflow-hidden p-0 shadow-lg">
         <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
-          {children}
+          {safeChildren}
         </Command>
       </DialogContent>
     </Dialog>
@@ -98,18 +106,18 @@ const CommandGroup = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Group>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Group>
 >(({ className, children, ...props }, ref) => {
-  // Безопасная обработка children, чтобы избежать ошибок при итерации
-  // Это защитит от ошибки "undefined is not iterable"
+  // Safe handling of children to prevent "undefined is not iterable" errors
   const safeChildren = React.useMemo(() => {
-    // Если children - массив, то проверяем, что он не undefined или null
+    // If children is an array, ensure it's not undefined or null
     if (Array.isArray(children)) {
-      return children;
+      // Filter out any undefined or null items
+      return children.filter(child => child !== undefined && child !== null);
     }
-    // Если children не массив, но существует, просто возвращаем его
+    // If children is not an array but exists, return it
     if (children !== undefined && children !== null) {
       return children;
     }
-    // В случае если children - undefined или null, возвращаем пустой массив
+    // If children is undefined or null, return empty array
     return [];
   }, [children]);
 
