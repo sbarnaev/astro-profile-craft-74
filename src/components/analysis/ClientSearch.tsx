@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Search, UserPlus, User, Phone, Calendar } from "lucide-react";
 import { format } from "date-fns";
@@ -56,8 +57,11 @@ export function ClientSearch({ isOpen, onClose, onSelect, onCreateNew }: ClientS
     enabled: !!user && isOpen
   });
   
+  // Ensure clients is always an array
+  const safeClients = Array.isArray(clients) ? clients : [];
+  
   // Фильтрация клиентов по поисковому запросу
-  const filteredClients = clients.filter(client => {
+  const filteredClients = safeClients.filter(client => {
     if (!searchQuery.trim()) return true;
     
     const query = searchQuery.toLowerCase();
