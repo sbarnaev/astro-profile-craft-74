@@ -63,6 +63,8 @@ const AppWithAuth = () => {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/sessions" element={<Sessions />} />
           <Route path="/sessions/schedule" element={<Sessions />} />
+          <Route path="/consultations" element={<Navigate to="/sessions" replace />} />
+          <Route path="/consultations/:id" element={<Navigate to={({ params }) => `/sessions?id=${params.id}`} replace />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/knowledge" element={<Knowledge />} />
           <Route path="/reminders" element={<Reminders />} />

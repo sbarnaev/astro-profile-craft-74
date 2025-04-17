@@ -64,7 +64,7 @@ export const ClientSessions = ({ clientId }: ClientSessionsProps) => {
             <div
               key={consultation.id}
               className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
-              onClick={() => navigate(`/consultations/${consultation.id}`)}
+              onClick={() => navigate(`/sessions?id=${consultation.id}`)}
             >
               <div className="flex justify-between">
                 <div>
