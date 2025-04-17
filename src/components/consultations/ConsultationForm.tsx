@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,7 +50,6 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
       
       setIsSubmitting(true);
       
-      // Подготовка данных для сохранения в базу данных
       const consultationData = {
         client_id: client?.id,
         date: values.date?.toISOString().split('T')[0],
@@ -61,10 +59,10 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
         format: values.format,
         request: values.request,
         notes: values.notes || "",
-        user_id: user.id
+        user_id: user.id,
+        status: "scheduled"
       };
       
-      // Сохранение данных в Supabase
       const { data, error } = await supabase
         .from('consultations')
         .insert(consultationData)
@@ -72,19 +70,17 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
         .single();
       
       if (error) {
-        console.error("Ошибка при создании консультации:", error);
-        toast.error("Произошла ошибка при записи на консультацию");
+        console.error("Ошибка при создании сессии:", error);
+        toast.error("Произошла ошибка при записи на сессию");
         return;
       }
       
-      toast.success("Консультация успешно запланирована");
-      
-      // Call the onSubmit prop with the form values and DB response
+      toast.success("Сессия успешно запланирована");
       onSubmit({...values, id: data.id});
       
     } catch (error) {
-      console.error("Ошибка при создании консультации:", error);
-      toast.error("Произошла ошибка при записи на консультацию");
+      console.error("Ошибка при создании сессии:", error);
+      toast.error("Произошла ошибка при записи на сессию");
     } finally {
       setIsSubmitting(false);
     }
@@ -121,7 +117,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Создание..." : "Записать на консультацию"}
+              {isSubmitting ? "Создание..." : "Записать на сессию"}
             </Button>
           </div>
         </form>
