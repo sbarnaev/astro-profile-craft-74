@@ -81,8 +81,22 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
       console.log("Полученный ответ от Supabase:", data);
       
       toast.success("Сессия успешно запланирована");
-      // Pass the full data object including the ID from the database response
-      onSubmit(data);
+      
+      // Transform Supabase response to match ConsultationFormValues format
+      const formattedData: ConsultationFormValues = {
+        id: data.id,
+        clientId: client?.id,
+        date: new Date(data.date),
+        time: data.time,
+        duration: data.duration,
+        type: data.type,
+        format: data.format as "video" | "in-person",
+        request: data.request,
+        notes: data.notes || ""
+      };
+      
+      // Pass the properly formatted data to onSubmit
+      onSubmit(formattedData);
       
     } catch (error) {
       console.error("Ошибка при создании сессии:", error);

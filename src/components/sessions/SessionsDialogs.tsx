@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,6 +14,7 @@ import { ReminderForm } from "@/components/consultations/ReminderForm";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { ConsultationFormValues } from "@/components/consultations/form/consultationFormSchema";
 
 interface SessionsDialogsProps {
   isClientSearchOpen: boolean;
@@ -63,7 +63,6 @@ export function SessionsDialogs({
         return;
       }
       
-      // Сохраняем нового клиента в Supabase
       const { data: newClient, error } = await supabase
         .from('clients')
         .insert({
@@ -105,22 +104,20 @@ export function SessionsDialogs({
     }
   };
   
-  const handleCreateConsultation = (data: any) => {
+  const handleCreateConsultation = (data: ConsultationFormValues) => {
     console.log("Creating consultation with data:", data);
     
-    // Make sure we have an ID from the database response
     if (!data || !data.id) {
       console.error("Missing consultation ID in data:", data);
       toast.error("Ошибка при создании сессии: отсутствует ID");
       return;
     }
     
-    // Format the data correctly for display
     const newConsultation = {
       id: data.id,
       clientId: selectedClient.id,
       clientName: `${selectedClient.lastName} ${selectedClient.firstName}`,
-      date: new Date(data.date),
+      date: data.date,
       time: data.time,
       duration: data.duration,
       type: data.type,
@@ -132,21 +129,17 @@ export function SessionsDialogs({
     
     console.log("Formatted consultation object:", newConsultation);
     
-    // Pass the consultation to parent component for state update
     addConsultation(newConsultation);
     
-    // Close dialogs
     setIsConsultationFormOpen(false);
     setSelectedClient(null);
     
-    // Navigate to the sessions view first
     navigate('/sessions', { replace: true });
     
-    // Then navigate to the specific session with a small delay
     setTimeout(() => {
       console.log(`Navigating to session details with ID: ${newConsultation.id}`);
       navigate(`/sessions?id=${newConsultation.id}`);
-    }, 500);
+    }, 800);
   };
   
   const handleCreateReminder = (data: any) => {

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const consultationFormSchema = z.object({
   id: z.string().uuid().optional(),
-  clientId: z.number().optional(),
+  clientId: z.union([z.number(), z.string()]).optional(),
   date: z.date({
     required_error: "Выберите дату консультации",
   }),
