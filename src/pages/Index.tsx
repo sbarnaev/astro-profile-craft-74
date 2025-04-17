@@ -1,60 +1,66 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Calendar, ClipboardList, UserPlus, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const Index = () => {
   // Статистика для примера
-  const stats = [
-    { 
-      title: "Всего клиентов", 
-      value: "43", 
-      icon: Users, 
-      color: "text-primary",
-      bg: "bg-primary/10"
-    },
-    { 
-      title: "Анализы за неделю", 
-      value: "12", 
-      icon: ClipboardList, 
-      color: "text-secondary",
-      bg: "bg-secondary/10"
-    },
-    { 
-      title: "Встречи сегодня", 
-      value: "3", 
-      icon: Calendar, 
-      color: "text-astro-violet",
-      bg: "bg-[hsl(var(--astro-violet)/0.1)]"
-    },
-    { 
-      title: "Новых клиентов", 
-      value: "+7", 
-      icon: UserPlus, 
-      color: "text-accent",
-      bg: "bg-accent/10"
-    },
-  ];
+  const stats = [{
+    title: "Всего клиентов",
+    value: "43",
+    icon: Users,
+    color: "text-primary",
+    bg: "bg-primary/10"
+  }, {
+    title: "Анализы за неделю",
+    value: "12",
+    icon: ClipboardList,
+    color: "text-secondary",
+    bg: "bg-secondary/10"
+  }, {
+    title: "Встречи сегодня",
+    value: "3",
+    icon: Calendar,
+    color: "text-astro-violet",
+    bg: "bg-[hsl(var(--astro-violet)/0.1)]"
+  }, {
+    title: "Новых клиентов",
+    value: "+7",
+    icon: UserPlus,
+    color: "text-accent",
+    bg: "bg-accent/10"
+  }];
 
   // Список последних клиентов
-  const recentClients = [
-    { id: 1, name: "Анна Смирнова", date: "14.04.2023", type: "Полный анализ" },
-    { id: 2, name: "Иван Петров", date: "28.02.1985", type: "Базовый анализ" },
-    { id: 3, name: "Мария Иванова", date: "10.10.1990", type: "Консультация" },
-    { id: 4, name: "Александр Козлов", date: "05.07.1982", type: "Полный анализ" },
-  ];
-
-  return (
-    <div className="space-y-6 animate-fade-in">
+  const recentClients = [{
+    id: 1,
+    name: "Анна Смирнова",
+    date: "14.04.2023",
+    type: "Полный анализ"
+  }, {
+    id: 2,
+    name: "Иван Петров",
+    date: "28.02.1985",
+    type: "Базовый анализ"
+  }, {
+    id: 3,
+    name: "Мария Иванова",
+    date: "10.10.1990",
+    type: "Консультация"
+  }, {
+    id: 4,
+    name: "Александр Козлов",
+    date: "05.07.1982",
+    type: "Полный анализ"
+  }];
+  return <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold">Панель управления</h1>
-        <p className="text-muted-foreground">Добро пожаловать в вашу CRM-систему для астрологического анализа</p>
+        <p className="text-muted-foreground">
+      </p>
       </div>
 
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <Card key={index} className="astro-card border-none">
+        {stats.map((stat, index) => <Card key={index} className="astro-card border-none">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -66,8 +72,7 @@ const Index = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
-        ))}
+          </Card>)}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -84,8 +89,7 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentClients.map((client) => (
-                <div key={client.id} className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
+              {recentClients.map(client => <div key={client.id} className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors">
                   <div className="flex items-center">
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                       <span className="text-xs font-medium">{client.name.charAt(0)}</span>
@@ -98,8 +102,7 @@ const Index = () => {
                   <span className="text-xs px-2 py-1 rounded-full bg-muted">
                     {client.type}
                   </span>
-                </div>
-              ))}
+                </div>)}
             </div>
           </CardContent>
         </Card>
@@ -128,8 +131,6 @@ const Index = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
