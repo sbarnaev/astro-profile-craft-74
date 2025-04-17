@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -103,6 +102,8 @@ const Analysis = () => {
   const [isClientSearchOpen, setIsClientSearchOpen] = useState(false);
   const [selectedAnalysis, setSelectedAnalysis] = useState<any>(null);
   const [viewMode, setViewMode] = useState<"standard" | "ai">("standard");
+  const [showAnalysisSheet, setShowAnalysisSheet] = useState(false);
+  const [currentAnalysis, setCurrentAnalysis] = useState<any>(null);
   
   // Фильтрация анализов по поисковому запросу
   const filteredAnalysis = analysisData.filter(analysis => {
@@ -198,10 +199,6 @@ const Analysis = () => {
         <>
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold">Анализы личности</h1>
-            <Button onClick={() => setIsClientSearchOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Создать анализ
-            </Button>
           </div>
           
           <div className="relative">
@@ -221,42 +218,34 @@ const Analysis = () => {
                 className="cursor-pointer hover:border-primary transition-all"
                 onClick={() => setSelectedAnalysis(analysis)}
               >
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <Badge className={getAnalysisTypeColor(analysis.type)}>
-                      {getAnalysisTypeLabel(analysis.type)}
-                    </Badge>
-                    <div className="text-sm text-muted-foreground">
-                      {format(analysis.date, "d MMMM yyyy", { locale: ru })}
-                    </div>
-                  </div>
-                  <CardTitle className="text-xl">{analysis.title}</CardTitle>
-                  <CardDescription>{analysis.clientName}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center text-sm text-muted-foreground mb-3">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>{analysis.clientName}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground mb-3">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    <span>
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <p className="font-medium text-lg">{analysis.clientName}</p>
+                    <p className="text-sm text-muted-foreground">
                       {format(analysis.clientDob, "d MMMM yyyy", { locale: ru })}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {analysis.type === "full" && (
-                      <>
-                        <Badge variant="outline" className="flex items-center">
-                          <BadgeIcon className="mr-1 h-3 w-3" />
-                          Личность: {analysis.codes.personality}
-                        </Badge>
-                        <Badge variant="outline" className="flex items-center">
-                          <BadgeIcon className="mr-1 h-3 w-3" />
-                          Коннектор: {analysis.codes.connector}
-                        </Badge>
-                      </>
-                    )}
+                    </p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Личность:</span>{" "}
+                        <span className="font-medium">{analysis.codes.personality}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Коннектор:</span>{" "}
+                        <span className="font-medium">{analysis.codes.connector}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Реализация:</span>{" "}
+                        <span className="font-medium">{analysis.codes.implementation}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Генератор:</span>{" "}
+                        <span className="font-medium">{analysis.codes.generator}</span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-muted-foreground">Миссия:</span>{" "}
+                        <span className="font-medium">{analysis.codes.mission}</span>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
