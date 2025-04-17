@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -76,6 +77,7 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
       }
       
       toast.success("Сессия успешно запланирована");
+      // Make sure we're passing the id from the database response
       onSubmit({...values, id: data.id});
       
     } catch (error) {

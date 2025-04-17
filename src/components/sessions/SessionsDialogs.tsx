@@ -108,6 +108,7 @@ export function SessionsDialogs({
   const handleCreateConsultation = (data: any) => {
     console.log("Creating consultation:", { ...data, client: selectedClient });
     
+    // Format the data correctly for display
     const newConsultation = {
       id: data.id || Date.now().toString(),
       clientId: selectedClient.id,
@@ -122,16 +123,20 @@ export function SessionsDialogs({
       status: "scheduled"
     };
     
+    // Pass the consultation to parent component for state update
     addConsultation(newConsultation);
     
+    // Close dialogs and navigate to sessions
+    setIsConsultationFormOpen(false);
+    setSelectedClient(null);
+    
+    // First navigate to sessions
     navigate('/sessions', { replace: true });
     
+    // Then navigate to the session details with a small delay to ensure state is updated
     setTimeout(() => {
-      navigate(`/sessions?id=${newConsultation.id}`);
+      navigate(`/sessions?id=${data.id}`);
     }, 300);
-    
-    setSelectedClient(null);
-    setIsConsultationFormOpen(false);
   };
   
   const handleCreateReminder = (data: any) => {
