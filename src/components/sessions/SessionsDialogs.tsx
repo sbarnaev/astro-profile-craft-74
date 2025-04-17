@@ -106,14 +106,21 @@ export function SessionsDialogs({
   };
   
   const handleCreateConsultation = (data: any) => {
-    console.log("Creating consultation:", { ...data, client: selectedClient });
+    console.log("Creating consultation with data:", data);
+    
+    // Make sure we have an ID from the database response
+    if (!data || !data.id) {
+      console.error("Missing consultation ID in data:", data);
+      toast.error("Ошибка при создании сессии: отсутствует ID");
+      return;
+    }
     
     // Format the data correctly for display
     const newConsultation = {
-      id: data.id || Date.now().toString(),
+      id: data.id,
       clientId: selectedClient.id,
       clientName: `${selectedClient.lastName} ${selectedClient.firstName}`,
-      date: data.date,
+      date: new Date(data.date),
       time: data.time,
       duration: data.duration,
       type: data.type,
@@ -123,20 +130,23 @@ export function SessionsDialogs({
       status: "scheduled"
     };
     
+    console.log("Formatted consultation object:", newConsultation);
+    
     // Pass the consultation to parent component for state update
     addConsultation(newConsultation);
     
-    // Close dialogs and navigate to sessions
+    // Close dialogs
     setIsConsultationFormOpen(false);
     setSelectedClient(null);
     
-    // First navigate to sessions
+    // Navigate to the sessions view first
     navigate('/sessions', { replace: true });
     
-    // Then navigate to the session details with a small delay to ensure state is updated
+    // Then navigate to the specific session with a small delay
     setTimeout(() => {
-      navigate(`/sessions?id=${data.id}`);
-    }, 300);
+      console.log(`Navigating to session details with ID: ${newConsultation.id}`);
+      navigate(`/sessions?id=${newConsultation.id}`);
+    }, 500);
   };
   
   const handleCreateReminder = (data: any) => {

@@ -64,6 +64,8 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
         status: "scheduled"
       };
       
+      console.log("Отправка данных в Supabase:", consultationData);
+      
       const { data, error } = await supabase
         .from('consultations')
         .insert(consultationData)
@@ -76,9 +78,11 @@ export function ConsultationForm({ client, onSubmit }: ConsultationFormProps) {
         return;
       }
       
+      console.log("Полученный ответ от Supabase:", data);
+      
       toast.success("Сессия успешно запланирована");
-      // Make sure we're passing the id from the database response
-      onSubmit({...values, id: data.id});
+      // Pass the full data object including the ID from the database response
+      onSubmit(data);
       
     } catch (error) {
       console.error("Ошибка при создании сессии:", error);
