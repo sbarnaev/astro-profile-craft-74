@@ -5,6 +5,24 @@ import { MessageCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+// Add the missing function that's being imported in ConsultationDetails.tsx
+export function getConsultationTypeText(type: string): string {
+  switch (type) {
+    case "initial":
+      return "Первичная консультация";
+    case "followup":
+      return "Повторная консультация";
+    case "express":
+      return "Экспресс-консультация";
+    case "analysis":
+      return "Анализ нумерологии";
+    case "correction":
+      return "Коррекционная сессия";
+    default:
+      return "Консультация";
+  }
+}
+
 interface ConsultationListProps {
   consultations: any[];
   emptyMessage: React.ReactNode;
