@@ -11,7 +11,7 @@ const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive>
 >(({ className, children, ...props }, ref) => {
-  // Safely handle undefined or null children
+  // Make sure children is never undefined or null
   const safeChildren = React.Children.toArray(children).filter(Boolean);
 
   return (
@@ -32,7 +32,7 @@ Command.displayName = CommandPrimitive.displayName
 interface CommandDialogProps extends DialogProps {}
 
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
-  // Safely handle undefined or null children
+  // Make sure children is never undefined or null
   const safeChildren = React.Children.toArray(children).filter(Boolean);
   
   return (
@@ -95,7 +95,7 @@ const CommandGroup = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Group>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Group>
 >(({ className, children, ...props }, ref) => {
-  // Handle undefined or empty children arrays
+  // Explicitly handle undefined or empty children arrays
   const safeChildren = React.Children.toArray(children).filter(Boolean);
   
   return (

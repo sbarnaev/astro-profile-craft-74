@@ -26,6 +26,10 @@ export function AppointmentDrawer({
 }: AppointmentDrawerProps) {
   const [showEditForm, setShowEditForm] = useState(false);
 
+  if (!appointment) {
+    return null;
+  }
+
   const handleEditClick = () => {
     setShowEditForm(true);
   };

@@ -141,14 +141,14 @@ export function ClientSearchField({
                 
                 {safeClientsData.length > 0 ? (
                   <CommandGroup>
-                    {safeClientsData.map((client) => {
+                    {safeClientsData.map((client, index) => {
                       // Ensure client is not null or undefined before rendering
                       if (!client) return null;
                       
                       return (
                         <CommandItem
-                          key={client.id}
-                          value={client.id.toString()}
+                          key={`${client.id || index}`}
+                          value={client.id?.toString() || `client-${index}`}
                           onSelect={() => {
                             onChange(client.id);
                             setSelectedClient(client);

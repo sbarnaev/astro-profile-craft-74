@@ -28,7 +28,7 @@ export function ClientSearch({ isOpen, onClose, onSelect, onCreateNew }: ClientS
   const { user } = useAuth();
   
   // Загрузка клиентов из Supabase
-  const { data: clients = [], isLoading } = useQuery({
+  const { data: clientsData = [], isLoading } = useQuery({
     queryKey: ['clientsSearch', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -58,10 +58,10 @@ export function ClientSearch({ isOpen, onClose, onSelect, onCreateNew }: ClientS
   });
   
   // Ensure clients is always an array
-  const safeClients = Array.isArray(clients) ? clients : [];
+  const clients = Array.isArray(clientsData) ? clientsData : [];
   
   // Фильтрация клиентов по поисковому запросу
-  const filteredClients = safeClients.filter(client => {
+  const filteredClients = clients.filter(client => {
     if (!searchQuery.trim()) return true;
     
     const query = searchQuery.toLowerCase();

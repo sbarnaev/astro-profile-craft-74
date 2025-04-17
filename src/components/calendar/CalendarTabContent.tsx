@@ -5,7 +5,6 @@ import { CalendarSidebar } from "./CalendarSidebar";
 import { CalendarDay } from "./CalendarDay";
 import { CalendarWeek } from "./CalendarWeek";
 import { DetailedMonthView } from "./DetailedMonthView";
-import { Badge } from "@/components/ui/badge";
 
 interface CalendarTabContentProps {
   selectedTab: string;
@@ -27,9 +26,9 @@ export function CalendarTabContent({
   selectedTab,
   date,
   currentWeek,
-  appointments,
-  workHours,
-  filteredAppointments,
+  appointments = [],
+  workHours = [],
+  filteredAppointments = [],
   selectedAppointment,
   setSelectedAppointment,
   handleDateSelect,
@@ -38,6 +37,11 @@ export function CalendarTabContent({
   goToNextWeek,
   onCancelAppointment
 }: CalendarTabContentProps) {
+  // Make sure we always have arrays, even if undefined is passed
+  const safeAppointments = Array.isArray(appointments) ? appointments : [];
+  const safeFilteredAppointments = Array.isArray(filteredAppointments) ? filteredAppointments : [];
+  const safeWorkHours = Array.isArray(workHours) ? workHours : [];
+
   // Render appropriate view based on selected tab
   const renderContent = () => {
     switch (selectedTab) {
@@ -47,7 +51,7 @@ export function CalendarTabContent({
             <CalendarSidebar date={date} onDateSelect={handleDateSelect} />
             <CalendarDay
               date={date}
-              appointments={filteredAppointments}
+              appointments={safeFilteredAppointments}
               onAddAppointment={handleAddAppointment}
               selectedAppointment={selectedAppointment}
               setSelectedAppointment={setSelectedAppointment}
@@ -60,8 +64,8 @@ export function CalendarTabContent({
         return (
           <CalendarWeek
             currentWeek={currentWeek}
-            appointments={appointments}
-            workHours={workHours}
+            appointments={safeAppointments}
+            workHours={safeWorkHours}
             onAppointmentClick={(id) => setSelectedAppointment(id)}
             onAddAppointment={handleAddAppointment}
             goToPrevWeek={goToPrevWeek}
@@ -74,7 +78,7 @@ export function CalendarTabContent({
         return (
           <DetailedMonthView
             currentDate={date || new Date()}
-            appointments={appointments}
+            appointments={safeAppointments}
             onAppointmentClick={(id) => setSelectedAppointment(id)}
             onAddAppointment={handleAddAppointment}
           />
